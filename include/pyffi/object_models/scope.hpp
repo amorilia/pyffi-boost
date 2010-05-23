@@ -173,6 +173,35 @@ public:
 	//! Shortcut.
 	typedef Attr::PAttr PAttr;
 
+	//! Get attribute with given name from scope.
+	PAttr get_attr(std::string const & attr_name) const {
+		// look for attribute in scope declarations
+		BOOST_FOREACH(Declaration declaration, declarations) {
+			if (PAttr result = // assignment!
+			        boost::apply_visitor(
+			            get_attr_visitor(attr_name),
+			            declaration)) {
+				return result;
+			}
+		}
+		// look for attribute in base class
+		if (PClass parent_class_ = parent_class.lock()) {
+			if (PScope parent_scope_ = parent_scope.lock()) {
+				if (PClass base_class_ =
+				        parent_scope_->get_class(
+				            parent_class_->base_class)) {
+					if (PScope base_scope =
+					        base_class_->scope) {
+						return base_scope->get_attr(
+						           attr_name);
+					}
+				}
+			}
+		}
+		// all failed
+		return PAttr();
+	};
+
 	//! The type of a declaration (class, or attribute).
 	typedef boost::variant<PClass, PAttr> Declaration;
 
@@ -255,6 +284,32 @@ public:
 
 		//! The name of the class to get.
 		std::string class_name;
+	};
+
+	//! A visitor for finding an attribute.
+	class get_attr_visitor : public boost::static_visitor<PAttr>
+	{
+	public:
+		//! Constructor.
+		get_attr_visitor(std::string const & attr_name)
+			: attr_name(attr_name) {};
+
+		//! A class never matches.
+		PAttr operator()(PClass cls) const {
+			return PAttr();
+		};
+
+		//! Return attribute if name matches.
+		PAttr operator()(PAttr attr) const {
+			if (attr->name == attr_name) {
+				return attr;
+			} else {
+				return PAttr();
+			}
+		};
+
+		//! The name of the attribute to get.
+		std::string attr_name;
 	};
 
 private:

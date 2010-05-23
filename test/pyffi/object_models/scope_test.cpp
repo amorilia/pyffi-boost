@@ -210,7 +210,9 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	BOOST_CHECK_NO_THROW(cls_float = scope->get_class("Float"));
 	// Char is not in scope!!
 	BOOST_CHECK_NO_THROW(cls_char = scope->get_class("Char"));
+	BOOST_CHECK(cls_int);
 	BOOST_CHECK_EQUAL(cls_int->name, "Int");
+	BOOST_CHECK(cls_test);
 	BOOST_CHECK_EQUAL(cls_test->name, "Test");
 	BOOST_CHECK_EQUAL(cls_float, PClass());
 	BOOST_CHECK_EQUAL(cls_char, PClass());
@@ -223,7 +225,9 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	BOOST_CHECK_EQUAL(cls_test, test_scope->get_class("Test"));
 	BOOST_CHECK_NO_THROW(cls_float = test_scope->get_class("Float"));
 	BOOST_CHECK_NO_THROW(cls_char = test_scope->get_class("Char"));
+	BOOST_CHECK(cls_float);
 	BOOST_CHECK_EQUAL(cls_float->name, "Float");
+	BOOST_CHECK(cls_char);
 	BOOST_CHECK_EQUAL(cls_char->name, "Char");
 	// destroy the parent scope and check scope changes
 	scope.reset(); // nulls the pointer, effectively deleting this scope
@@ -248,6 +252,54 @@ BOOST_AUTO_TEST_CASE(scope_base_class_test)
 	);
 	PClass cls_test = scope->get_class("Test");
 	BOOST_CHECK_EQUAL(cls_test->base_class, "Int");
+}
+
+// Check if we can get attributes by name.
+BOOST_AUTO_TEST_CASE(get_attr_test)
+{
+	PScope scope;
+	// define various classes
+	BOOST_CHECK_NO_THROW(
+	    scope =
+	        Scope::create()
+	        ->class_("Base")->scope(
+	            Scope::create()
+	            ->attr("Int", "a")
+	            ->attr("Int", "b")
+	        )
+	        ->class_("Derived")->base_class("Base")->scope(
+	            Scope::create()
+	            ->attr("Int", "d")
+	            ->attr("Int", "e")
+	        )
+	);
+	PClass base_cls = scope->get_class("Base");
+	PClass derived_cls = scope->get_class("Derived");
+	PAttr attr_a, attr_b, attr_c, attr_d;
+	// check base class attributes
+	BOOST_CHECK_NO_THROW(attr_a = base_cls->scope->get_attr("a"));
+	BOOST_CHECK_NO_THROW(attr_b = base_cls->scope->get_attr("b"));
+	BOOST_CHECK_NO_THROW(attr_c = base_cls->scope->get_attr("c"));
+	BOOST_CHECK_NO_THROW(attr_d = base_cls->scope->get_attr("d"));
+	BOOST_CHECK(attr_a);
+	BOOST_CHECK(attr_b);
+	BOOST_CHECK_EQUAL(attr_c, PAttr());
+	BOOST_CHECK_EQUAL(attr_d, PAttr());
+	BOOST_CHECK_EQUAL(attr_a->name, "a");
+	BOOST_CHECK_EQUAL(attr_a->class_name, "Int");
+	BOOST_CHECK_EQUAL(attr_b->name, "b");
+	BOOST_CHECK_EQUAL(attr_b->class_name, "Int");
+	// check derived class attributes
+	BOOST_CHECK_EQUAL(attr_a, derived_cls->scope->get_attr("a"));
+	BOOST_CHECK_EQUAL(attr_b, derived_cls->scope->get_attr("b"));
+	BOOST_CHECK_NO_THROW(attr_c = derived_cls->scope->get_attr("c"));
+	BOOST_CHECK_NO_THROW(attr_d = derived_cls->scope->get_attr("d"));
+	BOOST_CHECK(attr_c);
+	BOOST_CHECK(attr_d);
+	BOOST_CHECK_EQUAL(attr_c->name, "c");
+	BOOST_CHECK_EQUAL(attr_c->class_name, "Int");
+	BOOST_CHECK_EQUAL(attr_d->name, "d");
+	BOOST_CHECK_EQUAL(attr_d->class_name, "Int");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
