@@ -269,8 +269,8 @@ BOOST_AUTO_TEST_CASE(get_attr_test)
 	        )
 	        ->class_("Derived")->base_class("Base")->scope(
 	            Scope::create()
+	            ->attr("Int", "c")
 	            ->attr("Int", "d")
-	            ->attr("Int", "e")
 	        )
 	);
 	PClass base_cls = scope->get_class("Base");
