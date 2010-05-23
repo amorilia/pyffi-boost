@@ -212,15 +212,15 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	BOOST_CHECK_EQUAL(cls_test->name, "Test");
 	BOOST_CHECK_EQUAL(cls_float, PClass());
 	BOOST_CHECK_EQUAL(cls_char, PClass());
-	// double check parentship
+	// double check nested scope, and parentship
+	PScope test_scope = cls_test->scope;
+	BOOST_CHECK(test_scope);
 	BOOST_CHECK_EQUAL(scope, cls_test->scope->parent.lock());
 	// inspect scope within test class
-	scope = cls_test->scope;
-	BOOST_CHECK(scope);
-	BOOST_CHECK_EQUAL(cls_int, scope->get_class("Int"));
-	BOOST_CHECK_EQUAL(cls_test, scope->get_class("Test"));
-	BOOST_CHECK_NO_THROW(cls_float = scope->get_class("Float"));
-	BOOST_CHECK_NO_THROW(cls_char = scope->get_class("Char"));
+	BOOST_CHECK_EQUAL(cls_int, test_scope->get_class("Int"));
+	BOOST_CHECK_EQUAL(cls_test, test_scope->get_class("Test"));
+	BOOST_CHECK_NO_THROW(cls_float = test_scope->get_class("Float"));
+	BOOST_CHECK_NO_THROW(cls_char = test_scope->get_class("Char"));
 	BOOST_CHECK_EQUAL(cls_float->name, "Float");
 	BOOST_CHECK_EQUAL(cls_char->name, "Char");
 }
