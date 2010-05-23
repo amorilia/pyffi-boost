@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
 #include <vector>
 
 namespace pyffi
@@ -65,6 +66,13 @@ public:
 	//! Create a class within the current scope.
 	PScope class_(std::string const & name) {
 		declarations.push_back(Class::create(name));
+		return shared_from_this();
+	};
+
+	//! Create an attribute within the current scope.
+	PScope attribute(std::string const & class_name,
+	                 std::string const & name) {
+		declarations.push_back(Attribute::create(class_name, name));
 		return shared_from_this();
 	};
 
@@ -121,7 +129,7 @@ public:
 	typedef Attribute::PAttribute PAttribute;
 
 	//! Declarations in this scope.
-	std::vector<PClass> declarations;
+	std::vector<boost::variant<PClass, PAttribute> > declarations;
 
 private:
 	//! Private constructor to prevent it from being used.

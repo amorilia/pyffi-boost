@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pyffi/object_models/scope.hpp"
 
+using boost::get;
 using namespace pyffi;
 using namespace pyffi::object_models;
 
@@ -85,9 +86,54 @@ BOOST_AUTO_TEST_CASE(scope_create_class_test)
 	BOOST_CHECK_NO_THROW(scope->class_("TestClass3"));
 	// check scope declarations
 	BOOST_CHECK_EQUAL(scope->declarations.size(), 3);
-	BOOST_CHECK_EQUAL(scope->declarations[0]->name, "TestClass1");
-	BOOST_CHECK_EQUAL(scope->declarations[1]->name, "TestClass2");
-	BOOST_CHECK_EQUAL(scope->declarations[2]->name, "TestClass3");
+	PClass cls;
+	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[0]))
+	BOOST_CHECK_EQUAL(cls->name, "TestClass1");
+	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[1]))
+	BOOST_CHECK_EQUAL(cls->name, "TestClass2");
+	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[2]))
+	BOOST_CHECK_EQUAL(cls->name, "TestClass3");
+}
+
+// Check that scope class declaration syntax.
+BOOST_AUTO_TEST_CASE(scope_create_attribute_test)
+{
+	PScope scope;
+	// define some classes
+	BOOST_CHECK_NO_THROW(
+	    scope =
+	        Scope::create()
+	        ->class_("Float")
+	        ->attribute("Float", "x")
+	        ->attribute("Float", "y")
+	        ->attribute("Float", "z")
+	        ->class_("Int")
+	        ->attribute("Float", "time")
+	        ->attribute("Int", "num_vertices")
+	);
+	// check scope declarations
+	BOOST_CHECK_EQUAL(scope->declarations.size(), 7);
+	PClass cls;
+	PAttribute attr;
+	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[0]))
+	BOOST_CHECK_EQUAL(cls->name, "Float");
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[1]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Float");
+	BOOST_CHECK_EQUAL(attr->name, "x");
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[2]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Float");
+	BOOST_CHECK_EQUAL(attr->name, "y");
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[3]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Float");
+	BOOST_CHECK_EQUAL(attr->name, "z");
+	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[4]))
+	BOOST_CHECK_EQUAL(cls->name, "Int");
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[5]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Float");
+	BOOST_CHECK_EQUAL(attr->name, "time");
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[6]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Int");
+	BOOST_CHECK_EQUAL(attr->name, "num_vertices");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
