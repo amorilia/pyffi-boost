@@ -116,7 +116,7 @@ public:
 	typedef Class::PClass PClass;
 
 	//! Get class with given name from scope.
-	PClass get_class(std::string const & class_name) {
+	PClass get_class(std::string const & class_name) const {
 		// look for class in scope declarations
 		BOOST_FOREACH(Declaration declaration, declarations) {
 			if (PClass result = // assignment!
