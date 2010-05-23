@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[1]));
 	PScope cls_scope = cls->scope;
 	{
-		PScope cls_parent_scope = cls_scope->parent.lock();
+		PScope cls_parent_scope = cls_scope->parent_scope.lock();
 		BOOST_CHECK_EQUAL(cls_parent_scope, scope);
 	}
 	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	// double check nested scope, and parentship
 	PScope test_scope = cls_test->scope;
 	BOOST_CHECK(test_scope);
-	BOOST_CHECK_EQUAL(scope, cls_test->scope->parent.lock());
+	BOOST_CHECK_EQUAL(scope, cls_test->scope->parent_scope.lock());
 	// inspect scope within test class
 	BOOST_CHECK_EQUAL(cls_int, test_scope->get_class("Int"));
 	BOOST_CHECK_EQUAL(cls_test, test_scope->get_class("Test"));
@@ -223,6 +223,29 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	BOOST_CHECK_NO_THROW(cls_char = test_scope->get_class("Char"));
 	BOOST_CHECK_EQUAL(cls_float->name, "Float");
 	BOOST_CHECK_EQUAL(cls_char->name, "Char");
+	// destroy the parent scope and check scope changes
+	scope.reset(); // nulls the pointer, effectively deleting this scope
+	BOOST_CHECK_EQUAL(PClass(), test_scope->get_class("Int"));
+	BOOST_CHECK_EQUAL(PClass(), test_scope->get_class("Test"));
+	// test_scope is staying alive, so Float and Char should still exist
+	BOOST_CHECK_EQUAL(cls_float, test_scope->get_class("Float"));
+	BOOST_CHECK_EQUAL(cls_char, test_scope->get_class("Char"));
+}
+
+// Test base class syntax.
+BOOST_AUTO_TEST_CASE(scope_base_class_test)
+{
+	PScope scope;
+	// define various classes
+	BOOST_CHECK_NO_THROW(
+	    scope =
+	        Scope::create()
+	        ->class_("Int")
+	        ->class_("Test")->base_class("Int")
+	        ->class_("X")
+	);
+	PClass cls_test = scope->get_class("Test");
+	BOOST_CHECK_EQUAL(cls_test->base_class, "Int");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

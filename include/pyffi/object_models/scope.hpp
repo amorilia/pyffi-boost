@@ -72,6 +72,13 @@ public:
 		return shared_from_this();
 	};
 
+	//! Attach a base class to the last declaration.
+	PScope base_class(std::string const & class_name) {
+		boost::apply_visitor(
+		    base_class_visitor(class_name), declarations.back());
+		return shared_from_this();
+	};
+
 	//! Create an attribute within the current scope.
 	PScope attr(std::string const & class_name,
 	            std::string const & name) {
@@ -85,7 +92,7 @@ public:
 		boost::apply_visitor(
 		    scope_visitor(scope_), declarations.back());
 		// register scope parent
-		scope_->parent = shared_from_this();
+		scope_->parent_scope = shared_from_this();
 		return shared_from_this();
 	};
 
@@ -107,6 +114,9 @@ public:
 		//! The declarations within this class.
 		PScope scope;
 
+		//! The name of the base class.
+		std::string base_class;
+
 	private:
 		//! Private constructor to prevent it from being used.
 		Class(std::string const & name) : name(name) {};
@@ -127,8 +137,8 @@ public:
 			}
 		}
 		// look for class in parent scope
-		if (PScope parent_scope = parent.lock()) {
-			return parent_scope->get_class(class_name);
+		if (PScope parent_scope_ = parent_scope.lock()) {
+			return parent_scope_->get_class(class_name);
 		}
 		// all failed
 		return PClass();
@@ -170,7 +180,10 @@ public:
 	std::vector<Declaration> declarations;
 
 	//! Parent scope.
-	boost::weak_ptr<Scope> parent;
+	boost::weak_ptr<Scope> parent_scope;
+
+	//! Parent class.
+	boost::weak_ptr<PClass> parent_class;
 
 	//! A visitor for attaching a scope to a declaration.
 	class scope_visitor : public boost::static_visitor<>
@@ -192,6 +205,29 @@ public:
 
 		//! The scope to attach.
 		PScope scope;
+	};
+
+	//! A visitor for attaching a base class to a declaration.
+	class base_class_visitor : public boost::static_visitor<>
+	{
+	public:
+		//! Constructor.
+		base_class_visitor(const std::string & base_class)
+			: base_class(base_class) {};
+
+		//! Attach scope to class.
+		void operator()(PClass cls) const {
+			cls->base_class = base_class;
+		};
+
+		//! For attributes, we cannot have a base class, so
+		//! throw an exception.
+		void operator()(PAttr attr) const {
+			throw syntax_error("attributes cannot have a base class");
+		};
+
+		//! The base class to attach.
+		std::string base_class;
 	};
 
 	//! A visitor for finding a class.
@@ -222,7 +258,7 @@ public:
 
 private:
 	//! Private constructor to prevent it from being used.
-	Scope() : declarations(), parent() {};
+	Scope() : declarations(), parent_scope(), parent_class() {};
 };
 
 //! Shortcut.
