@@ -186,4 +186,43 @@ BOOST_AUTO_TEST_CASE(attr_scope_test)
 }
 
 
+// Check if we can get the classes by name.
+BOOST_AUTO_TEST_CASE(get_class_test)
+{
+	PScope scope;
+	// define various classes
+	BOOST_CHECK_NO_THROW(
+	    scope =
+	        Scope::create()
+	        ->class_("Int")
+	        ->class_("Test")->scope(
+	            Scope::create()
+	            ->class_("Float")
+	            ->class_("Char")
+	        )
+	);
+	PClass cls_int, cls_test, cls_float, cls_char;
+	BOOST_CHECK_NO_THROW(cls_int = scope->get_class("Int"));
+	BOOST_CHECK_NO_THROW(cls_test = scope->get_class("Test"));
+	// Float is not in scope!!
+	BOOST_CHECK_NO_THROW(cls_float = scope->get_class("Float"));
+	// Char is not in scope!!
+	BOOST_CHECK_NO_THROW(cls_char = scope->get_class("Char"));
+	BOOST_CHECK_EQUAL(cls_int->name, "Int");
+	BOOST_CHECK_EQUAL(cls_test->name, "Test");
+	BOOST_CHECK_EQUAL(cls_float, PClass());
+	BOOST_CHECK_EQUAL(cls_char, PClass());
+	// double check parentship
+	BOOST_CHECK_EQUAL(scope, cls_test->scope->parent.lock());
+	// inspect scope within test class
+	scope = cls_test->scope;
+	BOOST_CHECK(scope);
+	BOOST_CHECK_EQUAL(cls_int, scope->get_class("Int"));
+	BOOST_CHECK_EQUAL(cls_test, scope->get_class("Test"));
+	BOOST_CHECK_NO_THROW(cls_float = scope->get_class("Float"));
+	BOOST_CHECK_NO_THROW(cls_char = scope->get_class("Char"));
+	BOOST_CHECK_EQUAL(cls_float->name, "Float");
+	BOOST_CHECK_EQUAL(cls_char->name, "Char");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

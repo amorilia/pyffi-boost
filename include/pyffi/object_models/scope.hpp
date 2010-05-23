@@ -39,6 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PYFFI_OM_SCOPE_HPP_INCLUDED
 
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <vector>
@@ -114,6 +115,25 @@ public:
 	//! Shortcut.
 	typedef Class::PClass PClass;
 
+	//! Get class with given name from scope.
+	PClass get_class(std::string const & class_name) {
+		// look for class in scope declarations
+		BOOST_FOREACH(Declaration declaration, declarations) {
+			if (PClass result = // assignment!
+			        boost::apply_visitor(
+			            get_class_visitor(class_name),
+			            declaration)) {
+				return result;
+			}
+		}
+		// look for class in parent scope
+		if (PScope parent_scope = parent.lock()) {
+			return parent_scope->get_class(class_name);
+		}
+		// all failed
+		return PClass();
+	};
+
 	//! A named typed attribute.
 	class Attr
 	{
@@ -143,8 +163,11 @@ public:
 	//! Shortcut.
 	typedef Attr::PAttr PAttr;
 
+	//! The type of a declaration (class, or attribute).
+	typedef boost::variant<PClass, PAttr> Declaration;
+
 	//! Declarations in this scope.
-	std::vector<boost::variant<PClass, PAttr> > declarations;
+	std::vector<Declaration> declarations;
 
 	//! Parent scope.
 	boost::weak_ptr<Scope> parent;
@@ -169,6 +192,32 @@ public:
 
 		//! The scope to attach.
 		PScope scope;
+	};
+
+	//! A visitor for finding a class.
+	class get_class_visitor : public boost::static_visitor<PClass>
+	{
+	public:
+		//! Constructor.
+		get_class_visitor(std::string const & class_name)
+			: class_name(class_name) {};
+
+		//! Return class if name matches.
+		PClass operator()(PClass cls) const {
+			if (cls->name == class_name) {
+				return cls;
+			} else {
+				return PClass();
+			}
+		};
+
+		//! Attribute never matches.
+		PClass operator()(PAttr attr) const {
+			return PClass();
+		};
+
+		//! The name of the class to get.
+		std::string class_name;
 	};
 
 private:
