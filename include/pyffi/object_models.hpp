@@ -35,17 +35,20 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __PYFFI_HPP_INCLUDED
-#define __PYFFI_HPP_INCLUDED
+#ifndef PYFFI_OM_HPP_INCLUDED
+#define PYFFI_OM_HPP_INCLUDED
 
-#define PYFFI_VERSION @PYFFI_HEXVERSION@
+#include "pyffi/object_models/scope.hpp"
 
-#include "pyffi/object_models.hpp"
-
-//! Namespace for all pyffi declarations.
 namespace pyffi
 {
 
-}; // namespace pyffi
+//! Namespace for all object model declarations.
+namespace object_models
+{
+
+} // namespace object_models
+
+} // namespace pyffi
 
 #endif
