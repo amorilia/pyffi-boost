@@ -183,7 +183,7 @@ public:
 	boost::weak_ptr<Scope> parent_scope;
 
 	//! Parent class.
-	boost::weak_ptr<PClass> parent_class;
+	boost::weak_ptr<Class> parent_class;
 
 	//! A visitor for attaching a scope to a declaration.
 	class scope_visitor : public boost::static_visitor<>
@@ -195,6 +195,7 @@ public:
 		//! Attach scope to class.
 		void operator()(PClass cls) const {
 			cls->scope = scope;
+			scope->parent_class = cls;
 		};
 
 		//! For attributes, we cannot have a scope, so throw

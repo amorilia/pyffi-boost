@@ -158,8 +158,10 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[1]));
 	PScope cls_scope = cls->scope;
 	{
-		PScope cls_parent_scope = cls_scope->parent_scope.lock();
-		BOOST_CHECK_EQUAL(cls_parent_scope, scope);
+		PScope cls_scope_parent_scope = cls_scope->parent_scope.lock();
+		BOOST_CHECK_EQUAL(cls_scope_parent_scope, scope);
+		PClass cls_scope_parent_class = cls_scope->parent_class.lock();
+		BOOST_CHECK_EQUAL(cls_scope_parent_class, cls);
 	}
 	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
 	PAttr attr;
