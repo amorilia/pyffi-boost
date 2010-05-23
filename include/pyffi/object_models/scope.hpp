@@ -122,7 +122,7 @@ public:
 		PScope scope;
 
 		//! The base class.
-		PClass base_class;
+		boost::weak_ptr<Class> base_class;
 
 	private:
 		//! Private constructor to prevent it from being used.
@@ -193,7 +193,8 @@ public:
 		}
 		// look for attribute in base class
 		if (PClass parent_class_ = parent_class.lock()) {
-			if (PClass base_class_ = parent_class_->base_class) {
+			if (PClass base_class_ =
+			        parent_class_->base_class.lock()) {
 				if (PScope base_scope = base_class_->scope) {
 					return base_scope->get_attr(attr_name);
 				}
