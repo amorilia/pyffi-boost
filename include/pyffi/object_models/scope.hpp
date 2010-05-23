@@ -67,7 +67,7 @@ public:
 		return shared_from_this();
 	};
 
-	//! Class declaration.
+	//! A named class containing further declarations.
 	class Class
 	{
 	public:
