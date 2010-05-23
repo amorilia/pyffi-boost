@@ -64,11 +64,16 @@ BOOST_AUTO_TEST_CASE(class_create_test)
 BOOST_AUTO_TEST_CASE(scope_create_class_test)
 {
 	PScope scope;
+	// define some classes
 	BOOST_CHECK_NO_THROW(
 	    scope =
 	        Scope::create()
-	        ->class_("TestClass")
+	        ->class_("TestClass1")
+	        ->class_("TestClass2")
 	);
+	// ... do some stuff ...
+	// declare another class
+	BOOST_CHECK_NO_THROW(scope->class_("TestClass3"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
