@@ -60,10 +60,49 @@ public:
 	static PScope create() {
 		return PScope(new Scope);
 	};
+
+	//! Create a class within the current scope.
+	PScope class_(std::string const & name) {
+		PClass cls = Class::create(name);
+		return shared_from_this();
+	};
+
+	//! Class declaration.
+	class Class
+	{
+	public:
+		//! Shared pointer to class.
+		typedef boost::shared_ptr<Class> PClass;
+
+		//! Constructor.
+		static PClass create(std::string const & name) {
+			return PClass(new Class(name));
+		};
+
+		//! Name of this class.
+		std::string name;
+
+	private:
+		//! Private constructor to prevent it from being used.
+		Class(std::string const & name) : name(name) {};
+	};
+
+	//! Shortcut.
+	typedef Class::PClass PClass;
+
 private:
 	//! Private constructor to prevent it from being used.
 	Scope() {};
 };
+
+//! Shortcut.
+typedef Scope::PScope PScope;
+
+//! Shortcut.
+typedef Scope::Class Class;
+
+//! Shortcut.
+typedef Scope::PClass PClass;
 
 } // namespace object_models
 

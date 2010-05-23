@@ -52,4 +52,23 @@ BOOST_AUTO_TEST_CASE(scope_create_test)
 	BOOST_CHECK_NO_THROW(Scope::create());
 }
 
+// Check that classes can be created.
+BOOST_AUTO_TEST_CASE(class_create_test)
+{
+	PClass cls;
+	BOOST_CHECK_NO_THROW(cls = Class::create("TestClass"));
+	BOOST_CHECK_EQUAL(cls->name, "TestClass");
+}
+
+// Check that scope class declaration syntax.
+BOOST_AUTO_TEST_CASE(scope_create_class_test)
+{
+	PScope scope;
+	BOOST_CHECK_NO_THROW(
+	    scope =
+	        Scope::create()
+	        ->class_("TestClass")
+	);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
