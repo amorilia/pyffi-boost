@@ -72,7 +72,7 @@ public:
 	};
 
 	//! Create an attribute within the current scope.
-	PScope attribute(std::string const & class_name,
+	PScope attr(std::string const & class_name,
 	                 std::string const & name) {
 		declarations.push_back(Attribute::create(class_name, name));
 		return shared_from_this();

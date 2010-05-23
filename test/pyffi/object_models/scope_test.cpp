@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(class_create_test)
 }
 
 // Check that attributes can be created.
-BOOST_AUTO_TEST_CASE(attribute_create_test)
+BOOST_AUTO_TEST_CASE(attr_create_test)
 {
 	PAttribute attr;
 	BOOST_CHECK_NO_THROW(attr = Attribute::create("TestClass", "test"));
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(scope_create_class_test)
 }
 
 // Check that scope class declaration syntax.
-BOOST_AUTO_TEST_CASE(scope_create_attribute_test)
+BOOST_AUTO_TEST_CASE(scope_create_attr_test)
 {
 	PScope scope;
 	// define some classes
@@ -104,12 +104,12 @@ BOOST_AUTO_TEST_CASE(scope_create_attribute_test)
 	    scope =
 	        Scope::create()
 	        ->class_("Float")
-	        ->attribute("Float", "x")
-	        ->attribute("Float", "y")
-	        ->attribute("Float", "z")
+	        ->attr("Float", "x")
+	        ->attr("Float", "y")
+	        ->attr("Float", "z")
 	        ->class_("Int")
-	        ->attribute("Float", "time")
-	        ->attribute("Int", "num_vertices")
+	        ->attr("Float", "time")
+	        ->attr("Int", "num_vertices")
 	);
 	// check scope declarations
 	BOOST_CHECK_EQUAL(scope->declarations.size(), 7);
@@ -147,8 +147,8 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	        ->class_("Int")
 	        ->class_("TestClass")->scope(
 	            Scope::create()
-	            ->attribute("Int", "a")
-	            ->attribute("Int", "b")
+	            ->attr("Int", "a")
+	            ->attr("Int", "b")
 	        )
 	);
 	PClass cls;
@@ -165,13 +165,13 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_EQUAL(attr->name, "b");
 }
 
-BOOST_AUTO_TEST_CASE(attribute_scope_test)
+BOOST_AUTO_TEST_CASE(attr_scope_test)
 {
 	// check that attributes cannot have scopes
 	BOOST_CHECK_THROW(
 	    Scope::create()
 	    ->class_("Int")
-	    ->attribute("Int", "a")->scope(
+	    ->attr("Int", "a")->scope(
 	        Scope::create()
 	        ->class_("Float")
 	    ),
