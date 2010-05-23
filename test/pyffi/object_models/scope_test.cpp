@@ -60,6 +60,15 @@ BOOST_AUTO_TEST_CASE(class_create_test)
 	BOOST_CHECK_EQUAL(cls->name, "TestClass");
 }
 
+// Check that attributes can be created.
+BOOST_AUTO_TEST_CASE(attribute_create_test)
+{
+	PAttribute attr;
+	BOOST_CHECK_NO_THROW(attr = Attribute::create("TestClass", "test"));
+	BOOST_CHECK_EQUAL(attr->class_name, "TestClass");
+	BOOST_CHECK_EQUAL(attr->name, "test");
+}
+
 // Check that scope class declaration syntax.
 BOOST_AUTO_TEST_CASE(scope_create_class_test)
 {

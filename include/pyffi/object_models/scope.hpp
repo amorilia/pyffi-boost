@@ -91,6 +91,35 @@ public:
 	//! Shortcut.
 	typedef Class::PClass PClass;
 
+	//! A named typed attribute.
+	class Attribute
+	{
+	public:
+		//! Shared pointer to attribute.
+		typedef boost::shared_ptr<Attribute> PAttribute;
+
+		//! Constructor.
+		static PAttribute create(std::string const & class_name,
+		                         std::string const & name) {
+			return PAttribute(new Attribute(class_name, name));
+		};
+
+		//! Name of the class of this attribute.
+		std::string class_name;
+
+		//! Name of this attribute.
+		std::string name;
+
+	private:
+		//! Private constructor to prevent it from being used.
+		Attribute(std::string const & class_name,
+		          std::string const & name)
+			: class_name(class_name), name(name) {};
+	};
+
+	//! Shortcut.
+	typedef Attribute::PAttribute PAttribute;
+
 	//! Declarations in this scope.
 	std::vector<PClass> declarations;
 
@@ -107,6 +136,12 @@ typedef Scope::Class Class;
 
 //! Shortcut.
 typedef Scope::PClass PClass;
+
+//! Shortcut.
+typedef Scope::Attribute Attribute;
+
+//! Shortcut.
+typedef Scope::PAttribute PAttribute;
 
 } // namespace object_models
 
