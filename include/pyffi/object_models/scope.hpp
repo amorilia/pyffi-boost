@@ -73,14 +73,18 @@ public:
 
 	//! Create an attribute within the current scope.
 	PScope attr(std::string const & class_name,
-	                 std::string const & name) {
+	            std::string const & name) {
 		declarations.push_back(Attr::create(class_name, name));
 		return shared_from_this();
 	};
 
 	//! Attach a nested scope to the last declaration.
-	PScope scope(PScope scope) {
-		boost::apply_visitor(scope_visitor(scope), declarations.back());
+	PScope scope(PScope scope_) {
+		// attach scope to last declaration
+		boost::apply_visitor(
+		    scope_visitor(scope_), declarations.back());
+		// register scope parent
+		scope_->parent = shared_from_this();
 		return shared_from_this();
 	};
 
@@ -119,7 +123,7 @@ public:
 
 		//! Constructor.
 		static PAttr create(std::string const & class_name,
-		                         std::string const & name) {
+		                    std::string const & name) {
 			return PAttr(new Attr(class_name, name));
 		};
 
@@ -132,7 +136,7 @@ public:
 	private:
 		//! Private constructor to prevent it from being used.
 		Attr(std::string const & class_name,
-		          std::string const & name)
+		     std::string const & name)
 			: class_name(class_name), name(name) {};
 	};
 
@@ -141,6 +145,9 @@ public:
 
 	//! Declarations in this scope.
 	std::vector<boost::variant<PClass, PAttr> > declarations;
+
+	//! Parent scope.
+	boost::weak_ptr<Scope> parent;
 
 	//! A visitor for attaching a scope to a declaration.
 	class scope_visitor : public boost::static_visitor<>
@@ -166,7 +173,7 @@ public:
 
 private:
 	//! Private constructor to prevent it from being used.
-	Scope() : declarations() {};
+	Scope() : declarations(), parent() {};
 };
 
 //! Shortcut.
