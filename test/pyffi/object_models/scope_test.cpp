@@ -136,4 +136,48 @@ BOOST_AUTO_TEST_CASE(scope_create_attribute_test)
 	BOOST_CHECK_EQUAL(attr->name, "num_vertices");
 }
 
+// Check declaration of scopes within classes.
+BOOST_AUTO_TEST_CASE(class_scope_test)
+{
+	PScope scope;
+	// define a scope within a class
+	BOOST_CHECK_NO_THROW(
+	    scope =
+	        Scope::create()
+	        ->class_("Int")
+	        ->class_("TestClass")->scope(
+	            Scope::create()
+	            ->attribute("Int", "a")
+	            ->attribute("Int", "b")
+	        )
+	);
+	PClass cls;
+	BOOST_CHECK_EQUAL(scope->declarations.size(), 2);
+	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[1]));
+	PScope cls_scope = cls->scope;
+	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
+	PAttribute attr;
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(cls_scope->declarations[0]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Int");
+	BOOST_CHECK_EQUAL(attr->name, "a");
+	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(cls_scope->declarations[1]));
+	BOOST_CHECK_EQUAL(attr->class_name, "Int");
+	BOOST_CHECK_EQUAL(attr->name, "b");
+}
+
+BOOST_AUTO_TEST_CASE(attribute_scope_test)
+{
+	// check that attributes cannot have scopes
+	BOOST_CHECK_THROW(
+	    Scope::create()
+	    ->class_("Int")
+	    ->attribute("Int", "a")->scope(
+	        Scope::create()
+	        ->class_("Float")
+	    ),
+	    syntax_error
+	);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

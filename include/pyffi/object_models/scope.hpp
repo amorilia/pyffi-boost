@@ -43,6 +43,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/variant.hpp>
 #include <vector>
 
+#include "pyffi/exceptions.hpp"
+
 namespace pyffi
 {
 
@@ -76,6 +78,12 @@ public:
 		return shared_from_this();
 	};
 
+	//! Attach a nested scope to the last declaration.
+	PScope scope(PScope scope) {
+		boost::apply_visitor(scope_visitor(scope), declarations.back());
+		return shared_from_this();
+	};
+
 	//! A named class containing further declarations.
 	class Class
 	{
@@ -90,6 +98,9 @@ public:
 
 		//! Name of this class.
 		std::string name;
+
+		//! The declarations within this class.
+		PScope scope;
 
 	private:
 		//! Private constructor to prevent it from being used.
@@ -130,6 +141,28 @@ public:
 
 	//! Declarations in this scope.
 	std::vector<boost::variant<PClass, PAttribute> > declarations;
+
+	//! A visitor for attaching a scope to a declaration.
+	class scope_visitor : public boost::static_visitor<>
+	{
+	public:
+		//! Constructor.
+		scope_visitor(PScope scope) : scope(scope) {};
+
+		//! Attach scope to class.
+		void operator()(PClass cls) const {
+			cls->scope = scope;
+		};
+
+		//! For attributes, we cannot have a scope, so throw
+		//! an exception.
+		void operator()(PAttribute attr) const {
+			throw syntax_error("attributes cannot have a scope");
+		};
+
+		//! The scope to attach.
+		PScope scope;
+	};
 
 private:
 	//! Private constructor to prevent it from being used.
