@@ -52,9 +52,12 @@ namespace pyffi
 namespace object_models
 {
 
-//! A scope which contains declarations (classes, attributes, enums,
-//! and if/elif/else statements). Scopes can be constructed using
-//! method chaining: all methods return a shared pointer to this.
+//! A scope which contains declarations.
+/*!
+ * Declarations can be classes, attributes, enums, and if/elif/else
+ * statements. Scopes can be constructed using method chaining: all
+ * methods return a shared pointer to this.
+ */
 class Scope : public boost::enable_shared_from_this<Scope>
 {
 public:
@@ -227,8 +230,7 @@ public:
 			scope->parent_class = cls;
 		};
 
-		//! For attributes, we cannot have a scope, so throw
-		//! an exception.
+		//! No scope for attributes, so throw an exception.
 		void operator()(PAttr attr) const {
 			throw syntax_error("attributes cannot have a scope");
 		};
@@ -250,8 +252,7 @@ public:
 			cls->base_class = base_class;
 		};
 
-		//! For attributes, we cannot have a base class, so
-		//! throw an exception.
+		//! No base class for attributes, so throw an exception.
 		void operator()(PAttr attr) const {
 			throw syntax_error("attributes cannot have a base class");
 		};
