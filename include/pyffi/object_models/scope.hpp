@@ -74,7 +74,7 @@ public:
 	//! Create an attribute within the current scope.
 	PScope attr(std::string const & class_name,
 	                 std::string const & name) {
-		declarations.push_back(Attribute::create(class_name, name));
+		declarations.push_back(Attr::create(class_name, name));
 		return shared_from_this();
 	};
 
@@ -111,16 +111,16 @@ public:
 	typedef Class::PClass PClass;
 
 	//! A named typed attribute.
-	class Attribute
+	class Attr
 	{
 	public:
 		//! Shared pointer to attribute.
-		typedef boost::shared_ptr<Attribute> PAttribute;
+		typedef boost::shared_ptr<Attr> PAttr;
 
 		//! Constructor.
-		static PAttribute create(std::string const & class_name,
+		static PAttr create(std::string const & class_name,
 		                         std::string const & name) {
-			return PAttribute(new Attribute(class_name, name));
+			return PAttr(new Attr(class_name, name));
 		};
 
 		//! Name of the class of this attribute.
@@ -131,16 +131,16 @@ public:
 
 	private:
 		//! Private constructor to prevent it from being used.
-		Attribute(std::string const & class_name,
+		Attr(std::string const & class_name,
 		          std::string const & name)
 			: class_name(class_name), name(name) {};
 	};
 
 	//! Shortcut.
-	typedef Attribute::PAttribute PAttribute;
+	typedef Attr::PAttr PAttr;
 
 	//! Declarations in this scope.
-	std::vector<boost::variant<PClass, PAttribute> > declarations;
+	std::vector<boost::variant<PClass, PAttr> > declarations;
 
 	//! A visitor for attaching a scope to a declaration.
 	class scope_visitor : public boost::static_visitor<>
@@ -156,7 +156,7 @@ public:
 
 		//! For attributes, we cannot have a scope, so throw
 		//! an exception.
-		void operator()(PAttribute attr) const {
+		void operator()(PAttr attr) const {
 			throw syntax_error("attributes cannot have a scope");
 		};
 
@@ -179,10 +179,10 @@ typedef Scope::Class Class;
 typedef Scope::PClass PClass;
 
 //! Shortcut.
-typedef Scope::Attribute Attribute;
+typedef Scope::Attr Attr;
 
 //! Shortcut.
-typedef Scope::PAttribute PAttribute;
+typedef Scope::PAttr PAttr;
 
 } // namespace object_models
 

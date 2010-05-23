@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE(class_create_test)
 // Check that attributes can be created.
 BOOST_AUTO_TEST_CASE(attr_create_test)
 {
-	PAttribute attr;
-	BOOST_CHECK_NO_THROW(attr = Attribute::create("TestClass", "test"));
+	PAttr attr;
+	BOOST_CHECK_NO_THROW(attr = Attr::create("TestClass", "test"));
 	BOOST_CHECK_EQUAL(attr->class_name, "TestClass");
 	BOOST_CHECK_EQUAL(attr->name, "test");
 }
@@ -114,24 +114,24 @@ BOOST_AUTO_TEST_CASE(scope_create_attr_test)
 	// check scope declarations
 	BOOST_CHECK_EQUAL(scope->declarations.size(), 7);
 	PClass cls;
-	PAttribute attr;
+	PAttr attr;
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[0]))
 	BOOST_CHECK_EQUAL(cls->name, "Float");
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[1]));
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(scope->declarations[1]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Float");
 	BOOST_CHECK_EQUAL(attr->name, "x");
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[2]));
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(scope->declarations[2]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Float");
 	BOOST_CHECK_EQUAL(attr->name, "y");
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[3]));
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(scope->declarations[3]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Float");
 	BOOST_CHECK_EQUAL(attr->name, "z");
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[4]))
 	BOOST_CHECK_EQUAL(cls->name, "Int");
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[5]));
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(scope->declarations[5]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Float");
 	BOOST_CHECK_EQUAL(attr->name, "time");
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(scope->declarations[6]));
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(scope->declarations[6]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Int");
 	BOOST_CHECK_EQUAL(attr->name, "num_vertices");
 }
@@ -156,11 +156,11 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[1]));
 	PScope cls_scope = cls->scope;
 	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
-	PAttribute attr;
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(cls_scope->declarations[0]));
+	PAttr attr;
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(cls_scope->declarations[0]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Int");
 	BOOST_CHECK_EQUAL(attr->name, "a");
-	BOOST_CHECK_NO_THROW(attr = get<PAttribute>(cls_scope->declarations[1]));
+	BOOST_CHECK_NO_THROW(attr = get<PAttr>(cls_scope->declarations[1]));
 	BOOST_CHECK_EQUAL(attr->class_name, "Int");
 	BOOST_CHECK_EQUAL(attr->name, "b");
 }
