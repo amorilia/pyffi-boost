@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace pyffi
 {
@@ -63,7 +64,7 @@ public:
 
 	//! Create a class within the current scope.
 	PScope class_(std::string const & name) {
-		PClass cls = Class::create(name);
+		declarations.push_back(Class::create(name));
 		return shared_from_this();
 	};
 
@@ -90,9 +91,12 @@ public:
 	//! Shortcut.
 	typedef Class::PClass PClass;
 
+	//! Declarations in this scope.
+	std::vector<PClass> declarations;
+
 private:
 	//! Private constructor to prevent it from being used.
-	Scope() {};
+	Scope() : declarations() {};
 };
 
 //! Shortcut.

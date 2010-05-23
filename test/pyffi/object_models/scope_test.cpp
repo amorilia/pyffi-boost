@@ -74,6 +74,11 @@ BOOST_AUTO_TEST_CASE(scope_create_class_test)
 	// ... do some stuff ...
 	// declare another class
 	BOOST_CHECK_NO_THROW(scope->class_("TestClass3"));
+	// check scope declarations
+	BOOST_CHECK_EQUAL(scope->declarations.size(), 3);
+	BOOST_CHECK_EQUAL(scope->declarations[0]->name, "TestClass1");
+	BOOST_CHECK_EQUAL(scope->declarations[1]->name, "TestClass2");
+	BOOST_CHECK_EQUAL(scope->declarations[2]->name, "TestClass3");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
