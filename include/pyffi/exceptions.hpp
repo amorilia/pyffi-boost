@@ -51,6 +51,14 @@ public:
 		: std::runtime_error(msg) {};
 };
 
+//! Thrown on name error.
+class name_error : public std::runtime_error
+{
+public:
+	name_error(const std::string & msg)
+		: std::runtime_error(msg) {};
+};
+
 }; // namespace pyffi
 
 #endif

@@ -250,8 +250,9 @@ BOOST_AUTO_TEST_CASE(scope_base_class_test)
 	        ->class_("Test")->base_class("Int")
 	        ->class_("X")
 	);
+	PClass cls_int = scope->get_class("Int");
 	PClass cls_test = scope->get_class("Test");
-	BOOST_CHECK_EQUAL(cls_test->base_class, "Int");
+	BOOST_CHECK_EQUAL(cls_test->base_class, cls_int);
 }
 
 // Check if we can get attributes by name.

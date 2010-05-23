@@ -77,8 +77,12 @@ public:
 
 	//! Attach a base class to the last declaration.
 	PScope base_class(std::string const & class_name) {
-		boost::apply_visitor(
-		    base_class_visitor(class_name), declarations.back());
+		if (PClass base_class = get_class(class_name)) {
+			boost::apply_visitor(
+			    base_class_visitor(base_class), declarations.back());
+		} else {
+			throw name_error("class " + class_name + " not found");
+		}
 		return shared_from_this();
 	};
 
@@ -117,8 +121,8 @@ public:
 		//! The declarations within this class.
 		PScope scope;
 
-		//! The name of the base class.
-		std::string base_class;
+		//! The base class.
+		PClass base_class;
 
 	private:
 		//! Private constructor to prevent it from being used.
@@ -189,15 +193,9 @@ public:
 		}
 		// look for attribute in base class
 		if (PClass parent_class_ = parent_class.lock()) {
-			if (PScope parent_scope_ = parent_scope.lock()) {
-				if (PClass base_class_ =
-				        parent_scope_->get_class(
-				            parent_class_->base_class)) {
-					if (PScope base_scope =
-					        base_class_->scope) {
-						return base_scope->get_attr(
-						           attr_name);
-					}
+			if (PClass base_class_ = parent_class_->base_class) {
+				if (PScope base_scope = base_class_->scope) {
+					return base_scope->get_attr(attr_name);
 				}
 			}
 		}
@@ -244,10 +242,10 @@ public:
 	{
 	public:
 		//! Constructor.
-		base_class_visitor(const std::string & base_class)
+		base_class_visitor(PClass base_class)
 			: base_class(base_class) {};
 
-		//! Attach scope to class.
+		//! Attach base class to class.
 		void operator()(PClass cls) const {
 			cls->base_class = base_class;
 		};
@@ -258,7 +256,7 @@ public:
 		};
 
 		//! The base class to attach.
-		std::string base_class;
+		PClass base_class;
 	};
 
 	//! A visitor for finding a class.
