@@ -156,13 +156,12 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[0]));
 	BOOST_CHECK_EQUAL(cls->scope, PScope());
 	BOOST_CHECK_NO_THROW(cls = get<PClass>(scope->declarations[1]));
+	BOOST_CHECK_EQUAL(scope, cls->parent.lock());
 	PScope cls_scope = cls->scope;
-	{
-		PScope cls_scope_parent_scope = cls_scope->parent_scope.lock();
-		BOOST_CHECK_EQUAL(cls_scope_parent_scope, scope);
-		PClass cls_scope_parent_class = cls_scope->parent_class.lock();
-		BOOST_CHECK_EQUAL(cls_scope_parent_class, cls);
-	}
+	BOOST_CHECK_EQUAL(
+	    cls,
+	    boost::apply_visitor(
+	        Scope::get_class_visitor(), cls_scope->parent));
 	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
 	PAttr attr;
 	BOOST_CHECK_NO_THROW(attr = get<PAttr>(cls_scope->declarations[0]));
@@ -219,7 +218,7 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	// double check nested scope, and parentship
 	PScope test_scope = cls_test->scope;
 	BOOST_CHECK(test_scope);
-	BOOST_CHECK_EQUAL(scope, cls_test->scope->parent_scope.lock());
+	BOOST_CHECK_EQUAL(scope, cls_test->parent.lock());
 	// inspect scope within test class
 	BOOST_CHECK_EQUAL(cls_int, test_scope->get_class("Int"));
 	BOOST_CHECK_EQUAL(cls_test, test_scope->get_class("Test"));

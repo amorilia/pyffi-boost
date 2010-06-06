@@ -71,18 +71,25 @@ public:
 
 	//! Create a class within the current scope.
 	PScope class_(std::string const & name) {
-		declarations.push_back(Class::create(name));
+		PClass cls = Class::create(name);
+		declarations.push_back(cls);
+		cls->parent = shared_from_this();
 		return shared_from_this();
 	};
 
 	//! Attach a base class to the last declaration.
 	PScope base_class(std::string const & class_name) {
-		if (PClass base_class = get_class(class_name)) {
-			boost::apply_visitor(
-			    base_class_visitor(base_class), declarations.back());
+		if (PClass cls = // assignment!
+		        boost::apply_visitor(
+		            get_class_visitor(), declarations.back())) {
+			if (PClass base_class = get_class(class_name)) {
+				cls->base_class = base_class;
+			} else {
+				throw name_error("base class " + class_name + " not found");
+			}
 		} else {
-			throw name_error("class " + class_name + " not found");
-		}
+			throw syntax_error("only classes can have a base class");
+		};
 		return shared_from_this();
 	};
 
@@ -97,9 +104,7 @@ public:
 	PScope scope(PScope scope_) {
 		// attach scope to last declaration
 		boost::apply_visitor(
-		    scope_visitor(scope_), declarations.back());
-		// register scope parent
-		scope_->parent_scope = shared_from_this();
+		    set_scope_visitor(scope_), declarations.back());
 		return shared_from_this();
 	};
 
@@ -124,6 +129,9 @@ public:
 		//! The base class.
 		boost::weak_ptr<Class> base_class;
 
+		//! The parent of this class, always a scope.
+		boost::weak_ptr<Scope> parent;
+
 	private:
 		//! Private constructor to prevent it from being used.
 		Class(std::string const & name) : name(name) {};
@@ -138,14 +146,20 @@ public:
 		BOOST_FOREACH(Declaration declaration, declarations) {
 			if (PClass result = // assignment!
 			        boost::apply_visitor(
-			            get_class_visitor(class_name),
+			            get_class_visitor(),
 			            declaration)) {
-				return result;
+				if (result->name == class_name) {
+					return result;
+				}
 			}
 		}
-		// look for class in parent scope
-		if (PScope parent_scope_ = parent_scope.lock()) {
-			return parent_scope_->get_class(class_name);
+		// get the scope of the parent (class, if, elif, else, etc.)
+		if (PScope parent_scope = // assignment!
+		        boost::apply_visitor(
+		            get_parent_scope_visitor(),
+		            parent)) {
+			// search for the class in this scope
+			return parent_scope->get_class(class_name);
 		}
 		// all failed
 		return PClass();
@@ -192,10 +206,14 @@ public:
 			}
 		}
 		// look for attribute in base class
-		if (PClass parent_class_ = parent_class.lock()) {
-			if (PClass base_class_ =
-			        parent_class_->base_class.lock()) {
-				if (PScope base_scope = base_class_->scope) {
+		// parent_scope->cls->scope
+		if (PClass cls = // assignment!
+		        boost::apply_visitor(
+		            get_class_visitor(),
+		            parent)) {
+			if (PClass base_class =
+			        cls->base_class.lock()) {
+				if (PScope base_scope = base_class->scope) {
 					return base_scope->get_attr(attr_name);
 				}
 			}
@@ -210,23 +228,23 @@ public:
 	//! Declarations in this scope.
 	std::vector<Declaration> declarations;
 
-	//! Parent scope.
-	boost::weak_ptr<Scope> parent_scope;
+	//! The type of a parent of this scope (class, if, elif, or else).
+	typedef boost::variant<boost::weak_ptr<Class> > Parent;
 
-	//! Parent class.
-	boost::weak_ptr<Class> parent_class;
+	//! Parent of this scope.
+	Parent parent;
 
 	//! A visitor for attaching a scope to a declaration.
-	class scope_visitor : public boost::static_visitor<>
+	class set_scope_visitor : public boost::static_visitor<>
 	{
 	public:
 		//! Constructor.
-		scope_visitor(PScope scope) : scope(scope) {};
+		set_scope_visitor(PScope scope) : scope(scope) {};
 
 		//! Attach scope to class.
 		void operator()(PClass cls) const {
 			cls->scope = scope;
-			scope->parent_class = cls;
+			scope->parent = cls;
 		};
 
 		//! No scope for attributes, so throw an exception.
@@ -238,52 +256,27 @@ public:
 		PScope scope;
 	};
 
-	//! A visitor for attaching a base class to a declaration.
-	class base_class_visitor : public boost::static_visitor<>
-	{
-	public:
-		//! Constructor.
-		base_class_visitor(PClass base_class)
-			: base_class(base_class) {};
-
-		//! Attach base class to class.
-		void operator()(PClass cls) const {
-			cls->base_class = base_class;
-		};
-
-		//! No base class for attributes, so throw an exception.
-		void operator()(PAttr attr) const {
-			throw syntax_error("attributes cannot have a base class");
-		};
-
-		//! The base class to attach.
-		PClass base_class;
-	};
-
 	//! A visitor for finding a class.
 	class get_class_visitor : public boost::static_visitor<PClass>
 	{
 	public:
 		//! Constructor.
-		get_class_visitor(std::string const & class_name)
-			: class_name(class_name) {};
+		get_class_visitor() {};
 
-		//! Return class if name matches.
+		//! Return class.
 		PClass operator()(PClass cls) const {
-			if (cls->name == class_name) {
-				return cls;
-			} else {
-				return PClass();
-			}
+			return cls;
 		};
 
-		//! Attribute never matches.
+		//! Attribute returns nothing.
 		PClass operator()(PAttr attr) const {
 			return PClass();
 		};
 
-		//! The name of the class to get.
-		std::string class_name;
+		//! Return class.
+		PClass operator()(boost::weak_ptr<Class> cls) const {
+			return cls.lock();
+		};
 	};
 
 	//! A visitor for finding an attribute.
@@ -312,9 +305,31 @@ public:
 		std::string attr_name;
 	};
 
+	//! A visitor for finding the parent scope.
+	class get_parent_scope_visitor : public boost::static_visitor<PScope>
+	{
+	public:
+		//! Constructor.
+		get_parent_scope_visitor() {};
+
+		//! Return parent scope of a class.
+		PScope operator()(PClass cls) const {
+			return cls->parent.lock();
+		};
+
+		//! Return parent scope of a class.
+		PScope operator()(boost::weak_ptr<Class> cls) const {
+			if (PClass cls_ = cls.lock()) {
+				return cls_->parent.lock();
+			} else {
+				return PScope();
+			}
+		};
+	};
+
 private:
 	//! Private constructor to prevent it from being used.
-	Scope() : declarations(), parent_scope(), parent_class() {};
+	Scope() : declarations(), parent() {};
 };
 
 //! Shortcut.
