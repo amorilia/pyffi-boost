@@ -10,7 +10,7 @@ configure_file(${PYFFI_SOURCE_DIR}/include/pyffi.hpp.in ${PYFFI_SOURCE_DIR}/incl
 configure_file(${PYFFI_SOURCE_DIR}/Doxyfile.in ${PYFFI_SOURCE_DIR}/Doxyfile)
 
 # find boost
-find_package(Boost 1.43.0 REQUIRED COMPONENTS unit_test_framework)
+find_package(Boost 1.41.0 REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # include pyffi headers
