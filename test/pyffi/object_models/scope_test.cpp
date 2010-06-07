@@ -35,6 +35,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+/**
+
+\file
+
+Regression tests for pyffi::object_models::Scope.
+
+*/
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
@@ -47,13 +55,13 @@ using namespace pyffi::object_models;
 
 BOOST_AUTO_TEST_SUITE(scope_test_suite)
 
-// Check that scopes can be created.
+//! Check that scopes can be created.
 BOOST_AUTO_TEST_CASE(scope_create_test)
 {
 	BOOST_CHECK_NO_THROW(Scope::create());
 }
 
-// Check that classes can be created.
+//! Check that classes can be created.
 BOOST_AUTO_TEST_CASE(class_create_test)
 {
 	PClass cls;
@@ -61,7 +69,7 @@ BOOST_AUTO_TEST_CASE(class_create_test)
 	BOOST_CHECK_EQUAL(cls->name, "TestClass");
 }
 
-// Check that attributes can be created.
+//! Check that attributes can be created.
 BOOST_AUTO_TEST_CASE(attr_create_test)
 {
 	PAttr attr;
@@ -70,7 +78,7 @@ BOOST_AUTO_TEST_CASE(attr_create_test)
 	BOOST_CHECK_EQUAL(attr->name, "test");
 }
 
-// Check that scope class declaration syntax.
+//! Check that scope class declaration syntax.
 BOOST_AUTO_TEST_CASE(scope_create_class_test)
 {
 	PScope scope;
@@ -95,7 +103,7 @@ BOOST_AUTO_TEST_CASE(scope_create_class_test)
 	BOOST_CHECK_EQUAL(cls->name, "TestClass3");
 }
 
-// Check that scope class declaration syntax.
+//! Check that scope class declaration syntax.
 BOOST_AUTO_TEST_CASE(scope_create_attr_test)
 {
 	PScope scope;
@@ -136,7 +144,7 @@ BOOST_AUTO_TEST_CASE(scope_create_attr_test)
 	BOOST_CHECK_EQUAL(attr->name, "num_vertices");
 }
 
-// Check declaration of scopes within classes.
+//! Check declaration of scopes within classes.
 BOOST_AUTO_TEST_CASE(class_scope_test)
 {
 	PScope scope;
@@ -159,9 +167,8 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_EQUAL(scope, cls->parent.lock());
 	PScope cls_scope = cls->scope;
 	BOOST_CHECK_EQUAL(
-	    cls,
-	    boost::apply_visitor(
-	        Scope::get_class_visitor(), cls_scope->parent));
+	    cls, boost::apply_visitor(
+	        Scope::get_shared_ptr_visitor<Class>(), cls_scope->parent));
 	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
 	PAttr attr;
 	BOOST_CHECK_NO_THROW(attr = get<PAttr>(cls_scope->declarations[0]));
@@ -172,9 +179,9 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	BOOST_CHECK_EQUAL(attr->name, "b");
 }
 
+//! Check that attributes cannot have scopes.
 BOOST_AUTO_TEST_CASE(attr_scope_test)
 {
-	// check that attributes cannot have scopes
 	BOOST_CHECK_THROW(
 	    Scope::create()
 	    ->class_("Int")
@@ -186,8 +193,27 @@ BOOST_AUTO_TEST_CASE(attr_scope_test)
 	);
 }
 
+//! Check scope visitation.
+BOOST_AUTO_TEST_CASE(visitor_test)
+{
+	PScope scope =
+	    Scope::create() // create a scope
+	    ->class_("Test"); // declare a class
+	Scope::Declaration decl = scope->declarations[0];
+	PAttr attr = boost::apply_visitor(
+	                 Scope::get_shared_ptr_visitor<Attr>(), decl);
+	BOOST_CHECK(!attr); // first declaration is not an attribute
+	PClass cls = boost::apply_visitor(
+	                 Scope::get_shared_ptr_visitor<Class>(), decl);
+	BOOST_CHECK(cls); // first declaration is a class
+	BOOST_CHECK_EQUAL(cls->name, "Test");
+	BOOST_CHECK_EQUAL(
+	    scope,
+	    boost::apply_visitor(
+	        Scope::get_parent_scope_visitor(), decl));
+}
 
-// Check if we can get the classes by name.
+//! Check if we can get the classes by name.
 BOOST_AUTO_TEST_CASE(get_class_test)
 {
 	PScope scope;
@@ -237,7 +263,7 @@ BOOST_AUTO_TEST_CASE(get_class_test)
 	BOOST_CHECK_EQUAL(cls_char, test_scope->get_class("Char"));
 }
 
-// Test base class syntax.
+//! Test base class syntax.
 BOOST_AUTO_TEST_CASE(scope_base_class_test)
 {
 	PScope scope;
@@ -254,27 +280,25 @@ BOOST_AUTO_TEST_CASE(scope_base_class_test)
 	BOOST_CHECK_EQUAL(cls_test->base_class.lock(), cls_int);
 }
 
-// Check if we can get attributes by name.
+//! Check if we can get attributes by name.
 BOOST_AUTO_TEST_CASE(get_attr_test)
 {
-	PScope scope;
 	// define various classes
-	BOOST_CHECK_NO_THROW(
-	    scope =
+	PScope scope =
+	    Scope::create()
+	    ->class_("Int")
+	    ->class_("A")->scope(
 	        Scope::create()
-	        ->class_("Base")->scope(
-	            Scope::create()
-	            ->attr("Int", "a")
-	            ->attr("Int", "b")
-	        )
-	        ->class_("Derived")->base_class("Base")->scope(
-	            Scope::create()
-	            ->attr("Int", "c")
-	            ->attr("Int", "d")
-	        )
-	);
-	PClass base_cls = scope->get_class("Base");
-	PClass derived_cls = scope->get_class("Derived");
+	        ->attr("Int", "a")
+	        ->attr("Int", "b")
+	    )
+	    ->class_("B")->base_class("A")->scope(
+	        Scope::create()
+	        ->attr("Int", "c")
+	        ->attr("Int", "d")
+	    );
+	PClass base_cls = scope->get_class("A");
+	PClass derived_cls = scope->get_class("B");
 	PAttr attr_a, attr_b, attr_c, attr_d;
 	// check base class attributes
 	BOOST_CHECK_NO_THROW(attr_a = base_cls->scope->get_attr("a"));

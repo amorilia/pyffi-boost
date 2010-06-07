@@ -81,7 +81,8 @@ public:
 	PScope base_class(std::string const & class_name) {
 		if (PClass cls = // assignment!
 		        boost::apply_visitor(
-		            get_class_visitor(), declarations.back())) {
+		            get_shared_ptr_visitor<Class>(),
+		            declarations.back())) {
 			if (PClass base_class = get_class(class_name)) {
 				cls->base_class = base_class;
 			} else {
@@ -96,7 +97,9 @@ public:
 	//! Create an attribute within the current scope.
 	PScope attr(std::string const & class_name,
 	            std::string const & name) {
-		declarations.push_back(Attr::create(class_name, name));
+		PAttr attr = Attr::create(class_name, name);
+		declarations.push_back(attr);
+		attr->parent = shared_from_this();
 		return shared_from_this();
 	};
 
@@ -146,18 +149,18 @@ public:
 		BOOST_FOREACH(Declaration declaration, declarations) {
 			if (PClass result = // assignment!
 			        boost::apply_visitor(
-			            get_class_visitor(),
+			            get_shared_ptr_visitor<Class>(),
 			            declaration)) {
 				if (result->name == class_name) {
 					return result;
 				}
 			}
 		}
-		// get the scope of the parent (class, if, elif, else, etc.)
+		// get the scope of the parent (class, if, elif, else,
+		// etc.)  of this scope
 		if (PScope parent_scope = // assignment!
 		        boost::apply_visitor(
-		            get_parent_scope_visitor(),
-		            parent)) {
+		            get_parent_scope_visitor(), parent)) {
 			// search for the class in this scope
 			return parent_scope->get_class(class_name);
 		}
@@ -184,6 +187,9 @@ public:
 		//! Name of this attribute.
 		std::string name;
 
+		//! The parent of this attribute, always a scope.
+		boost::weak_ptr<Scope> parent;
+
 	private:
 		//! Private constructor to prevent it from being used.
 		Attr(std::string const & class_name,
@@ -200,16 +206,18 @@ public:
 		BOOST_FOREACH(Declaration declaration, declarations) {
 			if (PAttr result = // assignment!
 			        boost::apply_visitor(
-			            get_attr_visitor(attr_name),
+			            get_shared_ptr_visitor<Attr>(),
 			            declaration)) {
-				return result;
+				if (result->name == attr_name) {
+					return result;
+				}
 			}
 		}
 		// look for attribute in base class
 		// parent_scope->cls->scope
 		if (PClass cls = // assignment!
 		        boost::apply_visitor(
-		            get_class_visitor(),
+		            get_shared_ptr_visitor<Class>(),
 		            parent)) {
 			if (PClass base_class =
 			        cls->base_class.lock()) {
@@ -256,71 +264,56 @@ public:
 		PScope scope;
 	};
 
-	//! A visitor for finding a class.
-	class get_class_visitor : public boost::static_visitor<PClass>
+	//! A visitor for getting a shared pointer.
+	template <typename T>
+	class get_shared_ptr_visitor
+		: public boost::static_visitor<boost::shared_ptr<T> >
 	{
 	public:
 		//! Constructor.
-		get_class_visitor() {};
+		get_shared_ptr_visitor() {};
 
-		//! Return class.
-		PClass operator()(PClass cls) const {
-			return cls;
+		//! Return shared pointer.
+		boost::shared_ptr<T> operator()(const boost::shared_ptr<T> & t) const {
+			return t;
 		};
 
-		//! Attribute returns nothing.
-		PClass operator()(PAttr attr) const {
-			return PClass();
+		//! Lock weak pointer and return shared pointer.
+		boost::shared_ptr<T> operator()(const boost::weak_ptr<T> & t) const {
+			return t.lock();
 		};
 
-		//! Return class.
-		PClass operator()(boost::weak_ptr<Class> cls) const {
-			return cls.lock();
+		//! Return nothing.
+		template <typename S>
+		boost::shared_ptr<T> operator()(const boost::shared_ptr<S> & s) const {
+			return boost::shared_ptr<T>();
+		};
+
+		//! Return nothing.
+		template <typename S>
+		boost::shared_ptr<T> operator()(const boost::weak_ptr<S> & s) const {
+			return boost::shared_ptr<T>();
 		};
 	};
 
-	//! A visitor for finding an attribute.
-	class get_attr_visitor : public boost::static_visitor<PAttr>
-	{
-	public:
-		//! Constructor.
-		get_attr_visitor(std::string const & attr_name)
-			: attr_name(attr_name) {};
-
-		//! A class never matches.
-		PAttr operator()(PClass cls) const {
-			return PAttr();
-		};
-
-		//! Return attribute if name matches.
-		PAttr operator()(PAttr attr) const {
-			if (attr->name == attr_name) {
-				return attr;
-			} else {
-				return PAttr();
-			}
-		};
-
-		//! The name of the attribute to get.
-		std::string attr_name;
-	};
-
-	//! A visitor for finding the parent scope.
+	//! A visitor for finding the parent Scope of a Scope::Declaration.
 	class get_parent_scope_visitor : public boost::static_visitor<PScope>
 	{
 	public:
 		//! Constructor.
 		get_parent_scope_visitor() {};
 
-		//! Return parent scope of a class.
-		PScope operator()(PClass cls) const {
-			return cls->parent.lock();
+		//! Return parent scope.
+		template <typename T>
+		PScope operator()(const boost::shared_ptr<T> & t) const {
+			return t->parent.lock();
 		};
 
-		//! Return parent scope of a class.
-		PScope operator()(boost::weak_ptr<Class> cls) const {
-			if (PClass cls_ = cls.lock()) {
-				return cls_->parent.lock();
+		//! Lock weak pointer and return parent scope.
+		template <typename T>
+		PScope operator()(const boost::weak_ptr<T> & t) const {
+			if (boost::shared_ptr<T> t_ = t.lock()) {
+				return t_->parent.lock();
 			} else {
 				return PScope();
 			}

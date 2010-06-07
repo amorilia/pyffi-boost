@@ -43,7 +43,59 @@ POSSIBILITY OF SUCH DAMAGE.
 namespace pyffi
 {
 
-//! Namespace for all object model declarations.
+/**
+
+\brief Object models.
+
+\section pyffi_om_ast Abstract Syntax Tree
+
+\subsection pyffi_om_ast_struct Structure
+
+The Scope class stores a list of Scope::declarations, and is the top
+level object of the abstract syntax tree of a format specification. A
+Scope::Declaration can be a Scope::Class, a Scope::Attr, a Scope::If,
+a Scope::Elif, or a Scope::Else.
+
+The Scope::Class, Scope::If, Scope::Elif, and Scope::Else, again
+contain a Scope (see Scope::Class::scope, Scope::If::scope,
+Scope::Elif::scope, and Scope::Else::scope), which in turn contains
+further Scope::declarations.
+
+Each Scope also contains a weak pointer (Scope::parent) to the
+declaration in which it is defined, and each possible
+Scope::Declaration has a weak pointer to the scope in which it is
+defined (Scope::Class::parent, Scope::If::parent, Scope::Elif::parent,
+and Scope::Else::parent).
+
+\subsection pyffi_om_ast_construction Construction
+
+\todo Add a description of tree construction.
+
+\dontinclude test/pyffi/object_models/scope_test.cpp
+\skip BOOST_AUTO_TEST_CASE(get_attr_test)
+\skip scope =
+\until );
+
+\subsection pyffi_om_ast_nav Navigation
+
+To aid navigation through the syntax tree, the following visitors are
+available.
+
+To get a shared pointer to a Scope::Declaration, use
+Scope::get_shared_ptr_visitor <Class>, Scope::get_shared_ptr_visitor
+<Attr>, and so on: the result will be null if the declaration's type
+does not match.
+
+Similarly, to get a shared pointer to the parent Scope of a
+Scope::Declaration, use Scope::get_parent_scope_visitor.
+
+\dontinclude test/pyffi/object_models/scope_test.cpp
+\skip BOOST_AUTO_TEST_CASE(visitor_test)
+\skip scope =
+\until get_parent_scope_visitor
+
+*/
+
 namespace object_models
 {
 
