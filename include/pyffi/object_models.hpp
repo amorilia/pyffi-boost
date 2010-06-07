@@ -81,10 +81,10 @@ and Scope::Else::parent).
 To aid navigation through the syntax tree, the following visitors are
 available.
 
-To get a shared pointer to a Scope::Declaration, use
-Scope::get_shared_ptr_visitor <Class>, Scope::get_shared_ptr_visitor
-<Attr>, and so on: the result will be null if the declaration's type
-does not match.
+To get a shared pointer to a Scope::Declaration, use \ref
+Scope::get_shared_ptr_visitor\<Class\>, \ref
+Scope::get_shared_ptr_visitor\<Attr\>, and so on: the result will be
+null if the declaration's type does not match.
 
 Similarly, to get a shared pointer to the parent Scope of a
 Scope::Declaration, use Scope::get_parent_scope_visitor.
