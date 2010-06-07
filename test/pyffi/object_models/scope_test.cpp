@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(class_scope_test)
 	PScope cls_scope = cls->scope;
 	BOOST_CHECK_EQUAL(
 	    cls, boost::apply_visitor(
-	        Scope::get_shared_ptr_visitor<Class>(), cls_scope->parent));
+	        Scope::get_declaration_visitor<Class>(), cls_scope->parent));
 	BOOST_CHECK_EQUAL(cls_scope->declarations.size(), 2);
 	PAttr attr;
 	BOOST_CHECK_NO_THROW(attr = get<PAttr>(cls_scope->declarations[0]));
@@ -201,10 +201,10 @@ BOOST_AUTO_TEST_CASE(visitor_test)
 	    ->class_("Test"); // declare a class
 	Scope::Declaration decl = scope->declarations[0];
 	PAttr attr = boost::apply_visitor(
-	                 Scope::get_shared_ptr_visitor<Attr>(), decl);
+	                 Scope::get_declaration_visitor<Attr>(), decl);
 	BOOST_CHECK(!attr); // first declaration is not an attribute
 	PClass cls = boost::apply_visitor(
-	                 Scope::get_shared_ptr_visitor<Class>(), decl);
+	                 Scope::get_declaration_visitor<Class>(), decl);
 	BOOST_CHECK(cls); // first declaration is a class
 	BOOST_CHECK_EQUAL(cls->name, "Test");
 	BOOST_CHECK_EQUAL(

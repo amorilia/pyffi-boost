@@ -81,7 +81,7 @@ public:
 	PScope base_class(std::string const & class_name) {
 		if (PClass cls = // assignment!
 		        boost::apply_visitor(
-		            get_shared_ptr_visitor<Class>(),
+		            get_declaration_visitor<Class>(),
 		            declarations.back())) {
 			if (PClass base_class = get_class(class_name)) {
 				cls->base_class = base_class;
@@ -162,7 +162,7 @@ public:
 			BOOST_FOREACH(Declaration declaration, scope->declarations) {
 				if (PAttr result = // assignment!
 				        boost::apply_visitor(
-				            get_shared_ptr_visitor<Attr>(),
+				            get_declaration_visitor<Attr>(),
 				            declaration)) {
 					if (result->name == attr_name) {
 						return result;
@@ -203,7 +203,7 @@ public:
 		BOOST_FOREACH(Declaration declaration, declarations) {
 			if (PClass result = // assignment!
 			        boost::apply_visitor(
-			            get_shared_ptr_visitor<Class>(),
+			            get_declaration_visitor<Class>(),
 			            declaration)) {
 				if (result->name == class_name) {
 					return result;
@@ -264,12 +264,12 @@ public:
 
 	//! A visitor for getting a shared pointer.
 	template <typename T>
-	class get_shared_ptr_visitor
+	class get_declaration_visitor
 		: public boost::static_visitor<boost::shared_ptr<T> >
 	{
 	public:
 		//! Constructor.
-		get_shared_ptr_visitor() {};
+		get_declaration_visitor() {};
 
 		//! Return shared pointer.
 		boost::shared_ptr<T> operator()(const boost::shared_ptr<T> & t) const {

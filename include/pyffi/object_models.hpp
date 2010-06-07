@@ -82,8 +82,8 @@ To aid navigation through the syntax tree, the following visitors are
 available.
 
 To get a shared pointer to a Scope::Declaration, use \ref
-Scope::get_shared_ptr_visitor\<Scope::Class\>, \ref
-Scope::get_shared_ptr_visitor\<Scope::Class::Attr\>, and so on: the
+Scope::get_declaration_visitor\<Scope::Class\>, \ref
+Scope::get_declaration_visitor\<Scope::Class::Attr\>, and so on: the
 result will be null if the declaration's type does not match.
 
 Similarly, to get a shared pointer to the parent Scope of a
