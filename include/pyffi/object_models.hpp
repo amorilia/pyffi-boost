@@ -53,7 +53,7 @@ namespace pyffi
 
 The Scope class stores a list of Scope::declarations, and is the top
 level object of the abstract syntax tree of a format specification. A
-Scope::Declaration can be a Scope::Class, a Scope::Attr, a Scope::If,
+Scope::Declaration can be a Scope::Class, a Scope::Class::Attr, a Scope::If,
 a Scope::Elif, or a Scope::Else.
 
 The Scope::Class, Scope::If, Scope::Elif, and Scope::Else, again
@@ -82,9 +82,9 @@ To aid navigation through the syntax tree, the following visitors are
 available.
 
 To get a shared pointer to a Scope::Declaration, use \ref
-Scope::get_shared_ptr_visitor\<Class\>, \ref
-Scope::get_shared_ptr_visitor\<Attr\>, and so on: the result will be
-null if the declaration's type does not match.
+Scope::get_shared_ptr_visitor\<Scope::Class\>, \ref
+Scope::get_shared_ptr_visitor\<Scope::Class::Attr\>, and so on: the
+result will be null if the declaration's type does not match.
 
 Similarly, to get a shared pointer to the parent Scope of a
 Scope::Declaration, use Scope::get_parent_scope_visitor.
