@@ -301,10 +301,10 @@ BOOST_AUTO_TEST_CASE(get_attr_test)
 	PClass derived_cls = scope->get_class("B");
 	PAttr attr_a, attr_b, attr_c, attr_d;
 	// check base class attributes
-	BOOST_CHECK_NO_THROW(attr_a = base_cls->scope->get_attr("a"));
-	BOOST_CHECK_NO_THROW(attr_b = base_cls->scope->get_attr("b"));
-	BOOST_CHECK_NO_THROW(attr_c = base_cls->scope->get_attr("c"));
-	BOOST_CHECK_NO_THROW(attr_d = base_cls->scope->get_attr("d"));
+	BOOST_CHECK_NO_THROW(attr_a = base_cls->get_attr("a"));
+	BOOST_CHECK_NO_THROW(attr_b = base_cls->get_attr("b"));
+	BOOST_CHECK_NO_THROW(attr_c = base_cls->get_attr("c"));
+	BOOST_CHECK_NO_THROW(attr_d = base_cls->get_attr("d"));
 	BOOST_CHECK(attr_a);
 	BOOST_CHECK(attr_b);
 	BOOST_CHECK_EQUAL(attr_c, PAttr());
@@ -314,10 +314,10 @@ BOOST_AUTO_TEST_CASE(get_attr_test)
 	BOOST_CHECK_EQUAL(attr_b->name, "b");
 	BOOST_CHECK_EQUAL(attr_b->class_name, "Int");
 	// check derived class attributes
-	BOOST_CHECK_EQUAL(attr_a, derived_cls->scope->get_attr("a"));
-	BOOST_CHECK_EQUAL(attr_b, derived_cls->scope->get_attr("b"));
-	BOOST_CHECK_NO_THROW(attr_c = derived_cls->scope->get_attr("c"));
-	BOOST_CHECK_NO_THROW(attr_d = derived_cls->scope->get_attr("d"));
+	BOOST_CHECK_EQUAL(attr_a, derived_cls->get_attr("a"));
+	BOOST_CHECK_EQUAL(attr_b, derived_cls->get_attr("b"));
+	BOOST_CHECK_NO_THROW(attr_c = derived_cls->get_attr("c"));
+	BOOST_CHECK_NO_THROW(attr_d = derived_cls->get_attr("d"));
 	BOOST_CHECK(attr_c);
 	BOOST_CHECK(attr_d);
 	BOOST_CHECK_EQUAL(attr_c->name, "c");

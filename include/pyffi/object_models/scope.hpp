@@ -123,6 +123,60 @@ public:
 			return PClass(new Class(name));
 		};
 
+
+		//! A named typed attribute.
+		class Attr
+		{
+		public:
+			//! Shared pointer to attribute.
+			typedef boost::shared_ptr<Attr> PAttr;
+
+			//! Constructor.
+			static PAttr create(std::string const & class_name,
+			                    std::string const & name) {
+				return PAttr(new Attr(class_name, name));
+			};
+
+			//! Name of the class of this attribute.
+			std::string class_name;
+
+			//! Name of this attribute.
+			std::string name;
+
+			//! The parent of this attribute, always a scope.
+			boost::weak_ptr<Scope> parent;
+
+		private:
+			//! Private constructor to prevent it from being used.
+			Attr(std::string const & class_name,
+			     std::string const & name)
+				: class_name(class_name), name(name) {};
+		};
+
+		//! Shortcut.
+		typedef Attr::PAttr PAttr;
+
+		//! Get attribute with given name from class.
+		PAttr get_attr(std::string const & attr_name) const {
+			// look for attribute in scope declarations
+			BOOST_FOREACH(Declaration declaration, scope->declarations) {
+				if (PAttr result = // assignment!
+				        boost::apply_visitor(
+				            get_shared_ptr_visitor<Attr>(),
+				            declaration)) {
+					if (result->name == attr_name) {
+						return result;
+					}
+				}
+			}
+			// look for attribute in base class
+			if (PClass base_class_ = base_class.lock()) {
+				return base_class_->get_attr(attr_name);
+			}
+			// all failed
+			return PAttr();
+		};
+
 		//! Name of this class.
 		std::string name;
 
@@ -168,67 +222,11 @@ public:
 		return PClass();
 	};
 
-	//! A named typed attribute.
-	class Attr
-	{
-	public:
-		//! Shared pointer to attribute.
-		typedef boost::shared_ptr<Attr> PAttr;
-
-		//! Constructor.
-		static PAttr create(std::string const & class_name,
-		                    std::string const & name) {
-			return PAttr(new Attr(class_name, name));
-		};
-
-		//! Name of the class of this attribute.
-		std::string class_name;
-
-		//! Name of this attribute.
-		std::string name;
-
-		//! The parent of this attribute, always a scope.
-		boost::weak_ptr<Scope> parent;
-
-	private:
-		//! Private constructor to prevent it from being used.
-		Attr(std::string const & class_name,
-		     std::string const & name)
-			: class_name(class_name), name(name) {};
-	};
+	//! Shortcut.
+	typedef Class::Attr Attr;
 
 	//! Shortcut.
-	typedef Attr::PAttr PAttr;
-
-	//! Get attribute with given name from scope.
-	PAttr get_attr(std::string const & attr_name) const {
-		// look for attribute in scope declarations
-		BOOST_FOREACH(Declaration declaration, declarations) {
-			if (PAttr result = // assignment!
-			        boost::apply_visitor(
-			            get_shared_ptr_visitor<Attr>(),
-			            declaration)) {
-				if (result->name == attr_name) {
-					return result;
-				}
-			}
-		}
-		// look for attribute in base class
-		// parent_scope->cls->scope
-		if (PClass cls = // assignment!
-		        boost::apply_visitor(
-		            get_shared_ptr_visitor<Class>(),
-		            parent)) {
-			if (PClass base_class =
-			        cls->base_class.lock()) {
-				if (PScope base_scope = base_class->scope) {
-					return base_scope->get_attr(attr_name);
-				}
-			}
-		}
-		// all failed
-		return PAttr();
-	};
+	typedef Class::PAttr PAttr;
 
 	//! The type of a declaration (class, or attribute).
 	typedef boost::variant<PClass, PAttr> Declaration;
