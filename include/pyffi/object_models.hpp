@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_HPP_INCLUDED
 #define PYFFI_OM_HPP_INCLUDED
 
-#include "pyffi/object_models/scope.hpp"
+#include "pyffi/object_models/ast.hpp"
 
 namespace pyffi
 {
@@ -48,6 +48,9 @@ namespace pyffi
 \brief Object models.
 
 \section pyffi_om_ast Abstract Syntax Tree
+
+All classes for abstract syntax trees are in ast.hpp, and the
+regression tests reside in ast_test.cpp.
 
 \subsection pyffi_om_ast_struct Structure
 
@@ -71,7 +74,7 @@ and Scope::Else::parent).
 
 \todo Add a description of tree construction.
 
-\dontinclude test/pyffi/object_models/scope_test.cpp
+\dontinclude test/pyffi/object_models/ast_test.cpp
 \skip BOOST_AUTO_TEST_CASE(get_attr_test)
 \skip scope =
 \until );
@@ -89,7 +92,7 @@ result will be null if the declaration's type does not match.
 Similarly, to get a shared pointer to the parent Scope of a
 Scope::Declaration, use Scope::get_parent_scope_visitor.
 
-\dontinclude test/pyffi/object_models/scope_test.cpp
+\dontinclude test/pyffi/object_models/ast_test.cpp
 \skip BOOST_AUTO_TEST_CASE(visitor_test)
 \skip scope =
 \until get_parent_scope_visitor

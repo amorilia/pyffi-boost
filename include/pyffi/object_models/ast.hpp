@@ -35,8 +35,18 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef PYFFI_OM_SCOPE_HPP_INCLUDED
-#define PYFFI_OM_SCOPE_HPP_INCLUDED
+/**
+
+\file
+The abstract syntax tree model.
+
+\sa \ref pyffi_om_ast
+\sa ast_test.cpp
+
+*/
+
+#ifndef PYFFI_OM_AST_HPP_INCLUDED
+#define PYFFI_OM_AST_HPP_INCLUDED
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/foreach.hpp>

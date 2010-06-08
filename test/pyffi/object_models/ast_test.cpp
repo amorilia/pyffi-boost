@@ -38,8 +38,10 @@ POSSIBILITY OF SUCH DAMAGE.
 /**
 
 \file
+Regression tests for the abstract syntax tree model.
 
-Regression tests for pyffi::object_models::Scope.
+\sa \ref pyffi_om_ast
+\sa ast.hpp
 
 */
 
@@ -47,13 +49,13 @@ Regression tests for pyffi::object_models::Scope.
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 
-#include "pyffi/object_models/scope.hpp"
+#include "pyffi/object_models/ast.hpp"
 
 using boost::get;
 using namespace pyffi;
 using namespace pyffi::object_models;
 
-BOOST_AUTO_TEST_SUITE(scope_test_suite)
+BOOST_AUTO_TEST_SUITE(ast_test_suite)
 
 //! Check that scopes can be created.
 BOOST_AUTO_TEST_CASE(scope_create_test)
