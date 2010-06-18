@@ -102,6 +102,12 @@ public:
     Scope else_;            //!< The else part.
 };
 
+//! Convert format description to abstract syntax tree.
+bool parse(std::istream & in, Scope & scope);
+
+//! Convert abstract syntax tree to format description.
+bool generate(std::ostream & out, Scope const & scope);
+
 } // namespace object_models
 
 } // namespace pyffi

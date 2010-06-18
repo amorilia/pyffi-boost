@@ -16,6 +16,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 # include pyffi headers
 include_directories(${PYFFI_SOURCE_DIR}/include)
 
+# build the actual library
+add_library(pyffi
+    src/pyffi/object_models/ast.cpp
+)
+
 # build the tests
 enable_testing()
 add_subdirectory(test)

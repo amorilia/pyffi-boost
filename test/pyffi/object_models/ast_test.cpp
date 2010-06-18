@@ -100,4 +100,14 @@ BOOST_AUTO_TEST_CASE(ast_scope_test)
     scope.push_back(ifelifselse);
 }
 
+BOOST_AUTO_TEST_CASE(ast_generate_test)
+{
+    Scope scope;
+    Class int_("Int");
+    scope.push_back(int_);
+    std::ostringstream os;
+    generate(os, scope);
+    BOOST_CHECK_EQUAL(os.str(), "class Int\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
