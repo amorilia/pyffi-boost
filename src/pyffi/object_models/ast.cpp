@@ -35,12 +35,22 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/support_ostream_iterator.hpp>
 
 #include "pyffi/object_models/ast.hpp"
+
+// upgrade structs to fusion sequences
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pyffi::object_models::Class,
+    (std::string, name)
+    (boost::optional<std::string>, base_name)
+    (pyffi::object_models::Scope, scope)
+)
 
 namespace pyffi
 {
@@ -58,16 +68,34 @@ bool parse(std::istream & in, Scope & scope)
 }
 
 
+namespace karma = boost::spirit::karma;
+
 template <typename OutputIterator>
-bool generate(OutputIterator sink, Scope const & scope)
-{
+struct scope_karma_grammar : karma::grammar<OutputIterator, Class()> {
+    karma::rule<OutputIterator, Class()> class_;
+
+    scope_karma_grammar()
+        : scope_karma_grammar::base_type(class_) {
+    class_ =
+        "class "
+        << karma::string // Class.name
+        << -('(' << karma::string << ')') // Class.base_name
+        << karma::eol;
 }
+};
 
 bool generate(std::ostream & out, Scope const & scope)
 {
+    // wrap ostream into iterator
+    boost::spirit::ostream_iterator sink(out);
+
+    // create parser
+    scope_karma_grammar<boost::spirit::ostream_iterator> parser;
+
+    // use iterator to parse class
+    return karma::generate(sink, parser, boost::get<Class>(scope[0]));
 }
 
 }
 
 }
-

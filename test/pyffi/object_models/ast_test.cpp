@@ -58,11 +58,11 @@ BOOST_AUTO_TEST_CASE(ast_class_test)
 {
     Class int_("Int");
     BOOST_CHECK_EQUAL(int_.name, "Int");
-    BOOST_CHECK_EQUAL(int_.base_name, "");
+    BOOST_CHECK(!int_.base_name);
     BOOST_CHECK_EQUAL(int_.scope.size(), 0);
     int_.base_name = "Object";
     int_.scope.push_back(Attr("Bool", "negate"));
-    BOOST_CHECK_EQUAL(int_.base_name, "Object");
+    BOOST_CHECK_EQUAL(int_.base_name.get(), "Object");
     BOOST_CHECK_EQUAL(int_.scope.size(), 1);
     BOOST_CHECK_EQUAL(get<Attr>(int_.scope[0]).name, "negate");
     BOOST_CHECK_EQUAL(get<Attr>(int_.scope[0]).class_name, "Bool");
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(ast_scope_test)
     scope.push_back(ifelifselse);
 }
 
-BOOST_AUTO_TEST_CASE(ast_generate_test)
+BOOST_AUTO_TEST_CASE(ast_generate_class_test)
 {
     Scope scope;
     Class int_("Int");
@@ -108,6 +108,17 @@ BOOST_AUTO_TEST_CASE(ast_generate_test)
     std::ostringstream os;
     generate(os, scope);
     BOOST_CHECK_EQUAL(os.str(), "class Int\n");
+}
+
+BOOST_AUTO_TEST_CASE(ast_generate_base_name_test)
+{
+    Scope scope;
+    Class int_("Int");
+    int_.base_name = "Object";
+    scope.push_back(int_);
+    std::ostringstream os;
+    generate(os, scope);
+    BOOST_CHECK_EQUAL(os.str(), "class Int(Object)\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

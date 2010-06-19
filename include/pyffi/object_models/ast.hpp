@@ -67,9 +67,9 @@ public:
     //! Constructor.
     Class(std::string const & name)
         : name(name), base_name(), scope() {};
-    std::string name;      //!< Name of this class.
-    std::string base_name; //!< The base class name.
-    Scope scope;           //!< The declarations within this class.
+    std::string name;                       //!< Name of this class.
+    boost::optional<std::string> base_name; //!< The base class name.
+    Scope scope;                            //!< Declarations of this class.
 };
 
 //! An attribute declaration has a class (its type), and a name.
