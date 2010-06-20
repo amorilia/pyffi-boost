@@ -52,6 +52,12 @@ BOOST_FUSION_ADAPT_STRUCT(
     (pyffi::object_models::Scope, scope)
 )
 
+BOOST_FUSION_ADAPT_STRUCT(
+    pyffi::object_models::Attr,
+    (std::string, class_name)
+    (std::string, name)
+)
+
 namespace pyffi
 {
 
@@ -71,15 +77,25 @@ bool parse(std::istream & in, Scope & scope)
 namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator>
-struct scope_karma_grammar : karma::grammar<OutputIterator, Class()> {
+struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
     karma::rule<OutputIterator, Class()> class_;
+    karma::rule<OutputIterator, Attr()> attr;
+    karma::rule<OutputIterator, Scope()> scope;
 
     scope_karma_grammar()
-        : scope_karma_grammar::base_type(class_) {
+        : scope_karma_grammar::base_type(scope) {
+
+    scope = *(class_ | attr);
+
     class_ =
         "class "
         << karma::string // Class.name
         << -('(' << karma::string << ')') // Class.base_name
+        << karma::eol;
+
+    attr =
+        karma::string // Attr.class_name
+        << ' ' << karma::string // Attr.name
         << karma::eol;
 }
 };
@@ -93,7 +109,7 @@ bool generate(std::ostream & out, Scope const & scope)
     scope_karma_grammar<boost::spirit::ostream_iterator> parser;
 
     // use iterator to parse class
-    return karma::generate(sink, parser, boost::get<Class>(scope[0]));
+    return karma::generate(sink, parser, scope);
 }
 
 }

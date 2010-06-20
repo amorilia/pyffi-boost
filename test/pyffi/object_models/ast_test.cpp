@@ -121,4 +121,14 @@ BOOST_AUTO_TEST_CASE(ast_generate_base_name_test)
     BOOST_CHECK_EQUAL(os.str(), "class Int(Object)\n");
 }
 
+BOOST_AUTO_TEST_CASE(ast_generate_attr_test)
+{
+    Scope scope;
+    Attr x("Int", "x");
+    scope.push_back(x);
+    std::ostringstream os;
+    generate(os, scope);
+    BOOST_CHECK_EQUAL(os.str(), "Int x\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
