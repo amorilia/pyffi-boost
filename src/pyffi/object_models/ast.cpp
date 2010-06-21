@@ -78,27 +78,31 @@ namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator>
 struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
-    karma::rule<OutputIterator, Class()> class_;
-    karma::rule<OutputIterator, Attr()> attr;
-    karma::rule<OutputIterator, Scope()> scope;
+    karma::rule<OutputIterator, Scope()> start;
+    karma::rule<OutputIterator, Class(int)> class_;
+    karma::rule<OutputIterator, Attr(int)> attr;
+    karma::rule<OutputIterator, Scope(int)> scope;
     karma::rule<OutputIterator, void(int)> indent;
 
     scope_karma_grammar()
-        : scope_karma_grammar::base_type(scope) {
+        : scope_karma_grammar::base_type(start) {
 
     indent = karma::left_align(karma::_r1)[karma::eps];
 
-    scope = *(class_ | attr);
+    start = scope(0);
+
+    scope = *(class_(karma::_r1) | attr(karma::_r1));
 
     class_ =
-        indent(0)
+        indent(karma::_r1)
         << "class "
         << karma::string // Class.name
         << -('(' << karma::string << ')') // Class.base_name
+        << -(':' << karma::eol << scope(karma::_r1 + 4)) // Class.scope
         << karma::eol;
 
     attr =
-        indent(0)
+        indent(karma::_r1)
         << karma::string // Attr.class_name
         << ' ' << karma::string // Attr.name
         << karma::eol;
