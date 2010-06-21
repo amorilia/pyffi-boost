@@ -81,24 +81,24 @@ struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
     karma::rule<OutputIterator, Class()> class_;
     karma::rule<OutputIterator, Attr()> attr;
     karma::rule<OutputIterator, Scope()> scope;
-    karma::rule<OutputIterator, void()> indent;
+    karma::rule<OutputIterator, void(int)> indent;
 
     scope_karma_grammar()
         : scope_karma_grammar::base_type(scope) {
 
-    indent = karma::lit(std::string(0, ' '));
+    indent = karma::left_align(karma::_r1)[karma::eps];
 
     scope = *(class_ | attr);
 
     class_ =
-        indent
+        indent(0)
         << "class "
         << karma::string // Class.name
         << -('(' << karma::string << ')') // Class.base_name
         << karma::eol;
 
     attr =
-        indent
+        indent(0)
         << karma::string // Attr.class_name
         << ' ' << karma::string // Attr.name
         << karma::eol;
