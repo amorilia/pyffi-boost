@@ -59,13 +59,14 @@ BOOST_AUTO_TEST_CASE(ast_class_test)
     Class int_("Int");
     BOOST_CHECK_EQUAL(int_.name, "Int");
     BOOST_CHECK(!int_.base_name);
-    BOOST_CHECK_EQUAL(int_.scope.size(), 0);
+    BOOST_CHECK(!int_.scope);
     int_.base_name = "Object";
-    int_.scope.push_back(Attr("Bool", "negate"));
+    int_.scope = Scope();
+    int_.scope.get().push_back(Attr("Bool", "negate"));
     BOOST_CHECK_EQUAL(int_.base_name.get(), "Object");
-    BOOST_CHECK_EQUAL(int_.scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Attr>(int_.scope[0]).name, "negate");
-    BOOST_CHECK_EQUAL(get<Attr>(int_.scope[0]).class_name, "Bool");
+    BOOST_CHECK_EQUAL(int_.scope.get().size(), 1);
+    BOOST_CHECK_EQUAL(get<Attr>(int_.scope.get()[0]).name, "negate");
+    BOOST_CHECK_EQUAL(get<Attr>(int_.scope.get()[0]).class_name, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(ast_ifelifelse_test)
@@ -90,9 +91,10 @@ BOOST_AUTO_TEST_CASE(ast_scope_test)
     Attr x("Int", "x");
     Attr y("Int", "y");
     Attr z("Int", "z");
-    intvec.scope.push_back(x);
-    intvec.scope.push_back(y);
-    intvec.scope.push_back(z);
+    intvec.scope = Scope();
+    intvec.scope.get().push_back(x);
+    intvec.scope.get().push_back(y);
+    intvec.scope.get().push_back(z);
     scope.push_back(intvec);
     IfElifsElse ifelifselse;
     ifelifselse.if_.expr = true;

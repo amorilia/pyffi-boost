@@ -49,7 +49,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     pyffi::object_models::Class,
     (std::string, name)
     (boost::optional<std::string>, base_name)
-    (pyffi::object_models::Scope, scope)
+    (boost::optional<pyffi::object_models::Scope>, scope)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
