@@ -147,12 +147,13 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_attr_test)
 
 BOOST_AUTO_TEST_CASE(ast_generate_class_scope_test)
 {
-    Scope scope;
     Class vec("Vector");
-    scope.push_back(vec);
     Attr x("Int", "x");
     vec.scope = Scope();
     vec.scope.get().push_back(x);
+    BOOST_CHECK_EQUAL(vec.scope.get().size(), 1);
+    Scope scope;
+    scope.push_back(vec);
     std::ostringstream os;
     generate(os, scope);
     BOOST_CHECK_EQUAL(os.str(), "class Vector:\n    Int x\n");
