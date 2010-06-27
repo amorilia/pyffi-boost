@@ -35,28 +35,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/support_ostream_iterator.hpp>
 
 #include "pyffi/object_models/ast.hpp"
-
-// upgrade structs to fusion sequences
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::Class,
-    (std::string, name)
-    (boost::optional<std::string>, base_name)
-    (boost::optional<pyffi::object_models::Scope>, scope)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::Attr,
-    (std::string, class_name)
-    (std::string, name)
-)
 
 namespace pyffi
 {

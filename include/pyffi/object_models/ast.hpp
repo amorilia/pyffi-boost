@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_AST_HPP_INCLUDED
 #define PYFFI_OM_AST_HPP_INCLUDED
 
-#include <boost/shared_ptr.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/variant.hpp>
 
 namespace pyffi
@@ -111,5 +111,20 @@ bool generate(std::ostream & out, Scope const & scope);
 } // namespace object_models
 
 } // namespace pyffi
+
+// upgrade structs to fusion sequences
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pyffi::object_models::Class,
+    (std::string, name)
+    (boost::optional<std::string>, base_name)
+    (boost::optional<pyffi::object_models::Scope>, scope)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pyffi::object_models::Attr,
+    (std::string, class_name)
+    (std::string, name)
+)
 
 #endif
