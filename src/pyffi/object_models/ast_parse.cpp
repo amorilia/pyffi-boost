@@ -55,6 +55,7 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     qi::rule<Iterator, Skipper, Scope()> start;
     qi::rule<Iterator, Skipper, Class(int)> class_;
     qi::rule<Iterator, Skipper, Attr(int)> attr;
+    qi::rule<Iterator, Skipper, IfElifsElse(int)> if_elifs_else;
     qi::rule<Iterator, Skipper, Scope(int)> scope;
     qi::rule<Iterator, Skipper, void(int)> indent;
     qi::rule<Iterator, Skipper, std::string()> string_;
@@ -68,44 +69,39 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
 
     start %= scope(0);
 
-    scope %= *(class_(qi::_r1) | attr(qi::_r1));
+    scope %= *(class_(qi::_r1) | attr(qi::_r1) | if_elifs_else(qi::_r1));
 
     class_ %=
         indent(qi::_r1)
         >> qi::lit("class")
         >> string_ // Class.name
-      /*
-        >> -(qi::char_('(') >> string_ >> qi::char_(')')) // Class.base_name
-        >> -(qi::char_(':') >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
-        >> qi::eol
-      */
-        ;
-
-    /*
-    attr =
-        indent(qi::_r1)
-        >> qi::string // Attr.class_name
-        >> qi::string // Attr.name
+        >> -('(' >> string_ >> ')') // Class.base_name
+        >> -(':' >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
         >> qi::eol;
-    */
+
+    attr %=
+        indent(qi::_r1)
+        >> string_ // Attr.class_name
+        >> string_ // Attr.name
+        >> qi::eol;
 }
 };
 
 bool parse(std::istream & in, Scope & scope)
 {
-	// wrap istream into iterator
-	boost::spirit::istream_iterator first(in);
-	boost::spirit::istream_iterator last;
+    // wrap istream into iterator
+    boost::spirit::istream_iterator first(in);
+    boost::spirit::istream_iterator last;
 
-	// create parser
-	scope_qi_grammar<boost::spirit::istream_iterator, qi::ascii::space_type> parser;
+    // create parser
+    scope_qi_grammar<boost::spirit::istream_iterator, qi::ascii::space_type> parser;
 
-	// use iterator to parse stream
-	bool r = qi::phrase_parse(first, last, parser, qi::ascii::space, scope);
+    // use iterator to parse stream
+    bool r = qi::phrase_parse(first, last, parser, qi::ascii::space, scope);
 
-	// fail if we did not get a full match
-	if (!r || first != last)
-		throw std::runtime_error("Syntax error while parsing.");
+    // fail if we did not get a full match
+    if (!r || first != last)
+        throw std::runtime_error("Syntax error while parsing.");
 }
 
 }

@@ -90,18 +90,19 @@ public:
     std::string name;       //!< Name of this attribute.
 };
 
+//! A simple if declaration: an expression and a scope.
+class If
+{
+public:
+    If() : expr(), scope() {}; //<! Constructor.
+    Expr expr;   //!< Condition.
+    Scope scope; //!< Declarations.
+};
+
 //! An if/elif/else declaration.
 class IfElifsElse
 {
 public:
-    //! A simple if declaration: an expression and a scope.
-    class If
-    {
-    public:
-        If() : expr(), scope() {}; //<! Constructor.
-        Expr expr;   //!< Condition.
-        Scope scope; //!< Declarations.
-    };
     IfElifsElse() : if_(), elifs_(), else_() {}; //<! Constructor.
     If if_;                 //!< The if part.
     std::vector<If> elifs_; //!< The elif parts.
@@ -131,6 +132,19 @@ BOOST_FUSION_ADAPT_STRUCT(
     pyffi::object_models::Attr,
     (std::string, class_name)
     (std::string, name)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pyffi::object_models::If,
+    (pyffi::object_models::Expr, expr)
+    (pyffi::object_models::Scope, scope)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pyffi::object_models::IfElifsElse,
+    (pyffi::object_models::If, if_)
+    (std::vector<pyffi::object_models::If>, elifs_)
+    (pyffi::object_models::Scope, else_)
 )
 
 #endif
