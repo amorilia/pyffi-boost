@@ -57,25 +57,31 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     qi::rule<Iterator, Skipper, Attr(int)> attr;
     qi::rule<Iterator, Skipper, Scope(int)> scope;
     qi::rule<Iterator, Skipper, void(int)> indent;
+    qi::rule<Iterator, Skipper, std::string()> string_;
 
     scope_qi_grammar()
         : scope_qi_grammar::base_type(start) {
 
-    /*
+    string_ %= qi::lexeme[+qi::alnum];
+
     indent = qi::repeat(qi::_r1)[' '];
 
-    start = scope(0);
+    start %= scope(0);
 
-    scope = *(class_(qi::_r1) | attr(qi::_r1));
+    scope %= *(class_(qi::_r1) | attr(qi::_r1));
 
-    class_ =
+    class_ %=
         indent(qi::_r1)
         >> qi::lit("class")
-        >> qi::string // Class.name
-        >> -('(' >> qi::string >> ')') // Class.base_name
-        >> -(':' >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
-        >> qi::eol;
+        >> string_ // Class.name
+      /*
+        >> -(qi::char_('(') >> string_ >> qi::char_(')')) // Class.base_name
+        >> -(qi::char_(':') >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
+        >> qi::eol
+      */
+        ;
 
+    /*
     attr =
         indent(qi::_r1)
         >> qi::string // Attr.class_name
