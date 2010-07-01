@@ -18,7 +18,8 @@ include_directories(${PYFFI_SOURCE_DIR}/include)
 
 # build the actual library
 add_library(pyffi
-    src/pyffi/object_models/ast.cpp
+    src/pyffi/object_models/ast_generate.cpp
+    src/pyffi/object_models/ast_parse.cpp
 )
 
 # build the tests

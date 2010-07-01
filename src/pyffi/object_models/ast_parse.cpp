@@ -35,10 +35,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include <boost/spirit/include/karma.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/support_ostream_iterator.hpp>
+#include <stdexcept>
 
 #include "pyffi/object_models/ast.hpp"
 
@@ -48,51 +48,58 @@ namespace pyffi
 namespace object_models
 {
 
-namespace karma = boost::spirit::karma;
+namespace qi = boost::spirit::qi;
 
-template <typename OutputIterator>
-struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
-    karma::rule<OutputIterator, Scope()> start;
-    karma::rule<OutputIterator, Class(int)> class_;
-    karma::rule<OutputIterator, Attr(int)> attr;
-    karma::rule<OutputIterator, Scope(int)> scope;
-    karma::rule<OutputIterator, void(int)> indent;
+template <typename Iterator, typename Skipper = qi::grammar<Iterator> >
+struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
+    qi::rule<Iterator, Skipper, Scope()> start;
+    qi::rule<Iterator, Skipper, Class(int)> class_;
+    qi::rule<Iterator, Skipper, Attr(int)> attr;
+    qi::rule<Iterator, Skipper, Scope(int)> scope;
+    qi::rule<Iterator, Skipper, void(int)> indent;
 
-    scope_karma_grammar()
-        : scope_karma_grammar::base_type(start) {
+    scope_qi_grammar()
+        : scope_qi_grammar::base_type(start) {
 
-    indent = karma::left_align(karma::_r1)[karma::eps];
+    /*
+    indent = qi::repeat(qi::_r1)[' '];
 
     start = scope(0);
 
-    scope = *(class_(karma::_r1) | attr(karma::_r1));
+    scope = *(class_(qi::_r1) | attr(qi::_r1));
 
     class_ =
-        indent(karma::_r1)
-        << "class "
-        << karma::string // Class.name
-        << -('(' << karma::string << ')') // Class.base_name
-        << -(':' << karma::eol << scope(karma::_r1 + 4)) // Class.scope
-        << karma::eol;
+        indent(qi::_r1)
+        >> qi::lit("class")
+        >> qi::string // Class.name
+        >> -('(' >> qi::string >> ')') // Class.base_name
+        >> -(':' >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
+        >> qi::eol;
 
     attr =
-        indent(karma::_r1)
-        << karma::string // Attr.class_name
-        << ' ' << karma::string // Attr.name
-        << karma::eol;
+        indent(qi::_r1)
+        >> qi::string // Attr.class_name
+        >> qi::string // Attr.name
+        >> qi::eol;
+    */
 }
 };
 
-bool generate(std::ostream & out, Scope const & scope)
+bool parse(std::istream & in, Scope & scope)
 {
-    // wrap ostream into iterator
-    boost::spirit::ostream_iterator sink(out);
+	// wrap istream into iterator
+	boost::spirit::istream_iterator first(in);
+	boost::spirit::istream_iterator last;
 
-    // create parser
-    scope_karma_grammar<boost::spirit::ostream_iterator> parser;
+	// create parser
+	scope_qi_grammar<boost::spirit::istream_iterator, qi::ascii::space_type> parser;
 
-    // use iterator to parse class
-    return karma::generate(sink, parser, scope);
+	// use iterator to parse stream
+	bool r = qi::phrase_parse(first, last, parser, qi::ascii::space, scope);
+
+	// fail if we did not get a full match
+	if (!r || first != last)
+		throw std::runtime_error("Syntax error while parsing.");
 }
 
 }

@@ -64,6 +64,9 @@ typedef std::vector<Declaration> Scope;
 class Class
 {
 public:
+    //! Default constructor.
+    Class()
+        : name(), base_name(), scope() {};
     //! Constructor.
     Class(std::string const & name)
         : name(name), base_name(), scope() {};
@@ -76,6 +79,9 @@ public:
 class Attr
 {
 public:
+    //! Default constructor.
+    Attr()
+        : class_name(), name() {};
     //! Constructor.
     Attr(std::string const & class_name, std::string const & name)
         : class_name(class_name), name(name) {};
