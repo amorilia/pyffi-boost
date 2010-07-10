@@ -58,14 +58,17 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     qi::rule<Iterator, Skipper, IfElifsElse(int)> if_elifs_else;
     qi::rule<Iterator, Skipper, Scope(int)> scope;
     qi::rule<Iterator, Skipper, void(int)> indent;
-    qi::rule<Iterator, Skipper, std::string()> string_;
+    qi::rule<Iterator, Skipper, std::string()> class_name;
+    qi::rule<Iterator, Skipper, std::string()> attr_name;
 
     scope_qi_grammar()
         : scope_qi_grammar::base_type(start) {
 
-    string_ %= qi::lexeme[+qi::alnum];
+    class_name %= qi::lexeme[qi::upper >> *qi::lower];
 
-    indent = qi::repeat(qi::_r1)[' '];
+    attr_name %= qi::lexeme[+qi::lower];
+
+    indent %= qi::repeat(qi::_r1)[' '];
 
     start %= scope(0);
 
@@ -74,15 +77,15 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     class_ %=
         indent(qi::_r1)
         >> qi::lit("class")
-        >> string_ // Class.name
-        >> -('(' >> string_ >> ')') // Class.base_name
+        >> class_name // Class.name
+        >> -('(' >> class_name >> ')') // Class.base_name
         >> -(':' >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
         >> qi::eol;
 
     attr %=
         indent(qi::_r1)
-        >> string_ // Attr.class_name
-        >> string_ // Attr.name
+        >> class_name // Attr.class_name
+        >> attr_name // Attr.name
         >> qi::eol;
 }
 };

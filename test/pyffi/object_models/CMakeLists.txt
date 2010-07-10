@@ -1,4 +1,4 @@
-foreach(TEST ast_test)
+foreach(TEST ast_test ast_parse_test)
     add_executable(${TEST} ${TEST}.cpp)
     target_link_libraries(${TEST} pyffi)
     add_test(pyffi::object_models::${TEST} ${TEST})
