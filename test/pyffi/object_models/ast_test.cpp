@@ -72,13 +72,13 @@ BOOST_AUTO_TEST_CASE(ast_class_test)
 BOOST_AUTO_TEST_CASE(ast_ifelifelse_test)
 {
     IfElifsElse ifelifselse;
-    ifelifselse.if_.expr = false;
-    ifelifselse.if_.scope.push_back(Attr("Int", "x1"));
-    ifelifselse.elifs_.resize(2);
-    ifelifselse.elifs_[0].expr = true;
-    ifelifselse.elifs_[0].scope.push_back(Attr("Int", "x2"));
-    ifelifselse.elifs_[1].expr = true;
-    ifelifselse.elifs_[1].scope.push_back(Attr("Int", "x3"));
+    ifelifselse.ifs_.resize(3);
+    ifelifselse.ifs_[0].expr = false;
+    ifelifselse.ifs_[0].scope.push_back(Attr("Int", "x1"));
+    ifelifselse.ifs_[1].expr = true;
+    ifelifselse.ifs_[1].scope.push_back(Attr("Int", "x2"));
+    ifelifselse.ifs_[2].expr = true;
+    ifelifselse.ifs_[2].scope.push_back(Attr("Int", "x3"));
     ifelifselse.else_ = Scope();
     ifelifselse.else_.get().push_back(Attr("Int", "x4"));
 }
@@ -98,8 +98,9 @@ BOOST_AUTO_TEST_CASE(ast_scope_test)
     intvec.scope.get().push_back(z);
     scope.push_back(intvec);
     IfElifsElse ifelifselse;
-    ifelifselse.if_.expr = true;
-    ifelifselse.if_.scope.push_back(Attr("IVector", "position"));
+    ifelifselse.ifs_.resize(1);
+    ifelifselse.ifs_[0].expr = true;
+    ifelifselse.ifs_[0].scope.push_back(Attr("IVector", "position"));
     scope.push_back(ifelifselse);
 }
 

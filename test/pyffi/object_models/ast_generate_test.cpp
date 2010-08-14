@@ -107,8 +107,9 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_scope_test)
 BOOST_AUTO_TEST_CASE(ast_generate_if_test)
 {
     IfElifsElse ifelifselse;
-    ifelifselse.if_.expr = false;
-    ifelifselse.if_.scope.push_back(Attr("Float", "angle"));
+    ifelifselse.ifs_.resize(1);
+    ifelifselse.ifs_[0].expr = false;
+    ifelifselse.ifs_[0].scope.push_back(Attr("Float", "angle"));
     Scope scope;
     scope.push_back(ifelifselse);
     std::ostringstream os;
@@ -119,8 +120,9 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_test)
 BOOST_AUTO_TEST_CASE(ast_generate_if_else_test)
 {
     IfElifsElse ifelifselse;
-    ifelifselse.if_.expr = true;
-    ifelifselse.if_.scope.push_back(Attr("Int64", "size"));
+    ifelifselse.ifs_.resize(1);
+    ifelifselse.ifs_[0].expr = true;
+    ifelifselse.ifs_[0].scope.push_back(Attr("Int64", "size"));
     ifelifselse.else_ = Scope();
     ifelifselse.else_.get().push_back(Attr("Int32", "offset"));
     Scope scope;
@@ -133,15 +135,15 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_else_test)
 BOOST_AUTO_TEST_CASE(ast_generate_if_elifs_else_test)
 {
     IfElifsElse ifelifselse;
-    ifelifselse.if_.expr = false;
-    ifelifselse.if_.scope.push_back(Attr("Int", "x1"));
-    ifelifselse.elifs_.resize(3);
-    ifelifselse.elifs_[0].expr = true;
-    ifelifselse.elifs_[0].scope.push_back(Attr("Int", "x2"));
-    ifelifselse.elifs_[1].expr = false;
-    ifelifselse.elifs_[1].scope.push_back(Attr("Int", "x3"));
-    ifelifselse.elifs_[2].expr = true;
-    ifelifselse.elifs_[2].scope.push_back(Attr("Int", "x4"));
+    ifelifselse.ifs_.resize(4);
+    ifelifselse.ifs_[0].expr = false;
+    ifelifselse.ifs_[0].scope.push_back(Attr("Int", "x1"));
+    ifelifselse.ifs_[1].expr = true;
+    ifelifselse.ifs_[1].scope.push_back(Attr("Int", "x2"));
+    ifelifselse.ifs_[2].expr = false;
+    ifelifselse.ifs_[2].scope.push_back(Attr("Int", "x3"));
+    ifelifselse.ifs_[3].expr = true;
+    ifelifselse.ifs_[3].scope.push_back(Attr("Int", "x4"));
     ifelifselse.else_ = Scope();
     ifelifselse.else_.get().push_back(Attr("Int", "another_attribute"));
     Scope scope;
