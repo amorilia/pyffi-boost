@@ -53,6 +53,7 @@ namespace qi = boost::spirit::qi;
 template <typename Iterator, typename Skipper = qi::grammar<Iterator> >
 struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     qi::rule<Iterator, Skipper, Scope()> start;
+    qi::rule<Iterator, Skipper, Declaration(int)> declaration;
     qi::rule<Iterator, Skipper, Class(int)> class_;
     qi::rule<Iterator, Skipper, Attr(int)> attr;
     qi::rule<Iterator, Skipper, IfElifsElse(int)> if_elifs_else;
@@ -64,29 +65,29 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     scope_qi_grammar()
         : scope_qi_grammar::base_type(start) {
 
-    class_name %= qi::lexeme[qi::upper >> *qi::lower];
+    indent %= qi::lexeme[qi::repeat(qi::_r1)[' ']];
 
-    attr_name %= qi::lexeme[+qi::lower];
+    start %= scope(0) >> qi::eol;
 
-    indent %= qi::repeat(qi::_r1)[' '];
+    declaration %= class_(qi::_r1) | attr(qi::_r1) | if_elifs_else(qi::_r1);
 
-    start %= scope(0);
-
-    scope %= *(class_(qi::_r1) | attr(qi::_r1) | if_elifs_else(qi::_r1));
+    scope %= declaration(qi::_r1) % qi::eol;
 
     class_ %=
         indent(qi::_r1)
         >> qi::lit("class")
         >> class_name // Class.name
         >> -('(' >> class_name >> ')') // Class.base_name
-        >> -(':' >> qi::eol >> scope(qi::_r1 + 4)) // Class.scope
-        >> qi::eol;
+        >> -(':' >> qi::eol >> scope(qi::_r1 + 4)); // Class.scope
 
     attr %=
         indent(qi::_r1)
         >> class_name // Attr.class_name
-        >> attr_name // Attr.name
-        >> qi::eol;
+        >> attr_name; // Attr.name
+
+    class_name %= qi::lexeme[qi::upper >> *qi::lower];
+
+    attr_name %= qi::lexeme[+qi::lower];
 }
 };
 
