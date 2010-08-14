@@ -48,40 +48,40 @@ namespace pyffi
 namespace object_models
 {
 
-namespace qi = boost::spirit::qi;
+namespace engine = boost::spirit::qi;
 
 template <typename Iterator>
-class scope_qi_grammar : public qi::grammar<Iterator, Scope()>
+class scope_grammar : public engine::grammar<Iterator, Scope()>
 {
 public:
-    qi::rule<Iterator, Scope()> start;
-    qi::rule<Iterator, Declaration(int)> declaration;
-    qi::rule<Iterator, Class(int)> class_;
-    qi::rule<Iterator, Attr(int)> attr;
-    qi::rule<Iterator, IfElifsElse(int)> if_elifs_else;
-    qi::rule<Iterator, Scope(int)> scope;
-    qi::rule<Iterator, void(int)> indent;
-    qi::rule<Iterator, std::string()> class_name;
-    qi::rule<Iterator, std::string()> attr_name;
+    engine::rule<Iterator, Scope()> start;
+    engine::rule<Iterator, Declaration(int)> declaration;
+    engine::rule<Iterator, Class(int)> class_;
+    engine::rule<Iterator, Attr(int)> attr;
+    engine::rule<Iterator, IfElifsElse(int)> if_elifs_else;
+    engine::rule<Iterator, Scope(int)> scope;
+    engine::rule<Iterator, void(int)> indent;
+    engine::rule<Iterator, std::string()> class_name;
+    engine::rule<Iterator, std::string()> attr_name;
 
-    scope_qi_grammar() : scope_qi_grammar::base_type(start) {
-        indent %= qi::repeat(qi::_r1)[' '];
-        start %= scope(0) >> qi::eol;
-        declaration %= class_(qi::_r1) | attr(qi::_r1) | if_elifs_else(qi::_r1);
-        scope %= declaration(qi::_r1) % qi::eol;
+    scope_grammar() : scope_grammar::base_type(start) {
+        indent %= engine::repeat(engine::_r1)[' '];
+        start %= scope(0) >> engine::eol;
+        declaration %= class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1);
+        scope %= declaration(engine::_r1) % engine::eol;
         class_ %=
-            indent(qi::_r1)
-            >> qi::lit("class ")
+            indent(engine::_r1)
+            >> engine::lit("class ")
             >> class_name // Class.name
             >> -('(' >> class_name >> ')') // Class.base_name
-            >> -(':' >> qi::eol >> scope(qi::_r1 + 4)); // Class.scope
+            >> -(':' >> engine::eol >> scope(engine::_r1 + 4)); // Class.scope
         attr %=
-            indent(qi::_r1)
+            indent(engine::_r1)
             >> class_name // Attr.class_name
             >> ' '
             >> attr_name; // Attr.name
-        class_name %= qi::upper >> *qi::lower;
-        attr_name %= +qi::lower;
+        class_name %= engine::upper >> *engine::lower;
+        attr_name %= +engine::lower;
     }
 };
 
@@ -95,10 +95,10 @@ bool parse(std::istream & in, Scope & scope)
     boost::spirit::istream_iterator last;
 
     // create parser
-    scope_qi_grammar<boost::spirit::istream_iterator> parser;
+    scope_grammar<boost::spirit::istream_iterator> parser;
 
     // use iterator to parse stream
-    bool r = qi::parse(first, last, parser, scope);
+    bool r = engine::parse(first, last, parser, scope);
 
     // fail if we did not get a full match
     if (!r || first != last) {

@@ -48,35 +48,35 @@ namespace pyffi
 namespace object_models
 {
 
-namespace karma = boost::spirit::karma;
+namespace engine = boost::spirit::karma;
 
 template <typename Iterator>
-class scope_karma_grammar : public karma::grammar<Iterator, Scope()>
+class scope_grammar : public engine::grammar<Iterator, Scope()>
 {
 public:
-    karma::rule<Iterator, Scope()> start;
-    karma::rule<Iterator, Declaration(int)> declaration;
-    karma::rule<Iterator, Class(int)> class_;
-    karma::rule<Iterator, Attr(int)> attr;
-    karma::rule<Iterator, Scope(int)> scope;
-    karma::rule<Iterator, void(int)> indent;
+    engine::rule<Iterator, Scope()> start;
+    engine::rule<Iterator, Declaration(int)> declaration;
+    engine::rule<Iterator, Class(int)> class_;
+    engine::rule<Iterator, Attr(int)> attr;
+    engine::rule<Iterator, Scope(int)> scope;
+    engine::rule<Iterator, void(int)> indent;
 
-    scope_karma_grammar() : scope_karma_grammar::base_type(start) {
-        indent = karma::left_align(karma::_r1)[karma::eps];
-        start = scope(0) << karma::eol;
-        declaration = class_(karma::_r1) | attr(karma::_r1);
-        scope = declaration(karma::_r1) % karma::eol;
+    scope_grammar() : scope_grammar::base_type(start) {
+        indent = engine::left_align(engine::_r1)[engine::eps];
+        start = scope(0) << engine::eol;
+        declaration = class_(engine::_r1) | attr(engine::_r1);
+        scope = declaration(engine::_r1) % engine::eol;
         class_ =
-            indent(karma::_r1)
+            indent(engine::_r1)
             << "class "
-            << karma::string // Class.name
-            << -('(' << karma::string << ')') // Class.base_name
-            << -(':' << karma::eol << scope(karma::_r1 + 4)); // Class.scope
+            << engine::string // Class.name
+            << -('(' << engine::string << ')') // Class.base_name
+            << -(':' << engine::eol << scope(engine::_r1 + 4)); // Class.scope
         attr =
-            indent(karma::_r1)
-            << karma::string // Attr.class_name
+            indent(engine::_r1)
+            << engine::string // Attr.class_name
             << ' '
-            << karma::string; // Attr.name
+            << engine::string; // Attr.name
     }
 };
 
@@ -86,10 +86,10 @@ bool generate(std::ostream & out, Scope const & scope)
     boost::spirit::ostream_iterator sink(out);
 
     // create parser
-    scope_karma_grammar<boost::spirit::ostream_iterator> parser;
+    scope_grammar<boost::spirit::ostream_iterator> parser;
 
     // use iterator to parse class
-    return karma::generate(sink, parser, scope);
+    return engine::generate(sink, parser, scope);
 }
 
 }
