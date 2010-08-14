@@ -104,9 +104,9 @@ class IfElifsElse
 {
 public:
     IfElifsElse() : if_(), elifs_(), else_() {}; //<! Constructor.
-    If if_;                 //!< The if part.
-    std::vector<If> elifs_; //!< The elif parts.
-    Scope else_;            //!< The else part.
+    If if_;                       //!< The if part.
+    std::vector<If> elifs_;       //!< The elif parts.
+    boost::optional<Scope> else_; //!< The else part.
 };
 
 //! Convert format description to abstract syntax tree.
@@ -144,7 +144,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     pyffi::object_models::IfElifsElse,
     (pyffi::object_models::If, if_)
     (std::vector<pyffi::object_models::If>, elifs_)
-    (pyffi::object_models::Scope, else_)
+    (boost::optional<pyffi::object_models::Scope>, else_)
 )
 
 #endif

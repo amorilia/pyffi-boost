@@ -79,7 +79,8 @@ BOOST_AUTO_TEST_CASE(ast_ifelifelse_test)
     ifelifselse.elifs_[0].scope.push_back(Attr("Int", "x2"));
     ifelifselse.elifs_[1].expr = true;
     ifelifselse.elifs_[1].scope.push_back(Attr("Int", "x3"));
-    ifelifselse.else_.push_back(Attr("Int", "x4"));
+    ifelifselse.else_ = Scope();
+    ifelifselse.else_.get().push_back(Attr("Int", "x4"));
 }
 
 BOOST_AUTO_TEST_CASE(ast_scope_test)
