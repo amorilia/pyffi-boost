@@ -51,7 +51,9 @@ namespace object_models
 namespace qi = boost::spirit::qi;
 
 template <typename Iterator>
-struct scope_qi_grammar : qi::grammar<Iterator, Scope()> {
+class scope_qi_grammar : public qi::grammar<Iterator, Scope()>
+{
+public:
     qi::rule<Iterator, Scope()> start;
     qi::rule<Iterator, Declaration(int)> declaration;
     qi::rule<Iterator, Class(int)> class_;
@@ -62,34 +64,25 @@ struct scope_qi_grammar : qi::grammar<Iterator, Scope()> {
     qi::rule<Iterator, std::string()> class_name;
     qi::rule<Iterator, std::string()> attr_name;
 
-    scope_qi_grammar()
-        : scope_qi_grammar::base_type(start) {
-
-    indent %= qi::repeat(qi::_r1)[' '];
-
-    start %= scope(0) >> qi::eol;
-
-    declaration %= class_(qi::_r1) | attr(qi::_r1) | if_elifs_else(qi::_r1);
-
-    scope %= declaration(qi::_r1) % qi::eol;
-
-    class_ %=
-        indent(qi::_r1)
-        >> qi::lit("class ")
-        >> class_name // Class.name
-        >> -('(' >> class_name >> ')') // Class.base_name
-        >> -(':' >> qi::eol >> scope(qi::_r1 + 4)); // Class.scope
-
-    attr %=
-        indent(qi::_r1)
-        >> class_name // Attr.class_name
-        >> ' '
-        >> attr_name; // Attr.name
-
-    class_name %= qi::upper >> *qi::lower;
-
-    attr_name %= +qi::lower;
-}
+    scope_qi_grammar() : scope_qi_grammar::base_type(start) {
+        indent %= qi::repeat(qi::_r1)[' '];
+        start %= scope(0) >> qi::eol;
+        declaration %= class_(qi::_r1) | attr(qi::_r1) | if_elifs_else(qi::_r1);
+        scope %= declaration(qi::_r1) % qi::eol;
+        class_ %=
+            indent(qi::_r1)
+            >> qi::lit("class ")
+            >> class_name // Class.name
+            >> -('(' >> class_name >> ')') // Class.base_name
+            >> -(':' >> qi::eol >> scope(qi::_r1 + 4)); // Class.scope
+        attr %=
+            indent(qi::_r1)
+            >> class_name // Attr.class_name
+            >> ' '
+            >> attr_name; // Attr.name
+        class_name %= qi::upper >> *qi::lower;
+        attr_name %= +qi::lower;
+    }
 };
 
 bool parse(std::istream & in, Scope & scope)

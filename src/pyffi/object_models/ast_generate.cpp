@@ -51,7 +51,9 @@ namespace object_models
 namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator>
-struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
+class scope_karma_grammar : public karma::grammar<OutputIterator, Scope()>
+{
+public:
     karma::rule<OutputIterator, Scope()> start;
     karma::rule<OutputIterator, Declaration(int)> declaration;
     karma::rule<OutputIterator, Class(int)> class_;
@@ -59,30 +61,23 @@ struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
     karma::rule<OutputIterator, Scope(int)> scope;
     karma::rule<OutputIterator, void(int)> indent;
 
-    scope_karma_grammar()
-        : scope_karma_grammar::base_type(start) {
-
-    indent = karma::left_align(karma::_r1)[karma::eps];
-
-    start = scope(0) << karma::eol;
-
-    declaration = class_(karma::_r1) | attr(karma::_r1);
-
-    scope = declaration(karma::_r1) % karma::eol;
-
-    class_ =
-        indent(karma::_r1)
-        << "class "
-        << karma::string // Class.name
-        << -('(' << karma::string << ')') // Class.base_name
-        << -(':' << karma::eol << scope(karma::_r1 + 4)); // Class.scope
-
-    attr =
-        indent(karma::_r1)
-        << karma::string // Attr.class_name
-        << ' '
-        << karma::string; // Attr.name
-}
+    scope_karma_grammar() : scope_karma_grammar::base_type(start) {
+        indent = karma::left_align(karma::_r1)[karma::eps];
+        start = scope(0) << karma::eol;
+        declaration = class_(karma::_r1) | attr(karma::_r1);
+        scope = declaration(karma::_r1) % karma::eol;
+        class_ =
+            indent(karma::_r1)
+            << "class "
+            << karma::string // Class.name
+            << -('(' << karma::string << ')') // Class.base_name
+            << -(':' << karma::eol << scope(karma::_r1 + 4)); // Class.scope
+        attr =
+            indent(karma::_r1)
+            << karma::string // Attr.class_name
+            << ' '
+            << karma::string; // Attr.name
+    }
 };
 
 bool generate(std::ostream & out, Scope const & scope)
