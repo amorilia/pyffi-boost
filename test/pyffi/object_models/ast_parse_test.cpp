@@ -107,4 +107,75 @@ BOOST_AUTO_TEST_CASE(ast_parse_class_scope_test)
     BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).name, "x");
 }
 
+BOOST_AUTO_TEST_CASE(ast_parse_if_test)
+{
+    std::istringstream is("if false:\n    Float angle\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(parse(is, scope), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[0]);
+    BOOST_CHECK_EQUAL(ifelifselse.if_.expr, false);
+    BOOST_CHECK_EQUAL(ifelifselse.if_.scope.size(), 1);
+    Attr & attr = get<Attr>(ifelifselse.if_.scope[0]);
+    BOOST_CHECK_EQUAL(attr.class_name, "Float");
+    BOOST_CHECK_EQUAL(attr.name, "angle");
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_.size(), 0);
+    BOOST_CHECK(!ifelifselse.else_);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_if_else_test)
+{
+    std::istringstream is("if true:\n    Int64 size\nelse:\n    Int32 offset\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(parse(is, scope), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[0]);
+    BOOST_CHECK_EQUAL(ifelifselse.if_.expr, true);
+    BOOST_CHECK_EQUAL(ifelifselse.if_.scope.size(), 1);
+    Attr & attr1 = get<Attr>(ifelifselse.if_.scope[0]);
+    BOOST_CHECK_EQUAL(attr1.class_name, "Int64");
+    BOOST_CHECK_EQUAL(attr1.name, "size");
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_.size(), 0);
+    BOOST_CHECK(ifelifselse.else_);
+    BOOST_CHECK_EQUAL(ifelifselse.else_.get().size(), 1);
+    Attr & attr2 = get<Attr>(ifelifselse.else_.get()[0]);
+    BOOST_CHECK_EQUAL(attr2.class_name, "Int32");
+    BOOST_CHECK_EQUAL(attr2.name, "offset");
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_if_elifs_else_test)
+{
+    std::istringstream is("if false:\n    Int x1\nelif true:\n    Int x2\nelif false:\n    Int x3\nelif true:\n    Int x4\nelse:\n    Int another_attribute\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(parse(is, scope), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[0]);
+    BOOST_CHECK_EQUAL(ifelifselse.if_.expr, false);
+    BOOST_CHECK_EQUAL(ifelifselse.if_.scope.size(), 1);
+    Attr & attr = get<Attr>(ifelifselse.if_.scope[0]);
+    BOOST_CHECK_EQUAL(attr.class_name, "Int");
+    BOOST_CHECK_EQUAL(attr.name, "x1");
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_.size(), 3);
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_[0].expr, true);
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_[1].expr, false);
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_[2].expr, true);
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_[0].scope.size(), 1);
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_[1].scope.size(), 1);
+    BOOST_CHECK_EQUAL(ifelifselse.elifs_[2].scope.size(), 1);
+    Attr & attr0 = get<Attr>(ifelifselse.elifs_[0].scope[0]);
+    Attr & attr1 = get<Attr>(ifelifselse.elifs_[1].scope[0]);
+    Attr & attr2 = get<Attr>(ifelifselse.elifs_[2].scope[0]);
+    BOOST_CHECK_EQUAL(attr0.class_name, "Int");
+    BOOST_CHECK_EQUAL(attr1.class_name, "Int");
+    BOOST_CHECK_EQUAL(attr2.class_name, "Int");
+    BOOST_CHECK_EQUAL(attr0.name, "x2");
+    BOOST_CHECK_EQUAL(attr1.name, "x3");
+    BOOST_CHECK_EQUAL(attr2.name, "x4");
+    BOOST_CHECK(ifelifselse.else_);
+    BOOST_CHECK_EQUAL(ifelifselse.else_.get().size(), 1);
+    Attr & attr3 = get<Attr>(ifelifselse.else_.get()[0]);
+    BOOST_CHECK_EQUAL(attr3.class_name, "Int");
+    BOOST_CHECK_EQUAL(attr3.name, "another_attribute");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
