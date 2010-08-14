@@ -58,25 +58,30 @@ public:
     engine::rule<Iterator, Declaration(int)> declaration;
     engine::rule<Iterator, Class(int)> class_;
     engine::rule<Iterator, Attr(int)> attr;
+    engine::rule<Iterator, IfElifsElse(int)> if_elifs_else;
     engine::rule<Iterator, Scope(int)> scope;
     engine::rule<Iterator, void(int)> indent;
+    engine::rule<Iterator, std::string()> class_name;
+    engine::rule<Iterator, std::string()> attr_name;
 
     scope_grammar() : scope_grammar::base_type(start) {
-        indent = engine::left_align(engine::_r1)[engine::eps];
+        indent = engine::repeat(engine::_r1)[' '];
         start = scope(0) << engine::eol;
-        declaration = class_(engine::_r1) | attr(engine::_r1);
+        declaration = class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1);
         scope = declaration(engine::_r1) % engine::eol;
         class_ =
             indent(engine::_r1)
             << "class "
-            << engine::string // Class.name
-            << -('(' << engine::string << ')') // Class.base_name
+            << class_name // Class.name
+            << -('(' << class_name << ')') // Class.base_name
             << -(':' << engine::eol << scope(engine::_r1 + 4)); // Class.scope
         attr =
             indent(engine::_r1)
-            << engine::string // Attr.class_name
+            << class_name // Attr.class_name
             << ' '
-            << engine::string; // Attr.name
+            << attr_name; // Attr.name
+        class_name = engine::upper << *engine::lower;
+        attr_name = +engine::lower;
     }
 };
 
@@ -88,7 +93,7 @@ bool generate(std::ostream & out, Scope const & scope)
     // create parser
     scope_grammar<boost::spirit::ostream_iterator> parser;
 
-    // use iterator to parse class
+    // use iterator to generate stream
     return engine::generate(sink, parser, scope);
 }
 

@@ -71,7 +71,7 @@ public:
         scope %= declaration(engine::_r1) % engine::eol;
         class_ %=
             indent(engine::_r1)
-            >> engine::lit("class ")
+            >> "class "
             >> class_name // Class.name
             >> -('(' >> class_name >> ')') // Class.base_name
             >> -(':' >> engine::eol >> scope(engine::_r1 + 4)); // Class.scope
