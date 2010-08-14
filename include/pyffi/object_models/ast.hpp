@@ -55,10 +55,18 @@ class Attr;
 class IfElifsElse;
 
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
-typedef boost::variant<boost::recursive_wrapper<Class>, boost::recursive_wrapper<Attr>, boost::recursive_wrapper<IfElifsElse> > Declaration;
+typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
 
 //! A scope is a vector of declarations.
-typedef std::vector<Declaration> Scope;
+class Scope : public std::vector<Declaration>
+{
+public:
+    //! Convert format description to abstract syntax tree.
+    bool parse(std::istream & in);
+
+    //! Convert abstract syntax tree to format description.
+    bool generate(std::ostream & out) const;
+};
 
 //! A class declaration is a named scope, along with a base class.
 class Class
@@ -107,12 +115,6 @@ public:
     std::vector<If> ifs_;         //!< The if and elif parts.
     boost::optional<Scope> else_; //!< The else part.
 };
-
-//! Convert format description to abstract syntax tree.
-bool parse(std::istream & in, Scope & scope);
-
-//! Convert abstract syntax tree to format description.
-bool generate(std::ostream & out, Scope const & scope);
 
 } // namespace object_models
 

@@ -111,7 +111,7 @@ public:
     }
 };
 
-bool parse(std::istream & in, Scope & scope)
+bool Scope::parse(std::istream & in)
 {
     // disable skipping of whitespace
     in.unsetf(std::ios::skipws);
@@ -124,7 +124,7 @@ bool parse(std::istream & in, Scope & scope)
     scope_grammar<boost::spirit::istream_iterator> parser;
 
     // use iterator to parse stream
-    bool r = engine::parse(first, last, parser, scope);
+    bool r = engine::parse(first, last, parser, *this);
 
     // fail if we did not get a full match
     if (!r || first != last) {

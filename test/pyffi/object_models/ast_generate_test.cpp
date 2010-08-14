@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_test)
     Class int_("Int");
     scope.push_back(int_);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "class Int\n");
 }
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_base_name_test)
     int_.base_name = "Object";
     scope.push_back(int_);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "class Int(Object)\n");
 }
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_attr_test)
     Attr x("Int", "x");
     scope.push_back(x);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "Int x\n");
 }
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_attr_test)
     scope.push_back(int_);
     scope.push_back(x);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "class Int\nInt x\n");
 }
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_scope_test)
     Scope scope;
     scope.push_back(vec);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "class Vector:\n    Int x\n");
 }
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_test)
     Scope scope;
     scope.push_back(ifelifselse);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "if false:\n    Float angle\n");
 }
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_else_test)
     Scope scope;
     scope.push_back(ifelifselse);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "if true:\n    Int64 size\nelse:\n    Int32 offset\n");
 }
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_elifs_else_test)
     Scope scope;
     scope.push_back(ifelifselse);
     std::ostringstream os;
-    generate(os, scope);
+    scope.generate(os);
     BOOST_CHECK_EQUAL(os.str(), "if false:\n    Int x1\nelif true:\n    Int x2\nelif false:\n    Int x3\nelif true:\n    Int x4\nelse:\n    Int another_attribute\n");
 }
 

@@ -111,7 +111,7 @@ public:
     }
 };
 
-bool generate(std::ostream & out, Scope const & scope)
+bool Scope::generate(std::ostream & out) const
 {
     // wrap ostream into iterator
     boost::spirit::ostream_iterator sink(out);
@@ -120,7 +120,7 @@ bool generate(std::ostream & out, Scope const & scope)
     scope_grammar<boost::spirit::ostream_iterator> parser;
 
     // use iterator to generate stream
-    return engine::generate(sink, parser, scope);
+    return engine::generate(sink, parser, *this);
 }
 
 }
