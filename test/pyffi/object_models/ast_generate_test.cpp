@@ -104,4 +104,51 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_scope_test)
     BOOST_CHECK_EQUAL(os.str(), "class Vector:\n    Int x\n");
 }
 
+BOOST_AUTO_TEST_CASE(ast_generate_if_test)
+{
+    IfElifsElse ifelifselse;
+    ifelifselse.if_.expr = false;
+    ifelifselse.if_.scope.push_back(Attr("Float", "angle"));
+    Scope scope;
+    scope.push_back(ifelifselse);
+    std::ostringstream os;
+    generate(os, scope);
+    BOOST_CHECK_EQUAL(os.str(), "if false:\n    Float angle\n");
+}
+
+BOOST_AUTO_TEST_CASE(ast_generate_if_else_test)
+{
+    IfElifsElse ifelifselse;
+    ifelifselse.if_.expr = true;
+    ifelifselse.if_.scope.push_back(Attr("Int64", "size"));
+    ifelifselse.else_ = Scope();
+    ifelifselse.else_.get().push_back(Attr("Int32", "offset"));
+    Scope scope;
+    scope.push_back(ifelifselse);
+    std::ostringstream os;
+    generate(os, scope);
+    BOOST_CHECK_EQUAL(os.str(), "if true:\n    Int64 size\nelse:\n    Int32 offset\n");
+}
+
+BOOST_AUTO_TEST_CASE(ast_generate_if_elifs_else_test)
+{
+    IfElifsElse ifelifselse;
+    ifelifselse.if_.expr = false;
+    ifelifselse.if_.scope.push_back(Attr("Int", "x1"));
+    ifelifselse.elifs_.resize(3);
+    ifelifselse.elifs_[0].expr = true;
+    ifelifselse.elifs_[0].scope.push_back(Attr("Int", "x2"));
+    ifelifselse.elifs_[1].expr = false;
+    ifelifselse.elifs_[1].scope.push_back(Attr("Int", "x3"));
+    ifelifselse.elifs_[2].expr = true;
+    ifelifselse.elifs_[2].scope.push_back(Attr("Int", "x4"));
+    ifelifselse.else_ = Scope();
+    ifelifselse.else_.get().push_back(Attr("Int", "another_attribute"));
+    Scope scope;
+    scope.push_back(ifelifselse);
+    std::ostringstream os;
+    generate(os, scope);
+    BOOST_CHECK_EQUAL(os.str(), "if false:\n    Int x1\nelif true:\n    Int x2\nelif false:\n    Int x3\nelif true:\n    Int x4\nelse:\n    Int another_attribute\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

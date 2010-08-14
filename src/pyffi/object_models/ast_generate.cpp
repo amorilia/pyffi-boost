@@ -58,6 +58,10 @@ public:
     engine::rule<Iterator, Declaration(int)> declaration;
     engine::rule<Iterator, Class(int)> class_;
     engine::rule<Iterator, Attr(int)> attr;
+    engine::rule<Iterator, Expr()> expr;
+    engine::rule<Iterator, If(int)> if_;
+    engine::rule<Iterator, If(int)> elif_;
+    engine::rule<Iterator, Scope(int)> else_;
     engine::rule<Iterator, IfElifsElse(int)> if_elifs_else;
     engine::rule<Iterator, Scope(int)> scope;
     engine::rule<Iterator, void(int)> indent;
@@ -80,8 +84,27 @@ public:
             << class_name // Attr.class_name
             << ' '
             << attr_name; // Attr.name
-        class_name = engine::upper << *engine::lower;
-        attr_name = +engine::lower;
+        expr = engine::bool_; // for now
+        if_ =
+            indent(engine::_r1)
+            << "if "
+            << expr // If.expr
+            << ':' << engine::eol << scope(engine::_r1 + 4); // If.scope
+        elif_ =
+            indent(engine::_r1)
+            << "elif "
+            << expr // If.expr
+            << ':' << engine::eol << scope(engine::_r1 + 4); // If.scope
+        else_ =
+            indent(engine::_r1)
+            << "else"
+            << ':' << engine::eol << scope(engine::_r1 + 4); // Scope
+        if_elifs_else =
+            if_(engine::_r1) // IfElifsElse.if_
+            << *(engine::eol << elif_(engine::_r1)) // IfElifsElse.elifs_
+            << -(engine::eol << else_(engine::_r1)); // IfElifsElse.else_
+        class_name = engine::upper << *(engine::lower | engine::upper | engine::digit);
+        attr_name = engine::lower << *(engine::lower | engine::digit | engine::char_('_'));
     }
 };
 
