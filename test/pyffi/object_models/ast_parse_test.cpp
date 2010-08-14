@@ -49,9 +49,16 @@ BOOST_AUTO_TEST_SUITE(ast_parse_test_suite)
 
 BOOST_AUTO_TEST_CASE(ast_parse_test)
 {
-  std::istringstream is("Int x\n");
-  Scope scope;
-  BOOST_CHECK_EQUAL(parse(is, scope), true);
+    std::istringstream is("\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(parse(is, scope), true);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_attr_test)
+{
+    std::istringstream is("Int x\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(parse(is, scope), true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
