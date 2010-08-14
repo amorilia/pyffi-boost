@@ -50,16 +50,16 @@ namespace object_models
 
 namespace karma = boost::spirit::karma;
 
-template <typename OutputIterator>
-class scope_karma_grammar : public karma::grammar<OutputIterator, Scope()>
+template <typename Iterator>
+class scope_karma_grammar : public karma::grammar<Iterator, Scope()>
 {
 public:
-    karma::rule<OutputIterator, Scope()> start;
-    karma::rule<OutputIterator, Declaration(int)> declaration;
-    karma::rule<OutputIterator, Class(int)> class_;
-    karma::rule<OutputIterator, Attr(int)> attr;
-    karma::rule<OutputIterator, Scope(int)> scope;
-    karma::rule<OutputIterator, void(int)> indent;
+    karma::rule<Iterator, Scope()> start;
+    karma::rule<Iterator, Declaration(int)> declaration;
+    karma::rule<Iterator, Class(int)> class_;
+    karma::rule<Iterator, Attr(int)> attr;
+    karma::rule<Iterator, Scope(int)> scope;
+    karma::rule<Iterator, void(int)> indent;
 
     scope_karma_grammar() : scope_karma_grammar::base_type(start) {
         indent = karma::left_align(karma::_r1)[karma::eps];
