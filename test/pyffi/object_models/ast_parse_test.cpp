@@ -47,9 +47,9 @@ using namespace pyffi::object_models;
 
 BOOST_AUTO_TEST_SUITE(ast_parse_test_suite)
 
-BOOST_AUTO_TEST_CASE(ast_parse_test)
+BOOST_AUTO_TEST_CASE(ast_parse_class_test)
 {
-    std::istringstream is("\n");
+    std::istringstream is("class Int\n");
     Scope scope;
     BOOST_CHECK_EQUAL(parse(is, scope), true);
 }

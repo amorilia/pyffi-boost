@@ -80,7 +80,8 @@ struct scope_karma_grammar : karma::grammar<OutputIterator, Scope()> {
     attr =
         indent(karma::_r1)
         << karma::string // Attr.class_name
-        << ' ' << karma::string; // Attr.name
+        << ' '
+        << karma::string; // Attr.name
 }
 };
 

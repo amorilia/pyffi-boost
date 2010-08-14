@@ -50,22 +50,22 @@ namespace object_models
 
 namespace qi = boost::spirit::qi;
 
-template <typename Iterator, typename Skipper = qi::grammar<Iterator> >
-struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
-    qi::rule<Iterator, Skipper, Scope()> start;
-    qi::rule<Iterator, Skipper, Declaration(int)> declaration;
-    qi::rule<Iterator, Skipper, Class(int)> class_;
-    qi::rule<Iterator, Skipper, Attr(int)> attr;
-    qi::rule<Iterator, Skipper, IfElifsElse(int)> if_elifs_else;
-    qi::rule<Iterator, Skipper, Scope(int)> scope;
-    qi::rule<Iterator, Skipper, void(int)> indent;
-    qi::rule<Iterator, Skipper, std::string()> class_name;
-    qi::rule<Iterator, Skipper, std::string()> attr_name;
+template <typename Iterator>
+struct scope_qi_grammar : qi::grammar<Iterator, Scope()> {
+    qi::rule<Iterator, Scope()> start;
+    qi::rule<Iterator, Declaration(int)> declaration;
+    qi::rule<Iterator, Class(int)> class_;
+    qi::rule<Iterator, Attr(int)> attr;
+    qi::rule<Iterator, IfElifsElse(int)> if_elifs_else;
+    qi::rule<Iterator, Scope(int)> scope;
+    qi::rule<Iterator, void(int)> indent;
+    qi::rule<Iterator, std::string()> class_name;
+    qi::rule<Iterator, std::string()> attr_name;
 
     scope_qi_grammar()
         : scope_qi_grammar::base_type(start) {
 
-    indent %= qi::lexeme[qi::repeat(qi::_r1)[' ']];
+    indent %= qi::repeat(qi::_r1)[' '];
 
     start %= scope(0) >> qi::eol;
 
@@ -75,7 +75,7 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
 
     class_ %=
         indent(qi::_r1)
-        >> qi::lit("class")
+        >> qi::lit("class ")
         >> class_name // Class.name
         >> -('(' >> class_name >> ')') // Class.base_name
         >> -(':' >> qi::eol >> scope(qi::_r1 + 4)); // Class.scope
@@ -83,29 +83,37 @@ struct scope_qi_grammar : qi::grammar<Iterator, Skipper, Scope()> {
     attr %=
         indent(qi::_r1)
         >> class_name // Attr.class_name
+        >> ' '
         >> attr_name; // Attr.name
 
-    class_name %= qi::lexeme[qi::upper >> *qi::lower];
+    class_name %= qi::upper >> *qi::lower;
 
-    attr_name %= qi::lexeme[+qi::lower];
+    attr_name %= +qi::lower;
 }
 };
 
 bool parse(std::istream & in, Scope & scope)
 {
+    // disable skipping of whitespace
+    in.unsetf(std::ios::skipws);
+
     // wrap istream into iterator
     boost::spirit::istream_iterator first(in);
     boost::spirit::istream_iterator last;
 
     // create parser
-    scope_qi_grammar<boost::spirit::istream_iterator, qi::ascii::space_type> parser;
+    scope_qi_grammar<boost::spirit::istream_iterator> parser;
 
     // use iterator to parse stream
-    bool r = qi::phrase_parse(first, last, parser, qi::ascii::space, scope);
+    bool r = qi::parse(first, last, parser, scope);
 
     // fail if we did not get a full match
-    if (!r || first != last)
-        throw std::runtime_error("Syntax error while parsing.");
+    if (!r || first != last) {
+        std::string rest(first, last);
+        throw std::runtime_error(
+            "Syntax error while parsing\nStopped at:\n" + rest);
+    }
+    return r;
 }
 
 }
