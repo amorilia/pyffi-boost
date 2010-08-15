@@ -104,4 +104,55 @@ BOOST_AUTO_TEST_CASE(ast_scope_test)
     scope.push_back(ifelifselse);
 }
 
+BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
+{
+    Scope scope;
+    {
+        // keep scope construction local; test should use scope only
+        Class Int("Int");
+        Class Float("Float");
+        Class Vec("Vec");
+        Attr x("Float", "x");
+        Attr y("Int", "y");
+        Attr z("Int", "z");
+        Vec.scope = Scope();
+        Vec.scope.get().push_back(Float); // pushes a *copy*!!!
+        Vec.scope.get().push_back(x); // pushes a *copy*!!!
+        Vec.scope.get().push_back(y); // pushes a *copy*!!!
+        Vec.scope.get().push_back(z); // pushes a *copy*!!!
+        IfElifsElse ifelifselse;
+        Attr pos("Vec", "pos");
+        ifelifselse.ifs_.resize(1);
+        ifelifselse.ifs_[0].expr = true;
+        ifelifselse.ifs_[0].scope.push_back(pos);
+        scope.push_back(Int); // pushes a *copy*!!!
+        // Float is defined as a nested class inside Vec; see above
+        scope.push_back(Vec); // pushes a *copy*!!!
+        scope.push_back(ifelifselse); // pushes a *copy*!!!
+    }
+
+    // check that references are not set
+    Class & Int = get<Class>(scope[0]);
+    Class & Vec = get<Class>(scope[1]);
+    Class & Float = get<Class>(Vec.scope.get()[0]);
+    Attr & x = get<Attr>(Vec.scope.get()[1]);
+    Attr & y = get<Attr>(Vec.scope.get()[2]);
+    Attr & z = get<Attr>(Vec.scope.get()[3]);
+    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[2]);
+    Attr & pos = get<Attr>(ifelifselse.ifs_[0].scope[0]);
+    BOOST_CHECK(!x.class_);
+    BOOST_CHECK(!y.class_);
+    BOOST_CHECK(!z.class_);
+    BOOST_CHECK(!pos.class_);
+
+    // compile the scope
+    //scope.compile();
+
+    // check that references are set
+    BOOST_CHECK_EQUAL(x.class_, &Float);
+    BOOST_CHECK_EQUAL(y.class_, &Int);
+    BOOST_CHECK_EQUAL(z.class_, &Int);
+    BOOST_CHECK_EQUAL(pos.class_, &Vec);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

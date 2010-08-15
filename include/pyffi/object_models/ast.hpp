@@ -68,6 +68,9 @@ public:
 
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
+
+    //! Set up all references.
+    void compile();
 };
 
 //! Default init implementation.
@@ -127,13 +130,14 @@ class Attr
 public:
     //! Default constructor.
     Attr()
-        : class_name(), name() {};
+        : class_name(), name(), class_() {};
     //! Constructor.
     Attr(std::string const & class_name, std::string const & name)
-        : class_name(class_name), name(name) {};
+        : class_name(class_name), name(name), class_() {};
 
     std::string class_name; //!< Name of the class of this attribute.
     std::string name;       //!< Name of this attribute.
+    Class const *class_;    //!< Pointer to the actual class.
 };
 
 //! A simple if declaration: an expression and a scope.
