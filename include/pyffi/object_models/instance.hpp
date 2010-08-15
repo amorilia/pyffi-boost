@@ -109,7 +109,7 @@ public:
         class_.write(value, os);
     };
 
-    Class const & class_; //!< The class of this instance.
+    Class const & class_; //!< Reference to the class of this instance.
 private:
     boost::any value; //!< The value (actual data) of this instance.
 };

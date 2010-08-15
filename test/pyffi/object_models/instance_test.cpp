@@ -62,6 +62,7 @@ BOOST_AUTO_TEST_CASE(get_test)
 
     // check that get returns assigned value
     Instance obj_short(Short);
+    BOOST_CHECK_EQUAL(&obj_short.class_, &Short);
     BOOST_CHECK_EQUAL(obj_short.get<short>(), 0);
 
     // check bad type casts
@@ -73,6 +74,11 @@ BOOST_AUTO_TEST_CASE(get_test)
     // check assignment via get
     obj_short.get<short>() = 10;
     BOOST_CHECK_EQUAL(obj_short.get<short>(), 10);
+
+    // check copy constructor
+    Instance obj_short2(obj_short);
+    BOOST_CHECK_EQUAL(&obj_short2.class_, &Short);
+    BOOST_CHECK_EQUAL(obj_short2.get<short>(), 10);
 }
 
 BOOST_AUTO_TEST_CASE(write_test)
@@ -92,9 +98,55 @@ BOOST_AUTO_TEST_CASE(read_test)
     Int.set_type<int>();
     Instance x(Int);
     x.get<int>() = 1145258561;
-    std::istringstream is("ABCD");
+    std::istringstream is("ABCDandsomemore");
     x.read(is);
     BOOST_CHECK_EQUAL(x.get<int>(), 1145258561);
+}
+
+BOOST_AUTO_TEST_CASE(assign_by_value_test)
+{
+    Class Int("Int");
+    Int.set_type<int>();
+    Instance x(Int);
+
+    // check assigning different value
+    x = 100;
+    BOOST_CHECK_EQUAL(x.get<int>(), 100);
+
+    // cannot change type on assignment
+    BOOST_CHECK_THROW(x = 1.0f, std::runtime_error);
+    BOOST_CHECK_THROW(x = 'x', std::runtime_error);
+    BOOST_CHECK_THROW(x = std::string("Hello world!"), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(assign_by_instance_test)
+{
+    Class Int("Int");
+    Class Float("Float");
+    Class Char("Char");
+    Int.set_type<int>();
+    Float.set_type<float>();
+    Char.set_type<char>();
+    Instance x(Int);
+    Instance y(Int);
+    Instance a(Float);
+    Instance c(Char);
+
+    x = 50;
+    y = 100;
+    a = 1.0f;
+    c = 'x';
+
+    // check assigning different value from another instance
+    BOOST_CHECK_EQUAL(x.get<int>(), 50);
+    BOOST_CHECK_EQUAL(y.get<int>(), 100);
+    x = y;
+    BOOST_CHECK_EQUAL(x.get<int>(), 100);
+    BOOST_CHECK_EQUAL(y.get<int>(), 100);
+
+    // cannot change type on assignment
+    BOOST_CHECK_THROW(x = a, std::runtime_error);
+    BOOST_CHECK_THROW(x = c, std::runtime_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
