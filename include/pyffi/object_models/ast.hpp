@@ -137,7 +137,7 @@ public:
 
     std::string class_name; //!< Name of the class of this attribute.
     std::string name;       //!< Name of this attribute.
-    Class const *class_;    //!< Pointer to the actual class.
+    boost::optional<Class const &> class_; //!< Reference to the actual class.
 };
 
 //! A simple if declaration: an expression and a scope.

@@ -149,10 +149,10 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
     //scope.compile();
 
     // check that references are set
-    BOOST_CHECK_EQUAL(x.class_, &Float);
-    BOOST_CHECK_EQUAL(y.class_, &Int);
-    BOOST_CHECK_EQUAL(z.class_, &Int);
-    BOOST_CHECK_EQUAL(pos.class_, &Vec);
+    BOOST_CHECK_EQUAL(x.class_.get_ptr(), &Float);
+    BOOST_CHECK_EQUAL(y.class_.get_ptr(), &Int);
+    BOOST_CHECK_EQUAL(z.class_.get_ptr(), &Int);
+    BOOST_CHECK_EQUAL(pos.class_.get_ptr(), &Vec);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
