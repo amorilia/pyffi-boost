@@ -38,6 +38,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_AST_HPP_INCLUDED
 #define PYFFI_OM_AST_HPP_INCLUDED
 
+#include <boost/any.hpp>
+#include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/variant.hpp>
 
@@ -68,19 +70,55 @@ public:
     bool generate(std::ostream & out) const;
 };
 
+//! Default init implementation.
+template<class ValueType>
+boost::any _init()
+{
+    return boost::any(ValueType());
+};
+
+//! Default read implementation.
+template<class ValueType>
+void _read(boost::any & value, std::istream & is)
+{
+    is.read((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
+};
+
+//! Default write implementation.
+template<class ValueType>
+void _write(boost::any const & value, std::ostream & os)
+{
+    os.write((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
+};
+
 //! A class declaration is a named scope, along with a base class.
 class Class
 {
 public:
     //! Default constructor.
     Class()
-        : name(), base_name(), scope() {};
+        : name(), base_name(), scope(), init(), read(), write() {};
     //! Constructor.
     Class(std::string const & name)
         : name(name), base_name(), scope() {};
+
+    // information about the class which is stored in the format description
     std::string name;                       //!< Name of this class.
     boost::optional<std::string> base_name; //!< The base class name.
     boost::optional<Scope> scope;           //!< Declarations of this class.
+
+    // methods to work with instances of the class
+    boost::function<boost::any()> init; //!< Constructor.
+    boost::function<void(boost::any &, std::istream &)> read; //!< Read from stream.
+    boost::function<void(boost::any const &, std::ostream &)> write; //!< Write to stream.
+
+    //! Set default implementation for given type.
+    template <class ValueType>
+    void set_type() {
+        init = &_init<ValueType>;
+        read = &_read<ValueType>;
+        write = &_write<ValueType>;
+    };
 };
 
 //! An attribute declaration has a class (its type), and a name.
