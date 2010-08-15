@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(complex_constructor_test)
     Scope scope;
     scope.push_back(Int);
     scope.push_back(Vec);
- 
+
     // set the type of the Int class
     Int.set_type<int>();
 
