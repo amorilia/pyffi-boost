@@ -49,10 +49,59 @@ BOOST_AUTO_TEST_SUITE(instance_test_suite)
 BOOST_AUTO_TEST_CASE(constructor_test)
 {
     Class Int("Int");
+
     // cannot instantiate without init method
     BOOST_CHECK_THROW(Instance x(Int), std::runtime_error);
+
+    // can instantiate after setting the type
     Int.set_type<int>();
     BOOST_CHECK_NO_THROW(Instance x(Int));
+
+    // check the data
+    Instance y(Int);
+    BOOST_CHECK_EQUAL(&y.class_, &Int);
+    BOOST_CHECK_EQUAL(y.get<int>(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(complex_constructor_test)
+{
+    // first construct an abstract syntax tree in which we build a
+    // more complex class;
+    // essentially, we do the equivalent of parsing the following code:
+    // class Int
+    // class Vec:
+    //     Int x
+    //     Int y
+    //     Int z
+    // (but we don't do this via parsing to keep this test independent of the
+    // parser)
+    Class Int("Int");
+    Class Vec("Vec");
+    Attr x("Int", "x");
+    Attr y("Int", "y");
+    Attr z("Int", "z");
+    Vec.scope = Scope();
+    Vec.scope.get().push_back(x);
+    Vec.scope.get().push_back(y);
+    Vec.scope.get().push_back(z);
+    Scope scope;
+    scope.push_back(Int);
+    scope.push_back(Vec);
+ 
+    // set the type of the Int class
+    Int.set_type<int>();
+
+    // cannot instantiate without compiling first
+    BOOST_CHECK_THROW(Instance v(Vec), std::runtime_error);
+
+    /*
+    // compile the abstract syntax tree
+    // this sets up all the references
+    scope.compile();
+
+    // now we can rock and roll
+    BOOST_CHECK_NO_THROW(Instance v(Vec));
+    */
 }
 
 BOOST_AUTO_TEST_CASE(get_test)
