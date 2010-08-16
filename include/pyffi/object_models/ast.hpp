@@ -42,6 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/variant.hpp>
 #include <vector>
 
@@ -71,8 +72,17 @@ public:
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
 
-    //! Set up all references.
+    //! Compile all local class map.
+    void compile_local_class_maps();
+
+    //! Compile everything.
     void compile();
+
+    //! Type of local_class_map.
+    typedef boost::unordered_map<std::string, Class const * const> LocalClassMap;
+
+    //! Map local class names to classes.
+    LocalClassMap local_class_map;
 };
 
 //! Default init implementation.

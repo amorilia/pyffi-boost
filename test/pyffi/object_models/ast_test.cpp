@@ -121,12 +121,23 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
         Vec.scope.get().push_back(y); // pushes a *copy*!!!
         Vec.scope.get().push_back(z); // pushes a *copy*!!!
         IfElifsElse ifelifselse;
+        Class Bool("Bool");
         Attr pos("Vec", "pos");
+        Attr is_local("Vec", "is_local");
         ifelifselse.ifs_.resize(1);
         ifelifselse.ifs_[0].expr = true;
+        ifelifselse.ifs_[0].scope.push_back(Bool);
         ifelifselse.ifs_[0].scope.push_back(pos);
+        ifelifselse.ifs_[0].scope.push_back(is_local);
+        Class Color("Color");
+        Color.base_name = "Vec";
+        Attr col("Color", "col");
+        ifelifselse.else_ = Scope();
+        ifelifselse.else_.get().push_back(Color);
+        ifelifselse.else_.get().push_back(col);
         scope.push_back(Int); // pushes a *copy*!!!
         // Float is defined as a nested class inside Vec; see above
+        // Bool is defined as a nested class inside the if; see above
         scope.push_back(Vec); // pushes a *copy*!!!
         scope.push_back(ifelifselse); // pushes a *copy*!!!
     }
@@ -139,20 +150,39 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
     Attr & y = get<Attr>(Vec.scope.get()[2]);
     Attr & z = get<Attr>(Vec.scope.get()[3]);
     IfElifsElse & ifelifselse = get<IfElifsElse>(scope[2]);
-    Attr & pos = get<Attr>(ifelifselse.ifs_[0].scope[0]);
+    Class & Bool = get<Class>(ifelifselse.ifs_[0].scope[0]);
+    Attr & pos = get<Attr>(ifelifselse.ifs_[0].scope[1]);
+    Attr & is_local = get<Attr>(ifelifselse.ifs_[0].scope[2]);
+    Class & Color = get<Class>(ifelifselse.else_.get()[0]);
+    Attr & col = get<Attr>(ifelifselse.else_.get()[1]);
     BOOST_CHECK(!x.class_);
     BOOST_CHECK(!y.class_);
     BOOST_CHECK(!z.class_);
     BOOST_CHECK(!pos.class_);
+    BOOST_CHECK(!is_local.class_);
+    BOOST_CHECK(!col.class_);
 
     // compile the scope
     scope.compile();
 
+    // check local class maps
+    BOOST_CHECK_EQUAL(scope.local_class_map.size(), 2);
+    BOOST_CHECK_EQUAL(scope.local_class_map["Int"], &Int);
+    BOOST_CHECK_EQUAL(scope.local_class_map["Vec"], &Vec);
+    BOOST_CHECK_EQUAL(Vec.scope.get().local_class_map.size(), 1);
+    BOOST_CHECK_EQUAL(Vec.scope.get().local_class_map["Float"], &Float);
+    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.local_class_map.size(), 1);
+    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.local_class_map["Bool"], &Bool);
+    BOOST_CHECK_EQUAL(ifelifselse.else_.get().local_class_map.size(), 1);
+    BOOST_CHECK_EQUAL(ifelifselse.else_.get().local_class_map["Color"], &Color);
+
+    /*
     // check that references are set
     BOOST_CHECK_EQUAL(x.class_.get_ptr(), &Float);
     BOOST_CHECK_EQUAL(y.class_.get_ptr(), &Int);
     BOOST_CHECK_EQUAL(z.class_.get_ptr(), &Int);
     BOOST_CHECK_EQUAL(pos.class_.get_ptr(), &Vec);
+    */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
