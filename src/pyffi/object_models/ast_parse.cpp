@@ -135,6 +135,6 @@ bool Scope::parse(std::istream & in)
     return r;
 }
 
-}
+} // namespace object_models
 
-}
+} // namespace pyffi

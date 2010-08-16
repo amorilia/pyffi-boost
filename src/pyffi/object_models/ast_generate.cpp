@@ -123,6 +123,6 @@ bool Scope::generate(std::ostream & out) const
     return engine::generate(sink, parser, *this);
 }
 
-}
+} // namespace object_models
 
-}
+} // namespace pyffi
