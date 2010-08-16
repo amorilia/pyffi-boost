@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
     BOOST_CHECK(!pos.class_);
 
     // compile the scope
-    //scope.compile();
+    scope.compile();
 
     // check that references are set
     BOOST_CHECK_EQUAL(x.class_.get_ptr(), &Float);
