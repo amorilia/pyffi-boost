@@ -41,7 +41,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/any.hpp>
 #include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <vector>
 
 namespace pyffi
 {
