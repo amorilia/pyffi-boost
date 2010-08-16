@@ -79,6 +79,16 @@ public:
     //! class references).
     void compile();
 
+    //! Get locally defined class by name.
+    Class const & get_local_class(std::string const & class_name) const;
+
+    //! Get parent scope.
+    Scope const & get_parent_scope() const;
+
+    //! Get class by name (also inspecting parent scopes).
+    Class const & get_class(std::string const & class_name) const;
+
+private:
     //! Type of local_class_map.
     typedef boost::unordered_map<std::string, Class const *> LocalClassMap;
 
@@ -87,6 +97,15 @@ public:
 
     //! The parent scope in the syntax tree hierarchy.
     Scope const *parent_scope;
+
+    //! Compile the local class maps (lcm) and parent scopes (ps).
+    void compile_lcm_ps();
+
+    //! Compile the class of every attribute (a).
+    void compile_a();
+
+    friend class declaration_compile_lcm_ps_visitor;
+    friend class declaration_compile_a_visitor;
 };
 
 //! Default init implementation.
@@ -153,7 +172,14 @@ public:
 
     std::string class_name; //!< Name of the class of this attribute.
     std::string name;       //!< Name of this attribute.
-    boost::optional<Class const &> class_; //!< Reference to the actual class.
+
+    //! Get a reference to the actual class.
+    Class const & get_class() const;
+
+private:
+    Class const *class_; //!< Pointer to the actual class.
+
+    friend class declaration_compile_a_visitor;
 };
 
 //! A simple if declaration: an expression and a scope.

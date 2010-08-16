@@ -45,13 +45,14 @@ namespace pyffi
 namespace object_models
 {
 
-//! A visitor for compiling the declaration of a given scope.
-class declaration_compile_visitor
+//! A visitor for compiling the local class maps (lcm) and parent
+//! scopes (ps) of the declaration of a scope.
+class declaration_compile_lcm_ps_visitor
     : public boost::static_visitor<void>
 {
 public:
     //! Constructor.
-    declaration_compile_visitor(Scope & scope)
+    declaration_compile_lcm_ps_visitor(Scope & scope)
         : scope(scope) {};
 
     //! A class.
@@ -69,7 +70,7 @@ public:
         class_.scope.get().parent_scope = &scope;
         // compile the nested scope
         if (class_.scope) {
-            class_.scope.get().compile();
+            class_.scope.get().compile_lcm_ps();
         };
     };
 
@@ -82,26 +83,83 @@ public:
             // set the if's parent scope
             if_.scope.parent_scope = &scope;
             // compile this if's scope
-            if_.scope.compile();
+            if_.scope.compile_lcm_ps();
         };
         if (ifelifselse.else_) {
             // set the if's parent scope
             ifelifselse.else_.get().parent_scope = &scope;
             // compile the else's scope
-            ifelifselse.else_.get().compile();
+            ifelifselse.else_.get().compile_lcm_ps();
         };
     };
 
     Scope & scope;
 };
 
-void Scope::compile()
+void Scope::compile_lcm_ps()
 {
     BOOST_FOREACH(Declaration & decl, *this) {
         // compile all declarations
         boost::apply_visitor(
-            declaration_compile_visitor(*this), decl);
+            declaration_compile_lcm_ps_visitor(*this), decl);
     };
+}
+
+//! A visitor for compiling the class of every attribute (a) of the
+//! declaration of a scope.
+class declaration_compile_a_visitor
+    : public boost::static_visitor<void>
+{
+public:
+    //! Constructor.
+    declaration_compile_a_visitor(Scope & scope)
+        : scope(scope) {};
+
+    //! A class.
+    void operator()(Class & class_) const {
+        // compile the nested scope
+        if (class_.scope) {
+            class_.scope.get().compile_a();
+        };
+    };
+
+    //! An attribute.
+    void operator()(Attr & attr) const {
+        attr.class_ = &scope.get_class(attr.class_name);
+    };
+
+    //! An if/elif/.../else structure.
+    void operator()(IfElifsElse & ifelifselse) const {
+        BOOST_FOREACH(If & if_, ifelifselse.ifs_) {
+            // compile this if's scope
+            if_.scope.compile_a();
+        };
+        if (ifelifselse.else_) {
+            // compile the else's scope
+            ifelifselse.else_.get().compile_a();
+        };
+    };
+
+    Scope & scope;
+};
+
+void Scope::compile_a()
+{
+    BOOST_FOREACH(Declaration & decl, *this) {
+        // compile all declarations
+        boost::apply_visitor(
+            declaration_compile_a_visitor(*this), decl);
+    };
+}
+
+void Scope::compile()
+{
+    // compile local class maps and parent scopes
+    compile_lcm_ps();
+    // compile class of every attribute (note: we do this in a separate
+    // pass, so we can use classes that are only defined further on
+    // without requiring forward declarations)
+    compile_a();
 }
 
 } // namespace object_models

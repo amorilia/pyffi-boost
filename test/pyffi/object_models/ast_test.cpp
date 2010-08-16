@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
         IfElifsElse ifelifselse;
         Class Bool("Bool");
         Attr pos("Vec", "pos");
-        Attr is_local("Vec", "is_local");
+        Attr is_local("Bool", "is_local");
         ifelifselse.ifs_.resize(1);
         ifelifselse.ifs_[0].expr = true;
         ifelifselse.ifs_[0].scope.push_back(Bool);
@@ -155,40 +155,36 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
     Attr & is_local = get<Attr>(ifelifselse.ifs_[0].scope[2]);
     Class & Color = get<Class>(ifelifselse.else_.get()[0]);
     Attr & col = get<Attr>(ifelifselse.else_.get()[1]);
-    BOOST_CHECK(!x.class_);
-    BOOST_CHECK(!y.class_);
-    BOOST_CHECK(!z.class_);
-    BOOST_CHECK(!pos.class_);
-    BOOST_CHECK(!is_local.class_);
-    BOOST_CHECK(!col.class_);
+    BOOST_CHECK_THROW(x.get_class(), std::runtime_error);
+    BOOST_CHECK_THROW(y.get_class(), std::runtime_error);
+    BOOST_CHECK_THROW(z.get_class(), std::runtime_error);
+    BOOST_CHECK_THROW(pos.get_class(), std::runtime_error);
+    BOOST_CHECK_THROW(is_local.get_class(), std::runtime_error);
+    BOOST_CHECK_THROW(col.get_class(), std::runtime_error);
 
     // compile the scope
     scope.compile();
 
-    // check local class maps
-    BOOST_CHECK_EQUAL(scope.local_class_map.size(), 2);
-    BOOST_CHECK_EQUAL(scope.local_class_map["Int"], &Int);
-    BOOST_CHECK_EQUAL(scope.local_class_map["Vec"], &Vec);
-    BOOST_CHECK_EQUAL(Vec.scope.get().local_class_map.size(), 1);
-    BOOST_CHECK_EQUAL(Vec.scope.get().local_class_map["Float"], &Float);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.local_class_map.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.local_class_map["Bool"], &Bool);
-    BOOST_CHECK_EQUAL(ifelifselse.else_.get().local_class_map.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.else_.get().local_class_map["Color"], &Color);
+    // check local classes
+    BOOST_CHECK_EQUAL(&scope.get_local_class("Int"), &Int);
+    BOOST_CHECK_EQUAL(&scope.get_local_class("Vec"), &Vec);
+    BOOST_CHECK_EQUAL(&Vec.scope.get().get_local_class("Float"), &Float);
+    BOOST_CHECK_EQUAL(&ifelifselse.ifs_[0].scope.get_local_class("Bool"), &Bool);
+    BOOST_CHECK_EQUAL(&ifelifselse.else_.get().get_local_class("Color"), &Color);
 
     // check parent scopes
-    BOOST_CHECK(!scope.parent_scope);
-    BOOST_CHECK_EQUAL(Vec.scope.get().parent_scope, &scope);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.parent_scope, &scope);
-    BOOST_CHECK_EQUAL(ifelifselse.else_.get().parent_scope, &scope);
+    BOOST_CHECK_THROW(scope.get_parent_scope(), std::runtime_error);
+    BOOST_CHECK_EQUAL(&Vec.scope.get().get_parent_scope(), &scope);
+    BOOST_CHECK_EQUAL(&ifelifselse.ifs_[0].scope.get_parent_scope(), &scope);
+    BOOST_CHECK_EQUAL(&ifelifselse.else_.get().get_parent_scope(), &scope);
 
-    /*
-    // check that references are set
-    BOOST_CHECK_EQUAL(x.class_.get_ptr(), &Float);
-    BOOST_CHECK_EQUAL(y.class_.get_ptr(), &Int);
-    BOOST_CHECK_EQUAL(z.class_.get_ptr(), &Int);
-    BOOST_CHECK_EQUAL(pos.class_.get_ptr(), &Vec);
-    */
+    // check class of each attribute
+    BOOST_CHECK_EQUAL(&x.get_class(), &Float);
+    BOOST_CHECK_EQUAL(&y.get_class(), &Int);
+    BOOST_CHECK_EQUAL(&z.get_class(), &Int);
+    BOOST_CHECK_EQUAL(&pos.get_class(), &Vec);
+    BOOST_CHECK_EQUAL(&is_local.get_class(), &Bool);
+    BOOST_CHECK_EQUAL(&col.get_class(), &Color);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
