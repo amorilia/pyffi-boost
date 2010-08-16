@@ -66,23 +66,27 @@ typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaratio
 class Scope : public std::vector<Declaration>
 {
 public:
+    //! Constructor.
+    Scope() : std::vector<Declaration>(), local_class_map(), parent_scope() {};
+
     //! Convert format description to abstract syntax tree.
     bool parse(std::istream & in);
 
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
 
-    //! Compile all local class map.
-    void compile_local_class_maps();
-
-    //! Compile everything.
+    //! Compile everything (local class maps, parent scopes, attribute
+    //! class references).
     void compile();
 
     //! Type of local_class_map.
-    typedef boost::unordered_map<std::string, Class const * const> LocalClassMap;
+    typedef boost::unordered_map<std::string, Class const *> LocalClassMap;
 
     //! Map local class names to classes.
     LocalClassMap local_class_map;
+
+    //! The parent scope in the syntax tree hierarchy.
+    Scope const *parent_scope;
 };
 
 //! Default init implementation.

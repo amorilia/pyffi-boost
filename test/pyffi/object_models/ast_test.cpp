@@ -176,6 +176,12 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
     BOOST_CHECK_EQUAL(ifelifselse.else_.get().local_class_map.size(), 1);
     BOOST_CHECK_EQUAL(ifelifselse.else_.get().local_class_map["Color"], &Color);
 
+    // check parent scopes
+    BOOST_CHECK(!scope.parent_scope);
+    BOOST_CHECK_EQUAL(Vec.scope.get().parent_scope, &scope);
+    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.parent_scope, &scope);
+    BOOST_CHECK_EQUAL(ifelifselse.else_.get().parent_scope, &scope);
+
     /*
     // check that references are set
     BOOST_CHECK_EQUAL(x.class_.get_ptr(), &Float);

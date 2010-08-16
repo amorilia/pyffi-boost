@@ -45,92 +45,64 @@ namespace pyffi
 namespace object_models
 {
 
-//! A visitor for updating a local class map with the given
-//! declaration.
-class declaration_update_local_class_map_visitor
+//! A visitor for compiling the declaration of a given scope.
+class declaration_compile_visitor
     : public boost::static_visitor<void>
 {
 public:
     //! Constructor.
-    declaration_update_local_class_map_visitor(Scope::LocalClassMap & local_class_map)
-        : local_class_map(local_class_map) {};
+    declaration_compile_visitor(Scope & scope)
+        : scope(scope) {};
 
-    //! A class: update the map.
-    void operator()(Class const & class_) const {
+    //! A class.
+    void operator()(Class & class_) const {
+        // update the local class map
         std::pair<Scope::LocalClassMap::iterator, bool> ret =
-            local_class_map.insert(
+            scope.local_class_map.insert(
                 std::make_pair(class_.name, &class_));
         if (!ret.second) {
             // insert failed
             throw std::runtime_error(
-                "duplicate definition of class '"
-                + class_.name + "'.");
+                "duplicate definition of class '" + class_.name + "'.");
         };
-    };
-
-    //! An attribute: ignore.
-    void operator()(Attr const & attr) const {};
-
-    //! An if/elif/.../else structure: ignore.
-    void operator()(IfElifsElse const & ifelifselse) const {};
-
-    Scope::LocalClassMap & local_class_map;
-};
-
-//! A visitor for compiling the local class map of nested scopes of
-//! a declaration.
-class declaration_compile_nested_local_class_maps_visitor
-    : public boost::static_visitor<void>
-{
-public:
-    //! Constructor.
-    declaration_compile_nested_local_class_maps_visitor() {};
-
-    //! A class: update local map in nested scope.
-    void operator()(Class & class_) const {
-        // compile the local class map of the class scope
+        // set the class's parent scope
+        class_.scope.get().parent_scope = &scope;
+        // compile the nested scope
         if (class_.scope) {
-            class_.scope.get().compile_local_class_maps();
+            class_.scope.get().compile();
         };
     };
 
-    //! An attribute has no nested scopes, so ignore.
+    //! An attribute.
     void operator()(Attr & attr) const {};
 
-    //! An if/elif/.../else structure: update local maps in nested scopes.
+    //! An if/elif/.../else structure.
     void operator()(IfElifsElse & ifelifselse) const {
         BOOST_FOREACH(If & if_, ifelifselse.ifs_) {
-            // compile the local class map of this if's scope
-            if_.scope.compile_local_class_maps();
+            // set the if's parent scope
+            if_.scope.parent_scope = &scope;
+            // compile this if's scope
+            if_.scope.compile();
         };
         if (ifelifselse.else_) {
-            // compile the local class map of else's scope
-            ifelifselse.else_.get().compile_local_class_maps();
+            // set the if's parent scope
+            ifelifselse.else_.get().parent_scope = &scope;
+            // compile the else's scope
+            ifelifselse.else_.get().compile();
         };
     };
-};
 
-void Scope::compile_local_class_maps()
-{
-    BOOST_FOREACH(Declaration & decl, *this) {
-        // update our local class map
-        boost::apply_visitor(
-            declaration_update_local_class_map_visitor(local_class_map), decl);
-        // compile local class maps of nested scopes
-        boost::apply_visitor(
-            declaration_compile_nested_local_class_maps_visitor(), decl);
-    };
-}
+    Scope & scope;
+};
 
 void Scope::compile()
 {
-    // set up all local maps from class names to class references
-    compile_local_class_maps();
-
-    // set up all parent scope references
-
-    // set up all class references in attributes
-};
+    BOOST_FOREACH(Declaration & decl, *this) {
+        // compile all declarations
+        boost::apply_visitor(
+            declaration_compile_visitor(*this), decl);
+    };
+}
 
 } // namespace object_models
 
