@@ -94,14 +94,12 @@ BOOST_AUTO_TEST_CASE(complex_constructor_test)
     // cannot instantiate without compiling first
     BOOST_CHECK_THROW(Instance v(Vec), std::runtime_error);
 
-    /*
     // compile the abstract syntax tree
     // this sets up all the references
     scope.compile();
 
     // now we can rock and roll
     BOOST_CHECK_NO_THROW(Instance v(Vec));
-    */
 }
 
 BOOST_AUTO_TEST_CASE(get_test)

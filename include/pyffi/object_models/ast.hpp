@@ -110,21 +110,21 @@ private:
 
 //! Default init implementation.
 template<class ValueType>
-boost::any _init()
+boost::any _init(Class const & class_)
 {
     return boost::any(ValueType());
 };
 
 //! Default read implementation.
 template<class ValueType>
-void _read(boost::any & value, std::istream & is)
+void _read(Class const & class_, boost::any & value, std::istream & is)
 {
     is.read((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
 };
 
 //! Default write implementation.
 template<class ValueType>
-void _write(boost::any const & value, std::ostream & os)
+void _write(Class const & class_, boost::any const & value, std::ostream & os)
 {
     os.write((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
 };
@@ -146,9 +146,12 @@ public:
     boost::optional<Scope> scope;           //!< Declarations of this class.
 
     // methods to work with instances of the class
-    boost::function<boost::any()> init; //!< Constructor.
-    boost::function<void(boost::any &, std::istream &)> read; //!< Read from stream.
-    boost::function<void(boost::any const &, std::ostream &)> write; //!< Write to stream.
+    //! Constructor method.
+    boost::function<boost::any(Class const &)> init;
+    //! Read from stream method.
+    boost::function<void(Class const &, boost::any &, std::istream &)> read; 
+    //! Write to stream method.
+    boost::function<void(Class const &, boost::any const &, std::ostream &)> write;
 
     //! Set default implementation for given type.
     template <class ValueType>

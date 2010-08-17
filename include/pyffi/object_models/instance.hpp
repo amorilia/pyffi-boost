@@ -51,7 +51,7 @@ class Instance
 public:
     //! Instantiate a given class.
     Instance(Class const & class_)
-        : class_(class_), value(class_.init()) {};
+        : class_(class_), value(class_.init(class_)) {};
     //! Copy constructor.
     Instance(Instance const & instance)
         : class_(instance.class_), value(instance.value) {};
@@ -102,11 +102,11 @@ public:
     };
     //! Read from stream.
     void read(std::istream & is) {
-        class_.read(value, is);
+        class_.read(class_, value, is);
     };
     //! Write to stream.
     void write(std::ostream & os) const {
-        class_.write(value, os);
+        class_.write(class_, value, os);
     };
 
     Class const & class_; //!< Reference to the class of this instance.
