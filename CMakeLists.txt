@@ -22,6 +22,7 @@ add_library(pyffi
     src/pyffi/object_models/ast_parse.cpp
     src/pyffi/object_models/ast_scope.cpp
     src/pyffi/object_models/ast_compile.cpp
+    src/pyffi/object_models/ast_class.cpp
 )
 
 # build the tests

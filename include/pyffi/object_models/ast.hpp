@@ -62,7 +62,7 @@ class IfElifsElse;
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
 typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
 
-//! A scope is a vector of declarations.
+//! A scope is a vector of \ref Declaration "declarations".
 class Scope : public std::vector<Declaration>
 {
 public:
@@ -75,8 +75,7 @@ public:
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
 
-    //! Compile everything (local class maps, parent scopes, attribute
-    //! class references).
+    //! Compile everything.
     void compile();
 
     //! Get locally defined class by name.
@@ -108,23 +107,64 @@ private:
     friend class declaration_compile_a_visitor;
 };
 
-//! Default init implementation.
+//! Default init implementation for classes.
+/*!
+  \param class_ The \ref Class "class" to create an instance from.
+  \return A vector of \ref Instance "instances" for each \ref Attr
+          "attribute" in the class scope.
+*/
+boost::any class_init(Class const & class_);
+
+//! Default read implementation for classes.
+/*!
+  \param class_ The class of the instance.
+  \param value The internal representation of the instance.
+  \param is The input stream.
+*/
+boost::any class_read(Class const & class_, boost::any & value, std::istream & is);
+
+//! Default write implementation for classes.
+/*!
+  \param class_ The class of the instance.
+  \param value The internal representation of the instance.
+  \param os The output stream.
+*/
+boost::any class_write(Class const & class_, boost::any const & value, std::ostream & os);
+
+//! Init implementation for primitive types.
+/*!
+  \tparam ValueType The primitive type that is used to represent this class.
+  \param class_ The \ref Class "class" to create an instance from.
+  \return A ValueType instance, created by calling the default constructor.
+*/
 template<class ValueType>
-boost::any _init(Class const & class_)
+boost::any type_init(Class const & class_)
 {
     return boost::any(ValueType());
 };
 
-//! Default read implementation.
+//! Read implementation for primitive types.
+/*!
+  \tparam ValueType The primitive type that is used to represent this class.
+  \param class_ The class of the instance.
+  \param value The internal representation of the instance.
+  \param is The input stream.
+*/
 template<class ValueType>
-void _read(Class const & class_, boost::any & value, std::istream & is)
+void type_read(Class const & class_, boost::any & value, std::istream & is)
 {
     is.read((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
 };
 
-//! Default write implementation.
+//! Write implementation for primitive types.
+/*!
+  \tparam ValueType The primitive type that is used to represent this class.
+  \param class_ The class of the instance.
+  \param value The internal representation of the instance.
+  \param os The output stream.
+*/
 template<class ValueType>
-void _write(Class const & class_, boost::any const & value, std::ostream & os)
+void type_write(Class const & class_, boost::any const & value, std::ostream & os)
 {
     os.write((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
 };
@@ -135,31 +175,33 @@ class Class
 public:
     //! Default constructor.
     Class()
-        : name(), base_name(), scope(), init(), read(), write() {};
+        : name(), base_name(), scope(),
+          init(&class_init), read(&class_read), write(&class_write) {};
     //! Constructor.
     Class(std::string const & name)
-        : name(name), base_name(), scope() {};
+        : name(name), base_name(), scope(),
+          init(&class_init), read(&class_read), write(&class_write) {};
 
     // information about the class which is stored in the format description
     std::string name;                       //!< Name of this class.
     boost::optional<std::string> base_name; //!< The base class name.
     boost::optional<Scope> scope;           //!< Declarations of this class.
 
-    // methods to work with instances of the class
     //! Constructor method.
     boost::function<boost::any(Class const &)> init;
     //! Read from stream method.
-    boost::function<void(Class const &, boost::any &, std::istream &)> read; 
+    boost::function<void(Class const &, boost::any &, std::istream &)> read;
     //! Write to stream method.
     boost::function<void(Class const &, boost::any const &, std::ostream &)> write;
 
     //! Set default implementation for given type.
     template <class ValueType>
     void set_type() {
-        init = &_init<ValueType>;
-        read = &_read<ValueType>;
-        write = &_write<ValueType>;
+        init = &type_init<ValueType>;
+        read = &type_read<ValueType>;
+        write = &type_write<ValueType>;
     };
+
 };
 
 //! An attribute declaration has a class (its type), and a name.
