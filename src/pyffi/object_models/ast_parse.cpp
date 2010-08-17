@@ -108,6 +108,38 @@ public:
             >> -(engine::eol >> else_(engine::_r1)); // IfElifsElse.else_
         class_name %= engine::upper >> *(engine::lower | engine::upper | engine::digit);
         attr_name %= engine::lower >> *(engine::lower | engine::digit | engine::char_('_'));
+
+        indent.name("indent");
+        start.name("start");
+        declaration.name("declaration");
+        scope.name("scope");
+        class_.name("class");
+        attr.name("attr");
+        expr.name("expr");
+        if_.name("if");
+        elif_.name("elif");
+        else_.name("else");
+        if_elifs.name("if-elifs");
+        if_elifs_else.name("if-elifs-else");
+        class_name.name("class-name");
+        attr_name.name("attr-name");
+
+        /*
+        engine::debug(indent);
+        //engine::debug(start);
+        //engine::debug(declaration);
+        //engine::debug(scope);
+        //engine::debug(class_);
+        engine::debug(attr);
+        engine::debug(expr);
+        //engine::debug(if_);
+        //engine::debug(elif_);
+        //engine::debug(else_);
+        //engine::debug(if_elifs);
+        //engine::debug(if_elifs_else);
+        engine::debug(class_name);
+        engine::debug(attr_name);
+        */
     }
 };
 
