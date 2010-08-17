@@ -122,6 +122,16 @@ boost::any class_write(Class const & class_, boost::any const & value, std::ostr
     return result;
 };
 
+Instance & class_attr(Class const &, boost::any &, std::string const &)
+{
+    throw std::runtime_error("not yet implemented");
+}
+
+Instance const & class_const_attr(Class const &, boost::any const &, std::string const &)
+{
+    throw std::runtime_error("not yet implemented");
+}
+
 boost::optional<Class const &> Class::get_base_class() const
 {
     if (base_class) {
