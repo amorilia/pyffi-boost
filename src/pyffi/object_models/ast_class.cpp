@@ -46,25 +46,66 @@ namespace pyffi
 namespace object_models
 {
 
+//! A visitor for compiling the local class maps (lcm) and parent
+//! scopes (ps) of the declaration of a scope.
+class declaration_init_visitor
+    : public boost::static_visitor<void>
+{
+public:
+    //! Constructor.
+    declaration_init_visitor(std::vector<Instance> & instances)
+        : instances(instances) {};
+
+    //! A class.
+    void operator()(Class const & class_) const {};
+
+    //! An attribute.
+    void operator()(Attr const & attr) const {
+        // instantiate
+        instances.push_back(Instance(attr.get_class()));
+    };
+
+    //! An if/elif/.../else structure.
+    void operator()(IfElifsElse const & ifelifselse) const {
+        BOOST_FOREACH(If const & if_, ifelifselse.ifs_) {
+            // instantiate attributes of this if's scope
+            if_.scope.init(instances);
+        };
+        if (ifelifselse.else_) {
+            // instantiate attributes of the else's scope
+            ifelifselse.else_.get().init(instances);
+        };
+    };
+
+    std::vector<Instance> & instances;
+};
+
+void Scope::init(std::vector<Instance> & instances) const
+{
+    BOOST_FOREACH(Declaration const & decl, *this) {
+        boost::apply_visitor(declaration_init_visitor(instances), decl);
+    };
+};
+
 boost::any class_init(Class const & class_)
 {
-    if (!class_.scope) {
-        throw std::runtime_error(
-            "primitive class requires custom init (did you forget set_type?)");
+    std::vector<Instance> instances;
+    // instantiate base class attributes
+    boost::optional<Class const &> base_class = class_.get_base_class();
+    if (base_class) {
+        instances =
+            boost::any_cast<std::vector<Instance> >(
+                base_class.get().init(base_class.get()));
     };
-    std::vector<Instance> result;
-    BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
-        //boost::apply_visitor(declaration_init_visitor(result), decl);
+    // instantiate class attributes
+    if (class_.scope) {
+        class_.scope.get().init(instances);
     };
-    return result;
+    return boost::any(instances);
 };
 
 boost::any class_read(Class const & class_, boost::any & value, std::istream & is)
 {
-    if (!class_.scope) {
-        throw std::runtime_error(
-            "primitive class requires custom read (did you forget set_type?)");
-    };
     std::vector<Instance> result;
     BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
         //boost::apply_visitor(declaration_read_visitor(result), decl);
@@ -74,15 +115,20 @@ boost::any class_read(Class const & class_, boost::any & value, std::istream & i
 
 boost::any class_write(Class const & class_, boost::any const & value, std::ostream & os)
 {
-    if (!class_.scope) {
-        throw std::runtime_error(
-            "primitive class requires custom write (did you forget set_type?)");
-    };
     std::vector<Instance> result;
     BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
         //boost::apply_visitor(declaration_write_visitor(result), decl);
     };
     return result;
+};
+
+boost::optional<Class const &> Class::get_base_class() const
+{
+    if (base_class) {
+        return boost::optional<Class const &>(*base_class);
+    } else {
+        return boost::optional<Class const &>();
+    };
 };
 
 } // namespace object_models

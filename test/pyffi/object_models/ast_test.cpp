@@ -104,7 +104,27 @@ BOOST_AUTO_TEST_CASE(ast_scope_test)
     scope.push_back(ifelifselse);
 }
 
-BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
+BOOST_AUTO_TEST_CASE(ast_compile_base_class_test)
+{
+    Scope scope;
+    {
+        // keep scope construction local; test should use scope only
+        Class Vec("Vec");
+        Class Color("Color");
+        Color.base_name = "Vec";
+        scope.push_back(Vec);
+        scope.push_back(Color);
+    }
+
+    scope.compile();
+
+    // check that references are not set
+    Class & Vec = get<Class>(scope[0]);
+    Class & Color = get<Class>(scope[1]);
+    BOOST_CHECK_EQUAL(&Color.get_base_class().get(), &Vec);
+}
+
+BOOST_AUTO_TEST_CASE(ast_compile_complex_test)
 {
     Scope scope;
     {
@@ -185,6 +205,9 @@ BOOST_AUTO_TEST_CASE(ast_scope_compile_test)
     BOOST_CHECK_EQUAL(&pos.get_class(), &Vec);
     BOOST_CHECK_EQUAL(&is_local.get_class(), &Bool);
     BOOST_CHECK_EQUAL(&col.get_class(), &Color);
+
+    // check base class
+    BOOST_CHECK_EQUAL(&Color.get_base_class().get(), &Vec);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -52,6 +52,9 @@ namespace pyffi
 namespace object_models
 {
 
+// we cannot include instance.hpp, so forward declare it here
+class Instance;
+
 //! An expression (for now, simply defined as a primitive boolean type).
 typedef bool Expr;
 
@@ -100,11 +103,26 @@ private:
     //! Compile the local class maps (lcm) and parent scopes (ps).
     void compile_lcm_ps();
 
-    //! Compile the class of every attribute (a).
-    void compile_a();
+    //! Compile the class of every attribute (a) and every base class (bc).
+    void compile_a_bc();
+
+    // The next three methods are helper functions for class_init,
+    // class_read, and class_write. Therefore their implementation
+    // resides in ast_class.cpp.
+
+    //! Instantiate and append all declarations (ignoring nested classes).
+    void init(std::vector<Instance> & instances) const;
+
+    //! Read all declarations (ignoring nested classes).
+    void read(std::vector<Instance> & value, std::istream & is) const;
+
+    //! Write all declarations (ignoring nested classes).
+    void write(std::vector<Instance> & value, std::ostream & os) const;
 
     friend class declaration_compile_lcm_ps_visitor;
-    friend class declaration_compile_a_visitor;
+    friend class declaration_compile_a_bc_visitor;
+    friend class declaration_init_visitor;
+    friend boost::any class_init(Class const & class_);
 };
 
 //! Default init implementation for classes.
@@ -176,11 +194,13 @@ public:
     //! Default constructor.
     Class()
         : name(), base_name(), scope(),
-          init(&class_init), read(&class_read), write(&class_write) {};
+          init(&class_init), read(&class_read), write(&class_write),
+          base_class() {};
     //! Constructor.
     Class(std::string const & name)
         : name(name), base_name(), scope(),
-          init(&class_init), read(&class_read), write(&class_write) {};
+          init(&class_init), read(&class_read), write(&class_write),
+          base_class() {};
 
     // information about the class which is stored in the format description
     std::string name;                       //!< Name of this class.
@@ -202,6 +222,14 @@ public:
         write = &type_write<ValueType>;
     };
 
+    //! Get a reference to the actual class.
+    boost::optional<Class const &> get_base_class() const;
+
+private:
+
+    Class const *base_class; //!< Pointer to the base class.
+
+    friend class declaration_compile_a_bc_visitor;
 };
 
 //! An attribute declaration has a class (its type), and a name.
@@ -224,7 +252,7 @@ public:
 private:
     Class const *class_; //!< Pointer to the actual class.
 
-    friend class declaration_compile_a_visitor;
+    friend class declaration_compile_a_bc_visitor;
 };
 
 //! A simple if declaration: an expression and a scope.

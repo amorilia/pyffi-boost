@@ -66,10 +66,10 @@ public:
             throw std::runtime_error(
                 "duplicate definition of class '" + class_.name + "'.");
         };
-        // set the class's parent scope
-        class_.scope.get().parent_scope = &scope;
-        // compile the nested scope
         if (class_.scope) {
+            // set the class's parent scope
+            class_.scope.get().parent_scope = &scope;
+            // compile the nested scope
             class_.scope.get().compile_lcm_ps();
         };
     };
@@ -107,19 +107,23 @@ void Scope::compile_lcm_ps()
 
 //! A visitor for compiling the class of every attribute (a) of the
 //! declaration of a scope.
-class declaration_compile_a_visitor
+class declaration_compile_a_bc_visitor
     : public boost::static_visitor<void>
 {
 public:
     //! Constructor.
-    declaration_compile_a_visitor(Scope & scope)
+    declaration_compile_a_bc_visitor(Scope & scope)
         : scope(scope) {};
 
     //! A class.
     void operator()(Class & class_) const {
+        // find base class
+        if (class_.base_name) {
+            class_.base_class = &scope.get_class(class_.base_name.get());
+        };
         // compile the nested scope
         if (class_.scope) {
-            class_.scope.get().compile_a();
+            class_.scope.get().compile_a_bc();
         };
     };
 
@@ -132,23 +136,23 @@ public:
     void operator()(IfElifsElse & ifelifselse) const {
         BOOST_FOREACH(If & if_, ifelifselse.ifs_) {
             // compile this if's scope
-            if_.scope.compile_a();
+            if_.scope.compile_a_bc();
         };
         if (ifelifselse.else_) {
             // compile the else's scope
-            ifelifselse.else_.get().compile_a();
+            ifelifselse.else_.get().compile_a_bc();
         };
     };
 
     Scope & scope;
 };
 
-void Scope::compile_a()
+void Scope::compile_a_bc()
 {
     BOOST_FOREACH(Declaration & decl, *this) {
         // compile all declarations
         boost::apply_visitor(
-            declaration_compile_a_visitor(*this), decl);
+            declaration_compile_a_bc_visitor(*this), decl);
     };
 }
 
@@ -156,10 +160,10 @@ void Scope::compile()
 {
     // compile local class maps and parent scopes
     compile_lcm_ps();
-    // compile class of every attribute (note: we do this in a separate
-    // pass, so we can use classes that are only defined further on
-    // without requiring forward declarations)
-    compile_a();
+    // compile class of every attribute and all base classes (note: we
+    // do this in a separate pass, so we can use classes that are only
+    // defined further on without requiring forward declarations)
+    compile_a_bc();
 }
 
 } // namespace object_models

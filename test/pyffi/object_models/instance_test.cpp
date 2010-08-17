@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pyffi/object_models/instance.hpp"
 
+using boost::get;
 using namespace pyffi;
 using namespace pyffi::object_models;
 
@@ -50,11 +51,8 @@ BOOST_AUTO_TEST_CASE(constructor_test)
 {
     Class Int("Int");
 
-    // cannot instantiate without init method
-    BOOST_CHECK_THROW(Instance x(Int), std::runtime_error);
-
-    // can instantiate after setting the type
-    Int.set_type<int>();
+    // instantiate after setting the type
+    BOOST_CHECK_NO_THROW(Int.set_type<int>());
     BOOST_CHECK_NO_THROW(Instance x(Int));
 
     // check the data
@@ -75,31 +73,37 @@ BOOST_AUTO_TEST_CASE(complex_constructor_test)
     //     Int z
     // (but we don't do this via parsing to keep this test independent of the
     // parser)
-    Class Int("Int");
-    Class Vec("Vec");
-    Attr x("Int", "x");
-    Attr y("Int", "y");
-    Attr z("Int", "z");
-    Vec.scope = Scope();
-    Vec.scope.get().push_back(x);
-    Vec.scope.get().push_back(y);
-    Vec.scope.get().push_back(z);
     Scope scope;
-    scope.push_back(Int);
-    scope.push_back(Vec);
+    {
+        Class Int("Int");
+        Class Vec("Vec");
+        Attr x("Int", "x");
+        Attr y("Int", "y");
+        Attr z("Int", "z");
+        Vec.scope = Scope();
+        Vec.scope.get().push_back(x);
+        Vec.scope.get().push_back(y);
+        Vec.scope.get().push_back(z);
+        scope.push_back(Int);
+        scope.push_back(Vec);
+    }
+
+    Class & Int = get<Class>(scope[0]);
+    Class & Vec = get<Class>(scope[1]);
+    Attr & x = get<Attr>(Vec.scope.get()[0]);
+    Attr & y = get<Attr>(Vec.scope.get()[1]);
+    Attr & z = get<Attr>(Vec.scope.get()[2]);
 
     // set the type of the Int class
     Int.set_type<int>();
-
-    // cannot instantiate without compiling first
-    BOOST_CHECK_THROW(Instance v(Vec), std::runtime_error);
 
     // compile the abstract syntax tree
     // this sets up all the references
     scope.compile();
 
     // now we can rock and roll
-    BOOST_CHECK_NO_THROW(Instance v(Vec));
+    BOOST_CHECK_NO_THROW(Instance w(Vec));
+    Instance v(Vec);
 }
 
 BOOST_AUTO_TEST_CASE(get_test)
