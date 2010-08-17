@@ -194,12 +194,12 @@ public:
     //! Default constructor.
     Class()
         : name(), base_name(), scope(),
-          init(&class_init), read(&class_read), write(&class_write),
+          init(&class_init), read(&class_read), write(&class_write), attr(),
           base_class() {};
     //! Constructor.
     Class(std::string const & name)
         : name(name), base_name(), scope(),
-          init(&class_init), read(&class_read), write(&class_write),
+          init(&class_init), read(&class_read), write(&class_write), attr(),
           base_class() {};
 
     // information about the class which is stored in the format description
@@ -213,6 +213,10 @@ public:
     boost::function<void(Class const &, boost::any &, std::istream &)> read;
     //! Write to stream method.
     boost::function<void(Class const &, boost::any const &, std::ostream &)> write;
+    //! Get attribute.
+    boost::function<Instance &(Class const &, boost::any &, std::string const &)> attr;
+    //! Get const attribute.
+    boost::function<Instance const &(Class const &, boost::any const &, std::string const &)> const_attr;
 
     //! Set default implementation for given type.
     template <class ValueType>

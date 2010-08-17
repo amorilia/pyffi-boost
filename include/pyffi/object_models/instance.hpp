@@ -100,6 +100,7 @@ public:
         value = value_;
         return *this;
     };
+
     //! Read from stream.
     void read(std::istream & is) {
         class_.read(class_, value, is);
@@ -108,6 +109,16 @@ public:
     void write(std::ostream & os) const {
         class_.write(class_, value, os);
     };
+
+    //! Get attribute.
+    Instance & attr(std::string const & name) {
+        return class_.attr(class_, value, name);
+    }
+
+    //! Get const attribute.
+    Instance const & attr(std::string const & name) const {
+        return class_.const_attr(class_, value, name);
+    }
 
     Class const & class_; //!< Reference to the class of this instance.
 private:

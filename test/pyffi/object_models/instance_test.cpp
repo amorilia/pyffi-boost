@@ -104,6 +104,10 @@ BOOST_AUTO_TEST_CASE(complex_constructor_test)
     // now we can rock and roll
     BOOST_CHECK_NO_THROW(Instance w(Vec));
     Instance v(Vec);
+    BOOST_CHECK_NO_THROW(v.attr("x"));
+    BOOST_CHECK_NO_THROW(v.attr("y"));
+    BOOST_CHECK_NO_THROW(v.attr("z"));
+    BOOST_CHECK_THROW(v.attr("oops"), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(get_test)
