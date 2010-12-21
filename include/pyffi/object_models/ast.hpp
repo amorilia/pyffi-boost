@@ -62,6 +62,29 @@ class Class;
 class Attr;
 class IfElifsElse;
 
+//! An attribute declaration has a class (its type), and a name.
+class Attr
+{
+public:
+    //! Default constructor.
+    Attr()
+        : class_name(), name(), class_() {};
+    //! Constructor.
+    Attr(std::string const & class_name, std::string const & name)
+        : class_name(class_name), name(name), class_() {};
+
+    std::string class_name; //!< Name of the class of this attribute.
+    std::string name;       //!< Name of this attribute.
+
+    //! Get a reference to the actual class.
+    Class const & get_class() const;
+
+private:
+    Class const *class_; //!< Pointer to the actual class.
+
+    friend class declaration_compile_a_bc_visitor;
+};
+
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
 typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
 
@@ -282,29 +305,6 @@ public:
 private:
 
     Class const *base_class; //!< Pointer to the base class.
-
-    friend class declaration_compile_a_bc_visitor;
-};
-
-//! An attribute declaration has a class (its type), and a name.
-class Attr
-{
-public:
-    //! Default constructor.
-    Attr()
-        : class_name(), name(), class_() {};
-    //! Constructor.
-    Attr(std::string const & class_name, std::string const & name)
-        : class_name(class_name), name(name), class_() {};
-
-    std::string class_name; //!< Name of the class of this attribute.
-    std::string name;       //!< Name of this attribute.
-
-    //! Get a reference to the actual class.
-    Class const & get_class() const;
-
-private:
-    Class const *class_; //!< Pointer to the actual class.
 
     friend class declaration_compile_a_bc_visitor;
 };
