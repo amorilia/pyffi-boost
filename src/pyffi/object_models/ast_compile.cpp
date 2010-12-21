@@ -105,54 +105,64 @@ void Scope::compile_lcm_ps()
     };
 }
 
-//! A visitor for compiling the class of every attribute (a) of the
-//! declaration of a scope.
+//! A visitor for compiling the class and index of every attribute (a)
+//! and the base class (bc) and attribute map of every class.
 class declaration_compile_a_bc_visitor
     : public boost::static_visitor<void>
 {
 public:
     //! Constructor.
-    declaration_compile_a_bc_visitor(Scope & scope)
-        : scope(scope) {};
+    declaration_compile_a_bc_visitor(Scope & scope, Attr::Map & attr_map)
+        : scope(scope), attr_map(attr_map) {};
 
     //! A class.
     void operator()(Class & class_) const {
         // find base class
         if (class_.base_name) {
             class_.base_class = &scope.get_class(class_.base_name.get());
+            class_.attr_map = class_.base_class->attr_map;
         };
         // compile the nested scope
         if (class_.scope) {
-            class_.scope.get().compile_a_bc();
+            class_.scope.get().compile_a_bc(class_.attr_map);
         };
     };
 
     //! An attribute.
     void operator()(Attr & attr) const {
         attr.class_ = &scope.get_class(attr.class_name);
+        std::pair<Attr::Map::iterator, bool> ret = attr_map.push_back(&attr);
+        if (!ret.second) {
+            // insert failed, so it existed already
+            // TODO we allow duplicates, but we should still check here
+            // if the attribute definition is identical!! (same class etc.)
+        } else {
+            attr.index = attr_map.size() - 1;
+        }
     };
 
     //! An if/elif/.../else structure.
     void operator()(IfElifsElse & ifelifselse) const {
         BOOST_FOREACH(If & if_, ifelifselse.ifs_) {
             // compile this if's scope
-            if_.scope.compile_a_bc();
+            if_.scope.compile_a_bc(attr_map);
         };
         if (ifelifselse.else_) {
             // compile the else's scope
-            ifelifselse.else_.get().compile_a_bc();
+            ifelifselse.else_.get().compile_a_bc(attr_map);
         };
     };
 
     Scope & scope;
+    Attr::Map & attr_map;
 };
 
-void Scope::compile_a_bc()
+void Scope::compile_a_bc(Attr::Map & attr_map)
 {
     BOOST_FOREACH(Declaration & decl, *this) {
         // compile all declarations
         boost::apply_visitor(
-            declaration_compile_a_bc_visitor(*this), decl);
+            declaration_compile_a_bc_visitor(*this, attr_map), decl);
     };
 }
 
@@ -163,7 +173,8 @@ void Scope::compile()
     // compile class of every attribute and all base classes (note: we
     // do this in a separate pass, so we can use classes that are only
     // defined further on without requiring forward declarations)
-    compile_a_bc();
+    Attr::Map attr_map;
+    compile_a_bc(attr_map);
 }
 
 } // namespace object_models

@@ -46,8 +46,7 @@ namespace pyffi
 namespace object_models
 {
 
-//! A visitor for compiling the local class maps (lcm) and parent
-//! scopes (ps) of the declaration of a scope.
+//! A visitor for initializing all attributes of a class.
 class declaration_init_visitor
     : public boost::static_visitor<void>
 {
@@ -89,6 +88,7 @@ void Scope::init(std::vector<Instance> & instances) const
 
 boost::any class_init(Class const & class_)
 {
+    // TODO use the class_.attr_map here
     std::vector<Instance> instances;
     // instantiate base class attributes
     boost::optional<Class const &> base_class = class_.get_base_class();
@@ -122,9 +122,16 @@ boost::any class_write(Class const & class_, boost::any const & value, std::ostr
     return result;
 };
 
-Instance & class_attr(Class const &, boost::any &, std::string const &)
+Instance & class_attr(Class const & class_, boost::any & value, std::string const & name)
 {
-    throw std::runtime_error("not yet implemented");
+    std::vector<Instance> & instances
+    = boost::any_cast<std::vector<Instance> &>(value);
+    Attr::Map::nth_index<1>::type::iterator it
+    = class_.attr_map.get<1>().find(name);
+    if (it == class_.attr_map.get<1>().end()) {
+        throw std::runtime_error("attribute '" + name + "'not found");
+    }
+    return instances[(*it)->index];
 }
 
 Instance const & class_const_attr(Class const &, boost::any const &, std::string const &)

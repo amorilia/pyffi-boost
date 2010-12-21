@@ -41,6 +41,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/any.hpp>
 #include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/member.hpp>
 #include <boost/optional.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/variant.hpp>
@@ -58,8 +62,8 @@ class Instance;
 //! An expression (for now, simply defined as a primitive boolean type).
 typedef bool Expr;
 
+// forward declarations
 class Class;
-class Attr;
 class IfElifsElse;
 
 //! An attribute declaration has a class (its type), and a name.
@@ -81,8 +85,24 @@ public:
 
 private:
     Class const *class_; //!< Pointer to the actual class.
+    unsigned int index;  //!< Index in the attribute map.
 
+    friend class Scope;
+    friend class Class;
     friend class declaration_compile_a_bc_visitor;
+    friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
+
+    //! Type of Class::attr_map.
+    typedef boost::multi_index_container<
+    Attr *,
+         boost::multi_index::indexed_by<
+         // ordered by insertion (which is the same as ordered by index)
+         boost::multi_index::sequenced<>,
+         // hashed by name
+         boost::multi_index::hashed_unique<
+         boost::multi_index::member<Attr, std::string, &Attr::name> >
+         >
+         > Map;
 };
 
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
@@ -101,7 +121,7 @@ public:
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
 
-    //! Compile everything.
+    //! Compile everything (only to be called on a top-level scope).
     void compile();
 
     //! Get locally defined class by name.
@@ -127,7 +147,7 @@ private:
     void compile_lcm_ps();
 
     //! Compile the class of every attribute (a) and every base class (bc).
-    void compile_a_bc();
+    void compile_a_bc(Attr::Map & attr_map);
 
     // The next three methods are helper functions for class_init,
     // class_read, and class_write. Therefore their implementation
@@ -306,7 +326,11 @@ private:
 
     Class const *base_class; //!< Pointer to the base class.
 
+    //!< Maps attribute names to attributes.
+    Attr::Map attr_map;
+
     friend class declaration_compile_a_bc_visitor;
+    friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
 };
 
 //! A simple if declaration: an expression and a scope.
