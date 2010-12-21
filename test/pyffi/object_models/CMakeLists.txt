@@ -1,5 +1,5 @@
 foreach(TEST ast_test ast_parse_test ast_generate_test instance_test)
     add_executable(${TEST} ${TEST}.cpp)
-    target_link_libraries(${TEST} pyffi)
+    target_link_libraries(${TEST} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} pyffi)
     add_test(pyffi::object_models::${TEST} ${TEST})
 endforeach()
