@@ -50,6 +50,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/variant.hpp>
 #include <vector>
 
+#include "pyffi/object_models/attr.hpp"
+
 namespace pyffi
 {
 
@@ -65,48 +67,6 @@ typedef bool Expr;
 // forward declarations
 class Class;
 class IfElifsElse;
-
-//! An attribute declaration has a class (its type), and a name.
-class Attr
-{
-public:
-    //! Default constructor.
-    Attr()
-        : class_name(), name(), class_(), index() {};
-    //! Constructor.
-    Attr(std::string const & class_name, std::string const & name)
-        : class_name(class_name), name(name), class_() {};
-
-    std::string class_name; //!< Name of the class of this attribute.
-    std::string name;       //!< Name of this attribute.
-
-    //! Get a reference to the actual class.
-    Class const & get_class() const;
-
-    //! Get the index.
-    std::size_t get_index() const;
-
-private:
-    Class const *class_; //!< Pointer to the actual class.
-    boost::optional<std::size_t> index; //!< Index in the attribute map.
-
-    friend class Scope;
-    friend class Class;
-    friend class declaration_compile_a_bc_visitor;
-    friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
-
-    //! Type of Class::attr_map.
-    typedef boost::multi_index_container<
-    Attr *,
-         boost::multi_index::indexed_by<
-         // ordered by insertion (which is the same as ordered by index)
-         boost::multi_index::sequenced<>,
-         // hashed by name
-         boost::multi_index::hashed_unique<
-         boost::multi_index::member<Attr, std::string, &Attr::name> >
-         >
-         > Map;
-};
 
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
 typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
@@ -365,12 +325,6 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, name)
     (boost::optional<std::string>, base_name)
     (boost::optional<pyffi::object_models::Scope>, scope)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::Attr,
-    (std::string, class_name)
-    (std::string, name)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
