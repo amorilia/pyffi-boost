@@ -72,7 +72,7 @@ class Attr
 public:
     //! Default constructor.
     Attr()
-        : class_name(), name(), class_() {};
+        : class_name(), name(), class_(), index() {};
     //! Constructor.
     Attr(std::string const & class_name, std::string const & name)
         : class_name(class_name), name(name), class_() {};
@@ -83,9 +83,12 @@ public:
     //! Get a reference to the actual class.
     Class const & get_class() const;
 
+    //! Get the index.
+    std::size_t get_index() const;
+
 private:
     Class const *class_; //!< Pointer to the actual class.
-    unsigned int index;  //!< Index in the attribute map.
+    boost::optional<std::size_t> index; //!< Index in the attribute map.
 
     friend class Scope;
     friend class Class;

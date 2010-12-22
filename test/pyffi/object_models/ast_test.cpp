@@ -127,19 +127,29 @@ BOOST_AUTO_TEST_CASE(ast_compile_base_class_test)
 BOOST_AUTO_TEST_CASE(ast_compile_complex_test)
 {
     Scope scope;
+    // keep scope construction local; test should use scope only
     {
-        // keep scope construction local; test should use scope only
+        // class Int
+        // class Float
         Class Int("Int");
         Class Float("Float");
         Class Vec("Vec");
         Attr x("Float", "x");
         Attr y("Int", "y");
         Attr z("Int", "z");
+        // class Vec:
+        //     Float x
+        //     Int y
+        //     Int z
         Vec.scope = Scope();
         Vec.scope.get().push_back(Float); // pushes a *copy*!!!
         Vec.scope.get().push_back(x); // pushes a *copy*!!!
         Vec.scope.get().push_back(y); // pushes a *copy*!!!
         Vec.scope.get().push_back(z); // pushes a *copy*!!!
+        // if true:
+        //     class Bool
+        //     Vec pos
+        //     Bool is_local
         IfElifsElse ifelifselse;
         Class Bool("Bool");
         Attr pos("Vec", "pos");
@@ -149,6 +159,9 @@ BOOST_AUTO_TEST_CASE(ast_compile_complex_test)
         ifelifselse.ifs_[0].scope.push_back(Bool);
         ifelifselse.ifs_[0].scope.push_back(pos);
         ifelifselse.ifs_[0].scope.push_back(is_local);
+        // else:
+        //     class Color(Vec)
+        //     Color col
         Class Color("Color");
         Color.base_name = "Vec";
         Attr col("Color", "col");
@@ -162,7 +175,7 @@ BOOST_AUTO_TEST_CASE(ast_compile_complex_test)
         scope.push_back(ifelifselse); // pushes a *copy*!!!
     }
 
-    // check that references are not set
+    // check that classes and indices are not set
     Class & Int = get<Class>(scope[0]);
     Class & Vec = get<Class>(scope[1]);
     Class & Float = get<Class>(Vec.scope.get()[0]);
@@ -181,6 +194,12 @@ BOOST_AUTO_TEST_CASE(ast_compile_complex_test)
     BOOST_CHECK_THROW(pos.get_class(), std::runtime_error);
     BOOST_CHECK_THROW(is_local.get_class(), std::runtime_error);
     BOOST_CHECK_THROW(col.get_class(), std::runtime_error);
+    BOOST_CHECK_THROW(x.get_index(), std::runtime_error);
+    BOOST_CHECK_THROW(y.get_index(), std::runtime_error);
+    BOOST_CHECK_THROW(z.get_index(), std::runtime_error);
+    BOOST_CHECK_THROW(pos.get_index(), std::runtime_error);
+    BOOST_CHECK_THROW(is_local.get_index(), std::runtime_error);
+    BOOST_CHECK_THROW(col.get_index(), std::runtime_error);
 
     // compile the scope
     scope.compile();
@@ -205,6 +224,13 @@ BOOST_AUTO_TEST_CASE(ast_compile_complex_test)
     BOOST_CHECK_EQUAL(&pos.get_class(), &Vec);
     BOOST_CHECK_EQUAL(&is_local.get_class(), &Bool);
     BOOST_CHECK_EQUAL(&col.get_class(), &Color);
+    // check index of each attribute
+    BOOST_CHECK_EQUAL(x.get_index(), 0);
+    BOOST_CHECK_EQUAL(y.get_index(), 1);
+    BOOST_CHECK_EQUAL(z.get_index(), 2);
+    BOOST_CHECK_EQUAL(pos.get_index(), 0);
+    BOOST_CHECK_EQUAL(is_local.get_index(), 1);
+    BOOST_CHECK_EQUAL(col.get_index(), 2);
 
     // check base class
     BOOST_CHECK_EQUAL(&Color.get_base_class().get(), &Vec);

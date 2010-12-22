@@ -131,7 +131,7 @@ Instance & class_attr(Class const & class_, boost::any & value, std::string cons
     if (it == class_.attr_map.get<1>().end()) {
         throw std::runtime_error("attribute '" + name + "'not found");
     }
-    return instances[(*it)->index];
+    return instances[(*it)->get_index()];
 }
 
 Instance const & class_const_attr(Class const &, boost::any const &, std::string const &)

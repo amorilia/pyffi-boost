@@ -85,6 +85,15 @@ Class const & Attr::get_class() const
     };
 };
 
+std::size_t Attr::get_index() const
+{
+    if (index) {
+        return index.get();
+    } else {
+        throw std::runtime_error("attribute has no index");
+    };
+}
+
 } // namespace object_models
 
 } // namespace pyffi
