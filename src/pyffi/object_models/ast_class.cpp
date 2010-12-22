@@ -126,12 +126,7 @@ Instance & class_attr(Class const & class_, boost::any & value, std::string cons
 {
     std::vector<Instance> & instances
     = boost::any_cast<std::vector<Instance> &>(value);
-    Attr::Map::nth_index<1>::type::iterator it
-    = class_.attr_map.get<1>().find(name);
-    if (it == class_.attr_map.get<1>().end()) {
-        throw std::runtime_error("attribute '" + name + "'not found");
-    }
-    return instances[(*it)->get_index()];
+    return instances[class_.attr_map[name].get_index()];
 }
 
 Instance const & class_const_attr(Class const &, boost::any const &, std::string const &)

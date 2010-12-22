@@ -112,7 +112,7 @@ class declaration_compile_a_bc_visitor
 {
 public:
     //! Constructor.
-    declaration_compile_a_bc_visitor(Scope & scope, Attr::Map & attr_map)
+    declaration_compile_a_bc_visitor(Scope & scope, AttrMap & attr_map)
         : scope(scope), attr_map(attr_map) {};
 
     //! A class.
@@ -131,14 +131,7 @@ public:
     //! An attribute.
     void operator()(Attr & attr) const {
         attr.class_ = &scope.get_class(attr.class_name);
-        std::pair<Attr::Map::iterator, bool> ret = attr_map.push_back(&attr);
-        if (!ret.second) {
-            // insert failed, so it existed already
-            // TODO we allow duplicates, but we should still check here
-            // if the attribute definition is identical!! (same class etc.)
-        } else {
-            attr.index = attr_map.size() - 1;
-        }
+        attr_map.push_back(attr);
     };
 
     //! An if/elif/.../else structure.
@@ -154,10 +147,10 @@ public:
     };
 
     Scope & scope;
-    Attr::Map & attr_map;
+    AttrMap & attr_map;
 };
 
-void Scope::compile_a_bc(Attr::Map & attr_map)
+void Scope::compile_a_bc(AttrMap & attr_map)
 {
     BOOST_FOREACH(Declaration & decl, *this) {
         // compile all declarations
@@ -173,7 +166,7 @@ void Scope::compile()
     // compile class of every attribute and all base classes (note: we
     // do this in a separate pass, so we can use classes that are only
     // defined further on without requiring forward declarations)
-    Attr::Map attr_map;
+    AttrMap attr_map;
     compile_a_bc(attr_map);
 }
 

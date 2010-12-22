@@ -41,16 +41,13 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/any.hpp>
 #include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/member.hpp>
 #include <boost/optional.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/variant.hpp>
 #include <vector>
 
 #include "pyffi/object_models/attr.hpp"
+#include "pyffi/object_models/attr_map.hpp"
 
 namespace pyffi
 {
@@ -110,7 +107,7 @@ private:
     void compile_lcm_ps();
 
     //! Compile the class of every attribute (a) and every base class (bc).
-    void compile_a_bc(Attr::Map & attr_map);
+    void compile_a_bc(AttrMap & attr_map);
 
     // The next three methods are helper functions for class_init,
     // class_read, and class_write. Therefore their implementation
@@ -267,9 +264,9 @@ public:
     boost::function<void(Class const &, boost::any &, std::istream &)> read;
     //! Write to stream method.
     boost::function<void(Class const &, boost::any const &, std::ostream &)> write;
-    //! Get attribute.
+    //! Get attribute instance.
     boost::function<Instance &(Class const &, boost::any &, std::string const &)> attr;
-    //! Get const attribute.
+    //! Get const attribute instance.
     boost::function<Instance const &(Class const &, boost::any const &, std::string const &)> const_attr;
 
     //! Set default implementation for given type.
@@ -290,7 +287,7 @@ private:
     Class const *base_class; //!< Pointer to the base class.
 
     //!< Maps attribute names to attributes.
-    Attr::Map attr_map;
+    AttrMap attr_map;
 
     friend class declaration_compile_a_bc_visitor;
     friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);

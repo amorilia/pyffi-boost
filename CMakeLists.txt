@@ -23,6 +23,7 @@ add_library(pyffi
     src/pyffi/object_models/ast_scope.cpp
     src/pyffi/object_models/ast_compile.cpp
     src/pyffi/object_models/ast_class.cpp
+    src/pyffi/object_models/attr_map.cpp
 )
 
 # build the tests

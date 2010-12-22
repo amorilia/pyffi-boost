@@ -48,6 +48,7 @@ namespace object_models
 {
 
 // forward declarations
+class AttrMap;
 class Class;
 class Instance;
 class Scope;
@@ -76,22 +77,10 @@ private:
     Class const *class_; //!< Pointer to the actual class.
     boost::optional<std::size_t> index; //!< Index in the attribute map.
 
+    friend class AttrMap; // sets index
     friend class Scope;
     friend class Class;
     friend class declaration_compile_a_bc_visitor;
-    friend Instance & class_attr(Class const &, boost::any &, std::string const &);
-
-    //! Type of Class::attr_map.
-    typedef boost::multi_index_container<
-    Attr *,
-         boost::multi_index::indexed_by<
-         // ordered by insertion (which is the same as ordered by index)
-         boost::multi_index::sequenced<>,
-         // hashed by name
-         boost::multi_index::hashed_unique<
-         boost::multi_index::member<Attr, std::string, &Attr::name> >
-         >
-         > Map;
 };
 
 } // namespace object_models

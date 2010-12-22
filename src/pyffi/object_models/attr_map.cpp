@@ -35,16 +35,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef PYFFI_OM_ATTRMAP_HPP_INCLUDED
-#define PYFFI_OM_ATTRMAP_HPP_INCLUDED
+#include <stdexcept>
 
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/member.hpp>
-
-// needs full definition of Attr so we can hash the map by name
-#include "pyffi/object_models/attr.hpp"
+#include "pyffi/object_models/attr_map.hpp"
 
 namespace pyffi
 {
@@ -52,48 +45,33 @@ namespace pyffi
 namespace object_models
 {
 
-//! An attribute map which remembers insertion order (like Python's
-//! OrderedDict). Use by the Class implementation.
-class AttrMap
+void AttrMap::push_back(Attr & attr)
 {
-private:
-    typedef boost::multi_index_container
-    <Attr *,
-    boost::multi_index::indexed_by<
-    // hashed by name
-    boost::multi_index::hashed_unique<
-    boost::multi_index::member<Attr, std::string, &Attr::name> >,
-    // ordered by insertion (which is the same as ordered by index)
-    boost::multi_index::sequenced<> > > Map;
+    // make sure the attribute has not been indexed already
+    if (attr.index) {
+        throw std::runtime_error("attribute already indexed");
+    }
+    std::pair<AttrMap::Map::iterator, bool> ret = map.insert(&attr);
+    if (!ret.second) {
+        // insert failed, so it existed already
+        attr.index = (*ret.first)->index;
+        // TODO we allow duplicates, but we should still check here
+        // if the attribute definition is identical!! (same class etc.)
+    } else {
+        attr.index = map.size() - 1;
+    }
+}
 
-    //! The map data.
-    Map map;
-public:
-    typedef Map::nth_index<1>::type::const_iterator const_iterator;
-
-    //! Default constructor.
-    AttrMap() : map() {};
-
-    //! Insert an attribute in the map, and sets the attribute's index.
-    //! If an attribute with the same name already exists, then the map remains unchanged.
-    void push_back(Attr & attr);
-
-    //! Get the attribute of the given name.
-    Attr const & operator[](std::string const & name) const;
-
-    //! Iterator (by insertion order) begin.
-    const_iterator begin() {
-        return map.get<1>().begin();
-    };
-
-    //! Iterator (by insertion order) end.
-    const_iterator end()  {
-        return map.get<1>().end();
-    };
-};
+Attr const & AttrMap::operator[](std::string const & name) const
+{
+    // use (default) unique hash by name view for performance
+    AttrMap::Map::const_iterator it = map.find(name);
+    if (it == map.end()) {
+        throw std::runtime_error("attribute '" + name + "'not found");
+    }
+    return *(*it);
+}
 
 } // namespace object_models
 
 } // namespace pyffi
-
-#endif
