@@ -35,7 +35,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pyffi/object_models/ast.hpp"
+#include "pyffi/object_models/scope.hpp"
+#include "pyffi/object_models/ast.hpp" // TODO replace by:
+//#include "pyffi/object_models/class.hpp"
 
 namespace pyffi
 {
@@ -75,24 +77,6 @@ Class const & Scope::get_class(std::string const & class_name) const
         };
     };
 };
-
-Class const & Attr::get_class() const
-{
-    if (class_) {
-        return *class_;
-    } else {
-        throw std::runtime_error("attribute has no class");
-    };
-};
-
-std::size_t Attr::get_index() const
-{
-    if (index) {
-        return index.get();
-    } else {
-        throw std::runtime_error("attribute has no index");
-    };
-}
 
 } // namespace object_models
 

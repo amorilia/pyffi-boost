@@ -39,9 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PYFFI_OM_SCOPE_HPP_INCLUDED
 
 #include <boost/any.hpp>
-#include <boost/function.hpp>
-#include <boost/optional.hpp>
-#include <boost/unordered_map.hpp>
+#include <boost/unordered_map.hpp> // for LocalClassMap
 #include <boost/variant.hpp>
 #include <vector>
 
@@ -56,6 +54,7 @@ class Attr;
 class AttrMap;
 class Class;
 class IfElifsElse;
+class Instance;
 
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
 typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;

@@ -35,12 +35,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef PYFFI_OM_ATTR_HPP_INCLUDED
-#define PYFFI_OM_ATTR_HPP_INCLUDED
+#include <stdexcept>
 
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/optional.hpp>
-#include <string>
+#include "pyffi/object_models/attr.hpp"
 
 namespace pyffi
 {
@@ -48,52 +45,24 @@ namespace pyffi
 namespace object_models
 {
 
-// forward declarations
-class AttrMap;
-class Class;
-class Instance;
-class Scope;
-
-//! An attribute declaration has a class (its type), and a name.
-class Attr
+Class const & Attr::get_class() const
 {
-public:
-    //! Default constructor.
-    Attr()
-        : class_name(), name(), class_(), index() {};
-    //! Constructor.
-    Attr(std::string const & class_name, std::string const & name)
-        : class_name(class_name), name(name), class_() {};
-
-    std::string class_name; //!< Name of the class of this attribute.
-    std::string name;       //!< Name of this attribute.
-
-    //! Get a reference to the actual class.
-    Class const & get_class() const;
-
-    //! Get the index.
-    std::size_t get_index() const;
-
-private:
-    Class const *class_; //!< Pointer to the actual class.
-    boost::optional<std::size_t> index; //!< Index in the attribute map.
-
-    friend class AttrMap; // sets index
-    friend class Scope;
-    friend class Class;
-    friend class declaration_compile_a_bc_visitor;
+    if (class_) {
+        return *class_;
+    } else {
+        throw std::runtime_error("attribute has no class");
+    };
 };
+
+std::size_t Attr::get_index() const
+{
+    if (index) {
+        return index.get();
+    } else {
+        throw std::runtime_error("attribute has no index");
+    };
+}
 
 } // namespace object_models
 
 } // namespace pyffi
-
-// upgrade struct to fusion sequence
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::Attr,
-    (std::string, class_name)
-    (std::string, name)
-)
-
-#endif
