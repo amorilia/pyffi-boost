@@ -35,20 +35,16 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef PYFFI_OM_AST_HPP_INCLUDED
-#define PYFFI_OM_AST_HPP_INCLUDED
+#ifndef PYFFI_OM_CLASS_HPP_INCLUDED
+#define PYFFI_OM_CLASS_HPP_INCLUDED
 
 #include <boost/any.hpp>
 #include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/optional.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/variant.hpp>
-#include <vector>
+
+// cannot have optional of an incomplete type, so forward declaration
+// "class Scope" is not enough, and we must include the declaration in full
+#include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
 {
@@ -56,120 +52,8 @@ namespace pyffi
 namespace object_models
 {
 
-// we cannot include instance.hpp, so forward declare it here
-class Instance;
-
-//! An expression (for now, simply defined as a primitive boolean type).
-typedef bool Expr;
-
 // forward declarations
-class Class;
-class IfElifsElse;
-
-//! An attribute declaration has a class (its type), and a name.
-class Attr
-{
-public:
-    //! Default constructor.
-    Attr()
-        : class_name(), name(), class_(), index() {};
-    //! Constructor.
-    Attr(std::string const & class_name, std::string const & name)
-        : class_name(class_name), name(name), class_() {};
-
-    std::string class_name; //!< Name of the class of this attribute.
-    std::string name;       //!< Name of this attribute.
-
-    //! Get a reference to the actual class.
-    Class const & get_class() const;
-
-    //! Get the index.
-    std::size_t get_index() const;
-
-private:
-    Class const *class_; //!< Pointer to the actual class.
-    boost::optional<std::size_t> index; //!< Index in the attribute map.
-
-    friend class Scope;
-    friend class Class;
-    friend class declaration_compile_a_bc_visitor;
-    friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
-
-    //! Type of Class::attr_map.
-    typedef boost::multi_index_container<
-    Attr *,
-         boost::multi_index::indexed_by<
-         // ordered by insertion (which is the same as ordered by index)
-         boost::multi_index::sequenced<>,
-         // hashed by name
-         boost::multi_index::hashed_unique<
-         boost::multi_index::member<Attr, std::string, &Attr::name> >
-         >
-         > Map;
-};
-
-//! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
-typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
-
-//! A scope is a vector of \ref Declaration "declarations".
-class Scope : public std::vector<Declaration>
-{
-public:
-    //! Constructor.
-    Scope() : std::vector<Declaration>(), local_class_map(), parent_scope() {};
-
-    //! Convert format description to abstract syntax tree.
-    bool parse(std::istream & in);
-
-    //! Convert abstract syntax tree to format description.
-    bool generate(std::ostream & out) const;
-
-    //! Compile everything (only to be called on a top-level scope).
-    void compile();
-
-    //! Get locally defined class by name.
-    Class const & get_local_class(std::string const & class_name) const;
-
-    //! Get parent scope.
-    Scope const & get_parent_scope() const;
-
-    //! Get class by name (also inspecting parent scopes).
-    Class const & get_class(std::string const & class_name) const;
-
-private:
-    //! Type of local_class_map.
-    typedef boost::unordered_map<std::string, Class const *> LocalClassMap;
-
-    //! Map local class names to classes.
-    LocalClassMap local_class_map;
-
-    //! The parent scope in the syntax tree hierarchy.
-    Scope const *parent_scope;
-
-    //! Compile the local class maps (lcm) and parent scopes (ps).
-    void compile_lcm_ps();
-
-    //! Compile the class of every attribute (a) and every base class (bc).
-    void compile_a_bc(Attr::Map & attr_map);
-
-    // The next three methods are helper functions for class_init,
-    // class_read, and class_write. Therefore their implementation
-    // resides in ast_class.cpp.
-
-    //! Instantiate and append all declarations (ignoring nested classes).
-    void init(std::vector<Instance> & instances) const;
-
-    //! Read all declarations (ignoring nested classes).
-    void read(std::vector<Instance> & value, std::istream & is) const;
-
-    //! Write all declarations (ignoring nested classes).
-    void write(std::vector<Instance> & value, std::ostream & os) const;
-
-    friend class declaration_compile_lcm_ps_visitor;
-    friend class declaration_compile_a_bc_visitor;
-    friend class declaration_init_visitor;
-    friend boost::any class_init(Class const & class_);
-};
+class AttrMap;
 
 //! Default init implementation for classes.
 /*!
@@ -185,7 +69,7 @@ boost::any class_init(Class const & class_);
   \param value The internal representation of the instance.
   \param is The input stream.
 */
-boost::any class_read(Class const & class_, boost::any & value, std::istream & is);
+void class_read(Class const & class_, boost::any & value, std::istream & is);
 
 //! Default write implementation for classes.
 /*!
@@ -193,7 +77,7 @@ boost::any class_read(Class const & class_, boost::any & value, std::istream & i
   \param value The internal representation of the instance.
   \param os The output stream.
 */
-boost::any class_write(Class const & class_, boost::any const & value, std::ostream & os);
+void class_write(Class const & class_, boost::any const & value, std::ostream & os);
 
 //! Default attribute implementation for classes.
 /*!
@@ -330,28 +214,10 @@ private:
     Class const *base_class; //!< Pointer to the base class.
 
     //!< Maps attribute names to attributes.
-    Attr::Map attr_map;
+    AttrMap attr_map;
 
     friend class declaration_compile_a_bc_visitor;
     friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
-};
-
-//! A simple if declaration: an expression and a scope.
-class If
-{
-public:
-    If() : expr(), scope() {}; //<! Constructor.
-    Expr expr;   //!< Condition.
-    Scope scope; //!< Declarations.
-};
-
-//! An if/elif/else declaration.
-class IfElifsElse
-{
-public:
-    IfElifsElse() : ifs_(), else_() {}; //<! Constructor.
-    std::vector<If> ifs_;         //!< The if and elif parts.
-    boost::optional<Scope> else_; //!< The else part.
 };
 
 } // namespace object_models
@@ -365,24 +231,6 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, name)
     (boost::optional<std::string>, base_name)
     (boost::optional<pyffi::object_models::Scope>, scope)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::Attr,
-    (std::string, class_name)
-    (std::string, name)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::If,
-    (pyffi::object_models::Expr, expr)
-    (pyffi::object_models::Scope, scope)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::IfElifsElse,
-    (std::vector<pyffi::object_models::If>, ifs_)
-    (boost::optional<pyffi::object_models::Scope>, else_)
 )
 
 #endif

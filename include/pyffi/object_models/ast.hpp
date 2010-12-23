@@ -39,15 +39,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PYFFI_OM_AST_HPP_INCLUDED
 
 #include <boost/any.hpp>
-#include <boost/function.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/variant.hpp>
 #include <vector>
 
 #include "pyffi/object_models/attr.hpp"
 #include "pyffi/object_models/attr_map.hpp"
+#include "pyffi/object_models/class.hpp"
 #include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
@@ -56,180 +53,8 @@ namespace pyffi
 namespace object_models
 {
 
-// we cannot include instance.hpp, so forward declare it here
-class Instance;
-
 //! An expression (for now, simply defined as a primitive boolean type).
 typedef bool Expr;
-
-// forward declarations
-class Class;
-class IfElifsElse;
-
-//! Default init implementation for classes.
-/*!
-  \param class_ The \ref Class "class" to create an instance from.
-  \return A vector of \ref Instance "instances" for each \ref Attr
-          "attribute" in the class scope.
-*/
-boost::any class_init(Class const & class_);
-
-//! Default read implementation for classes.
-/*!
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param is The input stream.
-*/
-boost::any class_read(Class const & class_, boost::any & value, std::istream & is);
-
-//! Default write implementation for classes.
-/*!
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param os The output stream.
-*/
-boost::any class_write(Class const & class_, boost::any const & value, std::ostream & os);
-
-//! Default attribute implementation for classes.
-/*!
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param name The attribute name.
-*/
-Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
-
-//! Default const attribute implementation for classes.
-/*!
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param name The attribute name.
-*/
-Instance const & class_const_attr(Class const & class_, boost::any const & value, std::string const & name);
-
-//! Init implementation for primitive types.
-/*!
-  \tparam ValueType The primitive type that is used to represent this class.
-  \param class_ The \ref Class "class" to create an instance from.
-  \return A ValueType instance, created by calling the default constructor.
-*/
-template<class ValueType>
-boost::any type_init(Class const & class_)
-{
-    return boost::any(ValueType());
-};
-
-//! Read implementation for primitive types.
-/*!
-  \tparam ValueType The primitive type that is used to represent this class.
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param is The input stream.
-*/
-template<class ValueType>
-void type_read(Class const & class_, boost::any & value, std::istream & is)
-{
-    is.read((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
-};
-
-//! Write implementation for primitive types.
-/*!
-  \tparam ValueType The primitive type that is used to represent this class.
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param os The output stream.
-*/
-template<class ValueType>
-void type_write(Class const & class_, boost::any const & value, std::ostream & os)
-{
-    os.write((char *)boost::any_cast<ValueType>(&value), sizeof(ValueType));
-};
-
-//! Attribute implementation for primitive types.
-/*!
-  Always throws a runtime error.
-
-  \tparam ValueType The primitive type that is used to represent this class.
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param name The attribute name.
-*/
-template<class ValueType>
-Instance & type_attr(Class const & class_, boost::any & value, std::string const & name)
-{
-    throw std::runtime_error("class has no attributes");
-};
-
-//! Const attribute implementation for primitive types.
-/*!
-  Always throws a runtime error.
-
-  \tparam ValueType The primitive type that is used to represent this class.
-  \param class_ The class of the instance.
-  \param value The internal representation of the instance.
-  \param name The attribute name.
-*/
-template<class ValueType>
-Instance const & type_const_attr(Class const & class_, boost::any const & value, std::string const & name)
-{
-    throw std::runtime_error("class has no attributes");
-};
-
-//! A class declaration is a named scope, along with a base class.
-class Class
-{
-public:
-    //! Default constructor.
-    Class()
-        : name(), base_name(), scope(),
-          init(&class_init), read(&class_read), write(&class_write),
-          attr(&class_attr), const_attr(&class_const_attr),
-          base_class() {};
-    //! Constructor.
-    Class(std::string const & name)
-        : name(name), base_name(), scope(),
-          init(&class_init), read(&class_read), write(&class_write),
-          attr(&class_attr), const_attr(&class_const_attr),
-          base_class() {};
-
-    // information about the class which is stored in the format description
-    std::string name;                       //!< Name of this class.
-    boost::optional<std::string> base_name; //!< The base class name.
-    boost::optional<Scope> scope;           //!< Declarations of this class.
-
-    //! Constructor method.
-    boost::function<boost::any(Class const &)> init;
-    //! Read from stream method.
-    boost::function<void(Class const &, boost::any &, std::istream &)> read;
-    //! Write to stream method.
-    boost::function<void(Class const &, boost::any const &, std::ostream &)> write;
-    //! Get attribute instance.
-    boost::function<Instance &(Class const &, boost::any &, std::string const &)> attr;
-    //! Get const attribute instance.
-    boost::function<Instance const &(Class const &, boost::any const &, std::string const &)> const_attr;
-
-    //! Set default implementation for given type.
-    template <class ValueType>
-    void set_type() {
-        init = &type_init<ValueType>;
-        read = &type_read<ValueType>;
-        write = &type_write<ValueType>;
-        attr = &type_attr<ValueType>;
-        const_attr = &type_const_attr<ValueType>;
-    };
-
-    //! Get a reference to the actual class.
-    boost::optional<Class const &> get_base_class() const;
-
-private:
-
-    Class const *base_class; //!< Pointer to the base class.
-
-    //!< Maps attribute names to attributes.
-    AttrMap attr_map;
-
-    friend class declaration_compile_a_bc_visitor;
-    friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
-};
 
 //! A simple if declaration: an expression and a scope.
 class If
@@ -254,13 +79,6 @@ public:
 } // namespace pyffi
 
 // upgrade structs to fusion sequences
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::Class,
-    (std::string, name)
-    (boost::optional<std::string>, base_name)
-    (boost::optional<pyffi::object_models::Scope>, scope)
-)
 
 BOOST_FUSION_ADAPT_STRUCT(
     pyffi::object_models::If,

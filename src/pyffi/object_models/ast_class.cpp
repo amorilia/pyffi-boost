@@ -104,22 +104,20 @@ boost::any class_init(Class const & class_)
     return boost::any(instances);
 };
 
-boost::any class_read(Class const & class_, boost::any & value, std::istream & is)
+void class_read(Class const & class_, boost::any & value, std::istream & is)
 {
     std::vector<Instance> result;
     BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
         //boost::apply_visitor(declaration_read_visitor(result), decl);
     };
-    return result;
 };
 
-boost::any class_write(Class const & class_, boost::any const & value, std::ostream & os)
+void class_write(Class const & class_, boost::any const & value, std::ostream & os)
 {
     std::vector<Instance> result;
     BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
         //boost::apply_visitor(declaration_write_visitor(result), decl);
     };
-    return result;
 };
 
 Instance & class_attr(Class const & class_, boost::any & value, std::string const & name)
