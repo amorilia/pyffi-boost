@@ -48,6 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pyffi/object_models/attr.hpp"
 #include "pyffi/object_models/attr_map.hpp"
+#include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
 {
@@ -64,69 +65,6 @@ typedef bool Expr;
 // forward declarations
 class Class;
 class IfElifsElse;
-
-//! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
-typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
-
-//! A scope is a vector of \ref Declaration "declarations".
-class Scope : public std::vector<Declaration>
-{
-public:
-    //! Constructor.
-    Scope() : std::vector<Declaration>(), local_class_map(), parent_scope() {};
-
-    //! Convert format description to abstract syntax tree.
-    bool parse(std::istream & in);
-
-    //! Convert abstract syntax tree to format description.
-    bool generate(std::ostream & out) const;
-
-    //! Compile everything (only to be called on a top-level scope).
-    void compile();
-
-    //! Get locally defined class by name.
-    Class const & get_local_class(std::string const & class_name) const;
-
-    //! Get parent scope.
-    Scope const & get_parent_scope() const;
-
-    //! Get class by name (also inspecting parent scopes).
-    Class const & get_class(std::string const & class_name) const;
-
-private:
-    //! Type of local_class_map.
-    typedef boost::unordered_map<std::string, Class const *> LocalClassMap;
-
-    //! Map local class names to classes.
-    LocalClassMap local_class_map;
-
-    //! The parent scope in the syntax tree hierarchy.
-    Scope const *parent_scope;
-
-    //! Compile the local class maps (lcm) and parent scopes (ps).
-    void compile_lcm_ps();
-
-    //! Compile the class of every attribute (a) and every base class (bc).
-    void compile_a_bc(AttrMap & attr_map);
-
-    // The next three methods are helper functions for class_init,
-    // class_read, and class_write. Therefore their implementation
-    // resides in ast_class.cpp.
-
-    //! Instantiate and append all declarations (ignoring nested classes).
-    void init(std::vector<Instance> & instances) const;
-
-    //! Read all declarations (ignoring nested classes).
-    void read(std::vector<Instance> & value, std::istream & is) const;
-
-    //! Write all declarations (ignoring nested classes).
-    void write(std::vector<Instance> & value, std::ostream & os) const;
-
-    friend class declaration_compile_lcm_ps_visitor;
-    friend class declaration_compile_a_bc_visitor;
-    friend class declaration_init_visitor;
-    friend boost::any class_init(Class const & class_);
-};
 
 //! Default init implementation for classes.
 /*!
