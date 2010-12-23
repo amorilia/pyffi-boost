@@ -20,7 +20,7 @@ include_directories(${PYFFI_SOURCE_DIR}/include)
 add_library(pyffi
     src/pyffi/object_models/ast_generate.cpp
     src/pyffi/object_models/ast_parse.cpp
-    src/pyffi/object_models/ast_scope.cpp
+    src/pyffi/object_models/scope.cpp
     src/pyffi/object_models/ast_compile.cpp
     src/pyffi/object_models/ast_class.cpp
     src/pyffi/object_models/attr_map.cpp
