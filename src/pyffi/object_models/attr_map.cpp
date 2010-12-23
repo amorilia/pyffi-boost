@@ -51,7 +51,7 @@ void AttrMap::push_back(Attr & attr)
     if (attr.index) {
         throw std::runtime_error("attribute already indexed");
     }
-    std::pair<AttrMap::Map::iterator, bool> ret = map.insert(&attr);
+    std::pair<AttrMap::Map::const_iterator, bool> ret = map.insert(&attr);
     if (!ret.second) {
         // insert failed, so it existed already
         attr.index = (*ret.first)->index;
@@ -70,6 +70,21 @@ Attr const & AttrMap::operator[](std::string const & name) const
         throw std::runtime_error("attribute '" + name + "'not found");
     }
     return *(*it);
+}
+
+AttrMap::const_iterator AttrMap::begin() const
+{
+    return AttrMap::const_iterator(map.get<1>().begin());
+}
+
+AttrMap::const_iterator AttrMap::end() const
+{
+    return AttrMap::const_iterator(map.get<1>().end());
+}
+
+std::size_t AttrMap::size() const
+{
+    return map.size();
 }
 
 } // namespace object_models

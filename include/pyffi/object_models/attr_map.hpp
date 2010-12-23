@@ -42,6 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
+#include <boost/iterator/iterator_adaptor.hpp>
 
 // needs full definition of Attr so we can hash the map by name
 #include "pyffi/object_models/attr.hpp"
@@ -57,39 +58,57 @@ namespace object_models
 class AttrMap
 {
 private:
+    //! The map type.
     typedef boost::multi_index_container
-    <Attr *,
+    <Attr const *,
     boost::multi_index::indexed_by<
     // hashed by name
     boost::multi_index::hashed_unique<
-    boost::multi_index::member<Attr, std::string, &Attr::name> >,
+    boost::multi_index::member<Attr const, std::string const, &Attr::name> >,
     // ordered by insertion (which is the same as ordered by index)
     boost::multi_index::sequenced<> > > Map;
 
     //! The map data.
     Map map;
+
 public:
-    typedef Map::nth_index<1>::type::const_iterator const_iterator;
+    //! Constant iterator.
+    class const_iterator
+        : public boost::iterator_adaptor<
+        const_iterator,
+        Map::nth_index<1>::type::const_iterator, // base_type
+        Attr const // value_type
+        >
+    {
+    public:
+        explicit const_iterator(const_iterator::base_type const & iter)
+            : const_iterator::iterator_adaptor_(iter) {}
+    private:
+        friend class boost::iterator_core_access;
+        Attr const & dereference() const {
+            return **base();
+        }
+    };
 
     //! Default constructor.
     AttrMap() : map() {};
 
-    //! Insert an attribute in the map, and sets the attribute's index.
-    //! If an attribute with the same name already exists, then the map remains unchanged.
+    //! Insert an attribute in the map, and sets the attribute's
+    //! index.  If an attribute with the same name already exists,
+    //! then the map remains unchanged.
     void push_back(Attr & attr);
 
     //! Get the attribute of the given name.
     Attr const & operator[](std::string const & name) const;
 
     //! Iterator (by insertion order) begin.
-    const_iterator begin() {
-        return map.get<1>().begin();
-    };
+    const_iterator begin() const;
 
     //! Iterator (by insertion order) end.
-    const_iterator end()  {
-        return map.get<1>().end();
-    };
+    const_iterator end() const;
+
+    //! Size.
+    std::size_t size() const;
 };
 
 } // namespace object_models

@@ -47,17 +47,31 @@ using namespace pyffi::object_models;
 
 BOOST_AUTO_TEST_SUITE(attr_map_test_suite)
 
-BOOST_AUTO_TEST_CASE(ast_attr_test)
+BOOST_AUTO_TEST_CASE(attr_map_simple_test)
 {
     Attr x("Int", "x");
     Attr y("Int", "y");
+    Attr x2("Int", "x");
 
-    AttrMap map();
+    AttrMap map;
+    BOOST_CHECK_EQUAL(map.size(), 0);
     map.push_back(x);
     map.push_back(y);
+    BOOST_CHECK_EQUAL(map.size(), 2);
     BOOST_CHECK_EQUAL(&map["x"], &x);
     BOOST_CHECK_EQUAL(&map["y"], &y);
     BOOST_CHECK_THROW(&map["z"], std::runtime_error);
+
+    AttrMap::const_iterator iter = map.begin();
+    BOOST_CHECK_EQUAL(&(*iter), &x);
+    BOOST_CHECK_NO_THROW(++iter);
+    BOOST_CHECK_EQUAL(&(*iter), &y);
+    BOOST_CHECK_NO_THROW(++iter);
+    BOOST_CHECK(iter == map.end()); // cout << iter does not work, so use CHECK rather than CHECK_EQUAL
+
+    map.push_back(x2); // same as "x", does nothing
+    BOOST_CHECK_EQUAL(map.size(), 2);
+    BOOST_CHECK_EQUAL(&map["x"], &x);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
