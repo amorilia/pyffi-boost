@@ -35,9 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pyffi/object_models/scope.hpp"
-#include "pyffi/object_models/ast.hpp" // TODO replace by:
-//#include "pyffi/object_models/class.hpp"
+#include "pyffi/object_models/ast.hpp"
 
 namespace pyffi
 {

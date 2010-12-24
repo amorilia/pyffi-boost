@@ -38,7 +38,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_INSTANCE_HPP_INCLUDED
 #define PYFFI_OM_INSTANCE_HPP_INCLUDED
 
-#include "pyffi/object_models/ast.hpp"
+// TODO move implementation to instance.cpp and use forward "class Class"
+#include "pyffi/object_models/class.hpp"
 
 namespace pyffi
 {

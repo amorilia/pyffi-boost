@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/any.hpp>
 #include <boost/function.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/optional.hpp>
 
 // cannot have optional of an incomplete type, so forward declaration
 // "class Scope" is not enough, and we must include the declaration in full

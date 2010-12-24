@@ -38,7 +38,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_HPP_INCLUDED
 #define PYFFI_OM_HPP_INCLUDED
 
-#include "pyffi/object_models/ast.hpp"
+#include "pyffi/object_models/attr.hpp"
+#include "pyffi/object_models/attr_map.hpp"
+#include "pyffi/object_models/class.hpp"
+#include "pyffi/object_models/if_elifs_else.hpp"
+#include "pyffi/object_models/instance.hpp"
+#include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
 {
