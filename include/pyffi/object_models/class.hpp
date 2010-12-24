@@ -210,15 +210,15 @@ public:
     //! Get a reference to the actual class.
     boost::optional<Class const &> get_base_class() const;
 
+    //! Get attribute (Attr, not Instance).
+    Attr const & get_attr(std::string const & name) const;
+
 private:
 
     Class const *base_class; //!< Pointer to the base class.
+    AttrMap attr_map;        //!< Maps attribute names to attributes.
 
-    //!< Maps attribute names to attributes.
-    AttrMap attr_map;
-
-    friend class declaration_compile_a_bc_visitor;
-    friend Instance & class_attr(Class const & class_, boost::any & value, std::string const & name);
+    friend class declaration_compile_a_bc_visitor; // sets base_class
 };
 
 } // namespace object_models

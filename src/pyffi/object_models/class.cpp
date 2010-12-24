@@ -85,7 +85,7 @@ Instance & class_attr(Class const & class_, boost::any & value, std::string cons
 {
     std::vector<Instance> & instances
     = boost::any_cast<std::vector<Instance> &>(value);
-    return instances[class_.attr_map[name].get_index()];
+    return instances[class_.get_attr(name).get_index()];
 }
 
 Instance const & class_const_attr(Class const &, boost::any const &, std::string const &)
@@ -100,6 +100,11 @@ boost::optional<Class const &> Class::get_base_class() const
     } else {
         return boost::optional<Class const &>();
     };
+};
+
+Attr const & Class::get_attr(std::string const & name) const
+{
+    return attr_map[name];
 };
 
 } // namespace object_models
