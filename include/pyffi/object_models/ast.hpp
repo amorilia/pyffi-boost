@@ -38,13 +38,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_AST_HPP_INCLUDED
 #define PYFFI_OM_AST_HPP_INCLUDED
 
-#include <boost/any.hpp>
-#include <boost/optional.hpp>
-#include <vector>
-
 #include "pyffi/object_models/attr.hpp"
 #include "pyffi/object_models/attr_map.hpp"
 #include "pyffi/object_models/class.hpp"
+#include "pyffi/object_models/if_elifs_else.hpp"
 #include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
@@ -53,43 +50,8 @@ namespace pyffi
 namespace object_models
 {
 
-//! An expression (for now, simply defined as a primitive boolean type).
-typedef bool Expr;
-
-//! A simple if declaration: an expression and a scope.
-class If
-{
-public:
-    If() : expr(), scope() {}; //<! Constructor.
-    Expr expr;   //!< Condition.
-    Scope scope; //!< Declarations.
-};
-
-//! An if/elif/else declaration.
-class IfElifsElse
-{
-public:
-    IfElifsElse() : ifs_(), else_() {}; //<! Constructor.
-    std::vector<If> ifs_;         //!< The if and elif parts.
-    boost::optional<Scope> else_; //!< The else part.
-};
-
 } // namespace object_models
 
 } // namespace pyffi
-
-// upgrade structs to fusion sequences
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::If,
-    (pyffi::object_models::Expr, expr)
-    (pyffi::object_models::Scope, scope)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    pyffi::object_models::IfElifsElse,
-    (std::vector<pyffi::object_models::If>, ifs_)
-    (boost::optional<pyffi::object_models::Scope>, else_)
-)
 
 #endif
