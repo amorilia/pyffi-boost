@@ -113,9 +113,8 @@ private:
     // class_read, and class_write. Therefore their implementation
     // resides in ast_class.cpp.
 
-    friend class declaration_compile_lcm_ps_visitor;
-    friend class declaration_compile_a_bc_visitor;
-    friend class declaration_init_visitor;
+    friend class declaration_compile_lcm_ps_visitor; // part of implementation of compile_lcm_ps
+    friend class declaration_compile_a_bc_visitor; // part of implementation of compile_a_bc
 };
 
 } // namespace object_models

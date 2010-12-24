@@ -79,9 +79,7 @@ private:
     boost::optional<std::size_t> index; //!< Index in the attribute map.
 
     friend class AttrMap; // sets index
-    friend class Scope;
-    friend class Class;
-    friend class declaration_compile_a_bc_visitor;
+    friend class declaration_compile_a_bc_visitor; // sets class_
 };
 
 } // namespace object_models
