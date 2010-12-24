@@ -84,6 +84,15 @@ public:
     //! Get class by name (also inspecting parent scopes).
     Class const & get_class(std::string const & class_name) const;
 
+    //! Instantiate and append all attributes.
+    void init(std::vector<Instance> & instances) const;
+
+    //! Read all attributes.
+    void read(std::vector<Instance> & instances, std::istream & is) const;
+
+    //! Write all attributes.
+    void write(std::vector<Instance> & instances, std::ostream & os) const;
+
 private:
     //! Type of local_class_map.
     typedef boost::unordered_map<std::string, Class const *> LocalClassMap;
@@ -104,19 +113,9 @@ private:
     // class_read, and class_write. Therefore their implementation
     // resides in ast_class.cpp.
 
-    //! Instantiate and append all declarations (ignoring nested classes).
-    void init(std::vector<Instance> & instances) const;
-
-    //! Read all declarations (ignoring nested classes).
-    void read(std::vector<Instance> & value, std::istream & is) const;
-
-    //! Write all declarations (ignoring nested classes).
-    void write(std::vector<Instance> & value, std::ostream & os) const;
-
     friend class declaration_compile_lcm_ps_visitor;
     friend class declaration_compile_a_bc_visitor;
     friend class declaration_init_visitor;
-    friend boost::any class_init(Class const & class_);
 };
 
 } // namespace object_models

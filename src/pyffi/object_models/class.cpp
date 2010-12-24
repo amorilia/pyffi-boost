@@ -46,49 +46,8 @@ namespace pyffi
 namespace object_models
 {
 
-//! A visitor for initializing all attributes of a class.
-class declaration_init_visitor
-    : public boost::static_visitor<void>
-{
-public:
-    //! Constructor.
-    declaration_init_visitor(std::vector<Instance> & instances)
-        : instances(instances) {};
-
-    //! A class.
-    void operator()(Class const & class_) const {};
-
-    //! An attribute.
-    void operator()(Attr const & attr) const {
-        // instantiate
-        instances.push_back(Instance(attr.get_class()));
-    };
-
-    //! An if/elif/.../else structure.
-    void operator()(IfElifsElse const & ifelifselse) const {
-        BOOST_FOREACH(If const & if_, ifelifselse.ifs_) {
-            // instantiate attributes of this if's scope
-            if_.scope.init(instances);
-        };
-        if (ifelifselse.else_) {
-            // instantiate attributes of the else's scope
-            ifelifselse.else_.get().init(instances);
-        };
-    };
-
-    std::vector<Instance> & instances;
-};
-
-void Scope::init(std::vector<Instance> & instances) const
-{
-    BOOST_FOREACH(Declaration const & decl, *this) {
-        boost::apply_visitor(declaration_init_visitor(instances), decl);
-    };
-};
-
 boost::any class_init(Class const & class_)
 {
-    // TODO use the class_.attr_map here
     std::vector<Instance> instances;
     // instantiate base class attributes
     boost::optional<Class const &> base_class = class_.get_base_class();
@@ -106,7 +65,8 @@ boost::any class_init(Class const & class_)
 
 void class_read(Class const & class_, boost::any & value, std::istream & is)
 {
-    std::vector<Instance> result;
+    std::vector<Instance> & instances
+    = boost::any_cast<std::vector<Instance> &>(value);
     BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
         //boost::apply_visitor(declaration_read_visitor(result), decl);
     };
@@ -114,7 +74,8 @@ void class_read(Class const & class_, boost::any & value, std::istream & is)
 
 void class_write(Class const & class_, boost::any const & value, std::ostream & os)
 {
-    std::vector<Instance> result;
+    std::vector<Instance> const & instances
+    = boost::any_cast<std::vector<Instance> const &>(value);
     BOOST_FOREACH(Declaration const & decl, class_.scope.get()) {
         //boost::apply_visitor(declaration_write_visitor(result), decl);
     };

@@ -35,7 +35,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include <boost/foreach.hpp>
+
 #include "pyffi/object_models/ast.hpp"
+#include "pyffi/object_models/instance.hpp"
 
 namespace pyffi
 {
@@ -73,6 +76,46 @@ Class const & Scope::get_class(std::string const & class_name) const
         } else {
             throw std::runtime_error("class '" + class_name + "' not found");
         };
+    };
+};
+
+//! A visitor for initializing all attributes of a scope.
+class declaration_init_visitor
+    : public boost::static_visitor<void>
+{
+public:
+    //! Constructor.
+    declaration_init_visitor(std::vector<Instance> & instances)
+        : instances(instances) {};
+
+    //! A class.
+    void operator()(Class const & class_) const {};
+
+    //! An attribute.
+    void operator()(Attr const & attr) const {
+        // instantiate
+        instances.push_back(Instance(attr.get_class()));
+    };
+
+    //! An if/elif/.../else structure.
+    void operator()(IfElifsElse const & ifelifselse) const {
+        BOOST_FOREACH(If const & if_, ifelifselse.ifs_) {
+            // instantiate attributes of this if's scope
+            if_.scope.init(instances);
+        };
+        if (ifelifselse.else_) {
+            // instantiate attributes of the else's scope
+            ifelifselse.else_.get().init(instances);
+        };
+    };
+
+    std::vector<Instance> & instances;
+};
+
+void Scope::init(std::vector<Instance> & instances) const
+{
+    BOOST_FOREACH(Declaration const & decl, *this) {
+        boost::apply_visitor(declaration_init_visitor(instances), decl);
     };
 };
 
