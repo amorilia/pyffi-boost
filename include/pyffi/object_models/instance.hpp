@@ -38,8 +38,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef PYFFI_OM_INSTANCE_HPP_INCLUDED
 #define PYFFI_OM_INSTANCE_HPP_INCLUDED
 
-// TODO move implementation to instance.cpp and use forward "class Class"
-#include "pyffi/object_models/class.hpp"
+#include <boost/any.hpp>
+#include <stdexcept>
 
 namespace pyffi
 {
@@ -47,18 +47,16 @@ namespace pyffi
 namespace object_models
 {
 
+// forward declarations
+class Class;
+
 class Instance
 {
 public:
     //! Instantiate a given class.
-    Instance(Class const & class_)
-        : class_(class_), value(class_.init(class_)) {};
+    Instance(Class const & class_);
     //! Copy constructor.
-    Instance(Instance const & instance)
-        : class_(instance.class_), value(instance.value) {};
-    //! Constructor to set the type and the value.
-    template<typename ValueType> Instance(const ValueType & value)
-        : value(value) {};
+    Instance(Instance const & instance);
     //! Get reference to value stored in the instance.
     template<typename ValueType> ValueType & get() {
         try {
@@ -82,14 +80,7 @@ public:
         };
     };
     //! Override assignment operator so type cannot be changed.
-    Instance & operator=(const Instance & instance) {
-        if (&class_ != &instance.class_)
-            throw std::runtime_error(
-                "Type mismatch on instance assignment (required "
-                + class_.name + " but got " + instance.class_.name + ").");
-        value = instance.value;
-        return *this;
-    };
+    Instance & operator=(const Instance & instance);
     //! Override assignment operator so type cannot be changed.
     template<typename ValueType> Instance & operator=(const ValueType & value_) {
         if (value.type() != typeid(value_)) {
@@ -101,25 +92,14 @@ public:
         value = value_;
         return *this;
     };
-
     //! Read from stream.
-    void read(std::istream & is) {
-        class_.read(class_, value, is);
-    };
+    void read(std::istream & is);
     //! Write to stream.
-    void write(std::ostream & os) const {
-        class_.write(class_, value, os);
-    };
-
+    void write(std::ostream & os) const;
     //! Get attribute.
-    Instance & attr(std::string const & name) {
-        return class_.attr(class_, value, name);
-    }
-
+    Instance & attr(std::string const & name);
     //! Get const attribute.
-    Instance const & attr(std::string const & name) const {
-        return class_.const_attr(class_, value, name);
-    }
+    Instance const & attr(std::string const & name) const;
 
     Class const & class_; //!< Reference to the class of this instance.
 private:
