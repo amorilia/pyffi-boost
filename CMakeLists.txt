@@ -10,6 +10,9 @@ configure_file(${PYFFI_SOURCE_DIR}/include/pyffi.hpp.in ${PYFFI_SOURCE_DIR}/incl
 configure_file(${PYFFI_SOURCE_DIR}/Doxyfile.in ${PYFFI_SOURCE_DIR}/Doxyfile)
 
 # find boost
+if(MINGW)
+  set(Boost_COMPILER -gcc45)
+endif(MINGW)
 find_package(Boost 1.44.0 REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIRS})
 
