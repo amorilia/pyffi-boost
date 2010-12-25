@@ -72,6 +72,11 @@ public:
     //! Convert xml format description to abstract syntax tree.
     bool parse_xml(std::istream & in);
 
+    //! Fix all names (CamelCase for classes
+    //! lower_case_with_underscores for attributes) recursively, to
+    //! ensure that they can be parsed.
+    void fix();
+
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
 
