@@ -51,7 +51,7 @@ using namespace pyffi::object_models;
 struct XmlParser {
     XmlParser(std::string const & filename, bool result = true) {
         BOOST_TEST_MESSAGE(
-           "Parsing \"" + std::string(TEST_PATH) + filename + "\"");
+            "Parsing \"" + std::string(TEST_PATH) + filename + "\"");
         std::ifstream is((std::string(TEST_PATH) + filename).c_str());
         if (result) {
             BOOST_CHECK_EQUAL(scope.parse_xml(is), true);

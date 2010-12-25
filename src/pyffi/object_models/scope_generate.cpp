@@ -106,8 +106,8 @@ public:
         if_elifs_else =
             if_elifs(engine::_r1) // IfElifsElse.ifs_
             << -(engine::eol << else_(engine::_r1)); // IfElifsElse.else_
-        class_name = engine::upper << *(engine::lower | engine::upper | engine::digit);
-        attr_name = engine::lower << *(engine::lower | engine::digit | engine::char_('_'));
+        class_name = engine::string; // must be CamelCase for parser
+        attr_name = engine::string; // must be lower_case_with_underscores for parser
 
         indent.name("indent");
         start.name("start");

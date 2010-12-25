@@ -35,8 +35,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <iostream> // DEBUG
 
 #include "pyffi/object_models/scope.hpp"
 
@@ -46,14 +48,45 @@ namespace pyffi
 namespace object_models
 {
 
+using namespace boost::property_tree;
+
 bool Scope::parse_xml(std::istream & in)
 {
     // disable skipping of whitespace
     in.unsetf(std::ios::skipws);
 
     // read xml into property tree
-    boost::property_tree::ptree pt;
-    boost::property_tree::xml_parser::read_xml(in, pt);
+    ptree pt;
+    xml_parser::read_xml(in, pt);
+
+    BOOST_FOREACH(ptree::value_type & decl, pt.get_child("niftoolsxml")) {
+        if (decl.first == "basic") {
+            // set class name
+            Class class_(decl.second.get<std::string>("<xmlattr>.name"));
+            push_back(class_);
+        } else if (decl.first == "compound" || decl.first == "niobject") {
+            // set class name
+            Class class_(decl.second.get<std::string>("<xmlattr>.name"));
+            // set base class name
+            class_.base_name = decl.second.get_optional<std::string>("<xmlattr>.inherit");
+            Scope scope;
+            BOOST_FOREACH(ptree::value_type & add, decl.second) {
+                if (add.first == "add") {
+                    Attr attr(
+                        add.second.get<std::string>("<xmlattr>.type"),
+                        add.second.get<std::string>("<xmlattr>.name"));
+                    scope.push_back(attr);
+                };
+            };
+            if (!scope.empty()) {
+                class_.scope = scope;
+            };
+            push_back(class_);
+        };
+    };
+
+    // DEBUG
+    generate(std::cout);
 
     // successful parse
     return true;
