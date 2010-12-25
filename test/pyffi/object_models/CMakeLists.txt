@@ -1,6 +1,7 @@
 foreach(TEST
         scope_test
         scope_parse_test
+        scope_parse_xml_test
         scope_generate_test
         attr_map_test
         instance_test

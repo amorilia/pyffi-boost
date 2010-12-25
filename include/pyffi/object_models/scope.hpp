@@ -69,6 +69,9 @@ public:
     //! Convert format description to abstract syntax tree.
     bool parse(std::istream & in);
 
+    //! Convert xml format description to abstract syntax tree.
+    bool parse_xml(std::istream & in);
+
     //! Convert abstract syntax tree to format description.
     bool generate(std::ostream & out) const;
 
