@@ -1,7 +1,7 @@
 foreach(TEST
-        ast_test
-        ast_parse_test
-        ast_generate_test
+        scope_test
+        scope_parse_test
+        scope_generate_test
         attr_map_test
         instance_test
         attr_header_test

@@ -21,9 +21,9 @@ include_directories(${PYFFI_SOURCE_DIR}/include)
 
 # build the actual library
 add_library(pyffi
-    src/pyffi/object_models/ast_generate.cpp
-    src/pyffi/object_models/ast_parse.cpp
-    src/pyffi/object_models/ast_compile.cpp
+    src/pyffi/object_models/scope_generate.cpp
+    src/pyffi/object_models/scope_parse.cpp
+    src/pyffi/object_models/scope_compile.cpp
     src/pyffi/object_models/attr.cpp
     src/pyffi/object_models/attr_map.cpp
     src/pyffi/object_models/class.cpp
