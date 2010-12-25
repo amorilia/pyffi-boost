@@ -50,10 +50,10 @@ namespace object_models
 {
 
 // forward declarations
-class Attr;
+class Attr; // full declaration included later
 class AttrMap;
-class Class;
-class IfElifsElse;
+class Class; // full declaration included later
+class IfElifsElse; // full declaration included later
 class Instance;
 
 //! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
@@ -120,5 +120,9 @@ private:
 } // namespace object_models
 
 } // namespace pyffi
+
+#include "pyffi/object_models/attr.hpp"
+#include "pyffi/object_models/class.hpp"
+#include "pyffi/object_models/if_elifs_else.hpp"
 
 #endif

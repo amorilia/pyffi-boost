@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/foreach.hpp>
 
-#include "pyffi/object_models/ast.hpp"
+#include "pyffi/object_models/scope.hpp"
 #include "pyffi/object_models/instance.hpp"
 
 namespace pyffi

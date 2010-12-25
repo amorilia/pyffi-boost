@@ -43,8 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/optional.hpp>
 
-// cannot have optional of an incomplete type, so forward declaration
-// "class Scope" is not enough, and we must include the declaration in full
+#include "pyffi/object_models/attr_map.hpp"
 #include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
@@ -54,7 +53,6 @@ namespace object_models
 {
 
 // forward declarations
-class AttrMap;
 
 //! Default init implementation for classes.
 /*!

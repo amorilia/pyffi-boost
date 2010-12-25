@@ -40,7 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/support_ostream_iterator.hpp>
 
-#include "pyffi/object_models/ast.hpp"
+#include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
 {

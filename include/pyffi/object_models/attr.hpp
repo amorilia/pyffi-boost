@@ -51,8 +51,6 @@ namespace object_models
 // forward declarations
 class AttrMap;
 class Class;
-class Instance;
-class Scope;
 
 //! An attribute declaration has a class (its type), and a name.
 class Attr

@@ -42,7 +42,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/optional.hpp>
 #include <vector>
 
-// optional<Scope> needs full class definition of Scope
 #include "pyffi/object_models/scope.hpp"
 
 namespace pyffi

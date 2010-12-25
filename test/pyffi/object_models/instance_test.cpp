@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 
-#include "pyffi/object_models/ast.hpp"
+#include "pyffi/object_models/scope.hpp"
 #include "pyffi/object_models/instance.hpp"
 
 using boost::get;
