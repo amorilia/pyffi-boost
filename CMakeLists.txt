@@ -25,6 +25,7 @@ add_library(pyffi
     src/pyffi/object_models/scope_parse.cpp
     src/pyffi/object_models/scope_parse_xml.cpp
     src/pyffi/object_models/scope_compile.cpp
+    src/pyffi/object_models/scope_fix.cpp
     src/pyffi/object_models/attr.cpp
     src/pyffi/object_models/attr_map.cpp
     src/pyffi/object_models/class.cpp

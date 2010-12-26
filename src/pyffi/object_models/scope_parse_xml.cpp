@@ -85,6 +85,9 @@ bool Scope::parse_xml(std::istream & in)
         };
     };
 
+    // fix names
+    fix();
+
     // DEBUG
     generate(std::cout);
 
