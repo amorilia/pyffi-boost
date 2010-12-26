@@ -55,6 +55,14 @@ class declaration_fix_visitor
 {
 private:
     void fix_class_name(std::string & name) const {
+        // special cases
+        if (name == "uint") {
+            name = "UInt";
+            return;
+        } else if (name == "ushort") {
+            name = "UShort";
+            return;
+        };
         // remove all non-alphanumeric characters
         algorithm::find_format_all(
             name,
