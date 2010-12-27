@@ -1,0 +1,8 @@
+class Bool
+class Byte
+class Flags
+class Float
+class HeaderString
+class Ptr
+class Ref
+class StringOffset

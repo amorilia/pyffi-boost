@@ -38,7 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <iostream> // DEBUG
 
 #include "pyffi/object_models/scope.hpp"
 
@@ -87,9 +86,6 @@ bool Scope::parse_xml(std::istream & in)
 
     // fix names
     fix();
-
-    // DEBUG
-    generate(std::cout);
 
     // successful parse
     return true;

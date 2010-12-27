@@ -59,6 +59,20 @@ struct XmlParser {
             BOOST_CHECK_THROW(scope.parse_xml(is), std::runtime_error);
         };
     };
+
+    void check_generate(std::string const & filename) {
+        char buffer[65536];
+        std::ostringstream os;
+        BOOST_CHECK_EQUAL(scope.generate(os), true);
+        std::string generated = os.str();
+        std::ifstream is((std::string(TEST_PATH) + filename).c_str());
+        is.unsetf(std::ios::skipws);
+        is.read(buffer, 65536);
+        std::string expected = std::string(buffer, is.gcount());
+        BOOST_CHECK_EQUAL(is.gcount(), generated.size());
+        BOOST_CHECK_EQUAL(generated, expected);
+    };
+
     Scope scope;
 };
 
@@ -67,6 +81,7 @@ BOOST_AUTO_TEST_SUITE(scope_parse_xml_test_suite)
 BOOST_AUTO_TEST_CASE(scope_parse_xml_basic_test)
 {
     XmlParser xml("/data/xml/test_basic.xml");
+    xml.check_generate("/data/ffi/test_basic.ffi");
 }
 
 BOOST_AUTO_TEST_CASE(scope_parse_xml_enum_test)
