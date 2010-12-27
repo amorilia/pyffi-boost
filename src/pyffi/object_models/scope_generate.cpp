@@ -64,10 +64,12 @@ public:
     engine::rule<Iterator, Scope(int)> else_;
     engine::rule<Iterator, std::vector<If>(int)> if_elifs;
     engine::rule<Iterator, IfElifsElse(int)> if_elifs_else;
+    engine::rule<Iterator, Doc(int)> doc;
     engine::rule<Iterator, Scope(int)> scope;
     engine::rule<Iterator, void(int)> indent;
     engine::rule<Iterator, std::string()> class_name;
     engine::rule<Iterator, std::string()> attr_name;
+    engine::rule<Iterator, std::string()> doc_line;
 
     scope_grammar() : scope_grammar::base_type(start) {
         indent = engine::repeat(engine::_r1)[' '];
@@ -121,25 +123,27 @@ public:
         else_.name("else");
         if_elifs.name("if-elifs");
         if_elifs_else.name("if-elifs-else");
+        doc.name("doc");
         class_name.name("class-name");
         attr_name.name("attr-name");
+        doc_line.name("doc-line");
 
-        /*
         engine::debug(indent);
-        //engine::debug(start);
-        //engine::debug(declaration);
-        //engine::debug(scope);
-        //engine::debug(class_);
+        engine::debug(start);
+        engine::debug(declaration);
+        engine::debug(scope);
+        engine::debug(class_);
         engine::debug(attr);
         engine::debug(expr);
-        //engine::debug(if_);
-        //engine::debug(elif_);
-        //engine::debug(else_);
-        //engine::debug(if_elifs);
-        //engine::debug(if_elifs_else);
+        engine::debug(if_);
+        engine::debug(elif_);
+        engine::debug(else_);
+        engine::debug(if_elifs);
+        engine::debug(if_elifs_else);
+        engine::debug(doc);
         engine::debug(class_name);
         engine::debug(attr_name);
-        */
+        engine::debug(doc_line);
     }
 };
 
