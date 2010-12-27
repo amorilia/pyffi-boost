@@ -131,6 +131,12 @@ public:
             ifelifselse.else_.get().fix();
         };
     };
+
+    //! Documentation.
+    void operator()(Doc & doc) const {
+        // TODO split newlines
+        // TODO trim trailing whitespace
+    };
 };
 
 void Scope::fix()

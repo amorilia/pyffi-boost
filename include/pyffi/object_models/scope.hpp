@@ -55,9 +55,10 @@ class AttrMap;
 class Class; // full declaration included later
 class IfElifsElse; // full declaration included later
 class Instance;
+class Doc; // full declaration included later
 
-//! A declaration: a \ref Class "class", \ref Attr "attribute", or \ref IfElifsElse "if/elif/.../else".
-typedef boost::make_recursive_variant<Class, Attr, IfElifsElse>::type Declaration;
+//! A declaration: a \ref Class "class", \ref Attr "attribute", \ref IfElifsElse "if/elif/.../else", or \ref Doc "documentation".
+typedef boost::make_recursive_variant<Class, Attr, IfElifsElse, Doc>::type Declaration;
 
 //! A scope is a vector of \ref Declaration "declarations".
 class Scope : public std::vector<Declaration>
@@ -131,6 +132,7 @@ private:
 
 #include "pyffi/object_models/attr.hpp"
 #include "pyffi/object_models/class.hpp"
+#include "pyffi/object_models/doc.hpp"
 #include "pyffi/object_models/if_elifs_else.hpp"
 
 #endif

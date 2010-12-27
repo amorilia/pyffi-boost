@@ -93,6 +93,9 @@ public:
         };
     };
 
+    //! Documentation.
+    void operator()(Doc & doc) const {};
+
     Scope & scope;
 };
 
@@ -145,6 +148,9 @@ public:
             ifelifselse.else_.get().compile_a_bc(attr_map);
         };
     };
+
+    //! Documentation.
+    void operator()(Doc const & doc) const {};
 
     Scope & scope;
     AttrMap & attr_map;

@@ -109,6 +109,9 @@ public:
         };
     };
 
+    //! Documentation.
+    void operator()(Doc const & doc) const {};
+
     std::vector<Instance> & instances;
 };
 
