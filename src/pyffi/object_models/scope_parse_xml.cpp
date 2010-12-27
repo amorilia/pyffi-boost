@@ -41,6 +41,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "pyffi/object_models/scope.hpp"
 
+//#include <boost/property_tree/info_parser.hpp> // DEBUG
+//#include <iostream> // DEBUG
+
 namespace pyffi
 {
 
@@ -57,11 +60,22 @@ bool Scope::parse_xml(std::istream & in)
     // read xml into property tree
     ptree pt;
     xml_parser::read_xml(in, pt);
+    //info_parser::write_info(std::cout, pt); // DEBUG
 
     BOOST_FOREACH(ptree::value_type & decl, pt.get_child("niftoolsxml")) {
         if (decl.first == "basic") {
             // set class name
             Class class_(decl.second.get<std::string>("<xmlattr>.name"));
+            // set class docs (the fixer will split the lines and
+            // handle whitespace)
+            std::string docstr = decl.second.data();
+            if (!docstr.empty()) {
+                Scope scope;
+                Doc doc;
+                doc.push_back(docstr);
+                scope.push_back(doc);
+                class_.scope = scope;
+            };
             push_back(class_);
         } else if (decl.first == "compound" || decl.first == "niobject") {
             // set class name
@@ -84,7 +98,7 @@ bool Scope::parse_xml(std::istream & in)
         };
     };
 
-    // fix names
+    // fix names and documentation
     fix();
 
     // successful parse

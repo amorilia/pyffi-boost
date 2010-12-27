@@ -49,7 +49,7 @@ namespace object_models
 
 namespace algorithm = boost::algorithm;
 
-//! A visitor for fixing names.
+//! A visitor for fixing names and documentation.
 class declaration_fix_visitor
     : public boost::static_visitor<void>
 {
@@ -101,6 +101,29 @@ private:
                 "cannot fix attribute name without valid characters");
         };
     };
+    void fix_doc_line(std::string const & doc_line, Doc & doc) const {
+        std::list<std::string> split_doc_line;
+        boost::split(
+            split_doc_line,
+            doc_line,
+            boost::is_any_of("\n"),
+            boost::token_compress_off); // preserve multiple newlines
+        BOOST_FOREACH(std::string & line, split_doc_line) {
+            boost::trim(line);
+            doc.push_back(line);
+        };
+    };
+    void fix_doc(Doc & doc) const {
+        while (!doc.empty() && doc.front().empty()) {
+            doc.pop_front();
+        };
+        while (!doc.empty() && doc.back().empty()) {
+            doc.pop_back();
+        };
+        if (doc.size() > 1) {
+            doc.push_back("");
+        };
+    };
 public:
     //! A class.
     void operator()(Class & class_) const {
@@ -134,8 +157,14 @@ public:
 
     //! Documentation.
     void operator()(Doc & doc) const {
-        // TODO split newlines
-        // TODO trim trailing whitespace
+        std::list<std::string> old_doc(doc);
+        doc.clear();
+        // split and trim lines
+        BOOST_FOREACH(std::string const & doc_line, old_doc) {
+            fix_doc_line(doc_line, doc);
+        };
+        // remove empty lines in front and back
+        fix_doc(doc);
     };
 };
 
