@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_1)
 
 BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
 {
-        Scope scope;
+    Scope scope;
     Class int_("Int");
     Doc doc;
     doc.push_back("A 32-bit integer.");
