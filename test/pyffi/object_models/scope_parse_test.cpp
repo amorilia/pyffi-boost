@@ -178,4 +178,55 @@ BOOST_AUTO_TEST_CASE(ast_parse_if_elifs_else_test)
     BOOST_CHECK_EQUAL(attr4.name, "another_attribute");
 }
 
+BOOST_AUTO_TEST_CASE(ast_parse_doc_oneline_test)
+{
+    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
+    BOOST_CHECK(get<Class>(scope[0]).scope);
+    Scope & inner_scope = get<Class>(scope[0]).scope.get();
+    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
+    Doc & doc = get<Doc>(inner_scope[0]);
+    BOOST_CHECK_EQUAL(doc.size(), 1);
+    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_doc_multiline_test_1)
+{
+    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
+    BOOST_CHECK(get<Class>(scope[0]).scope);
+    Scope & inner_scope = get<Class>(scope[0]).scope.get();
+    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
+    Doc & doc = get<Doc>(inner_scope[0]);
+    BOOST_CHECK_EQUAL(doc.size(), 2);
+    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
+    doc.pop_front();
+    BOOST_CHECK_EQUAL(doc.front(), "Indeed!");
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_doc_multiline_test_2)
+{
+    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
+    BOOST_CHECK(get<Class>(scope[0]).scope);
+    Scope & inner_scope = get<Class>(scope[0]).scope.get();
+    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
+    Doc & doc = get<Doc>(inner_scope[0]);
+    BOOST_CHECK_EQUAL(doc.size(), 3);
+    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
+    doc.pop_front();
+    BOOST_CHECK_EQUAL(doc.front(), "Indeed!");
+    doc.pop_front();
+    BOOST_CHECK_EQUAL(doc.front(), "");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

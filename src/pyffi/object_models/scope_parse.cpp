@@ -74,7 +74,7 @@ public:
     scope_grammar() : scope_grammar::base_type(start) {
         indent %= engine::repeat(engine::_r1)[' '];
         start %= scope(0) >> engine::eol;
-        declaration %= class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1);
+        declaration %= class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1) | doc(engine::_r1);
         scope %= declaration(engine::_r1) % engine::eol;
         class_ %=
             indent(engine::_r1)
@@ -108,8 +108,14 @@ public:
         if_elifs_else %=
             if_elifs(engine::_r1) // IfElifsElse.ifs_
             >> -(engine::eol >> else_(engine::_r1)); // IfElifsElse.else_
+        doc %=
+            indent(engine::_r1)
+            >> "\"\"\""
+            >> (doc_line % (engine::eol >> indent(engine::_r1)))
+            >> "\"\"\"";
         class_name %= engine::upper >> *(engine::lower | engine::upper | engine::digit);
         attr_name %= engine::lower >> *(engine::lower | engine::digit | engine::char_('_'));
+        doc_line %= *(!engine::lit("\"\"\"") >> !engine::eol >> engine::char_);
 
         indent.name("indent");
         start.name("start");

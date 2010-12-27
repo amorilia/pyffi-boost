@@ -153,4 +153,49 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_elifs_else_test)
     BOOST_CHECK_EQUAL(os.str(), "if false:\n    Int x1\nelif true:\n    Int x2\nelif false:\n    Int x3\nelif true:\n    Int x4\nelse:\n    Int another_attribute\n");
 }
 
+BOOST_AUTO_TEST_CASE(ast_generate_doc_oneline_test)
+{
+    Scope scope;
+    Class int_("Int");
+    Doc doc;
+    doc.push_back("A 32-bit integer.");
+    int_.scope = Scope();
+    int_.scope.get().push_back(doc);
+    scope.push_back(int_);
+    std::ostringstream os;
+    scope.generate(os);
+    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
+}
+
+BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_1)
+{
+    Scope scope;
+    Class int_("Int");
+    Doc doc;
+    doc.push_back("A 32-bit integer.");
+    doc.push_back("Indeed!");
+    int_.scope = Scope();
+    int_.scope.get().push_back(doc);
+    scope.push_back(int_);
+    std::ostringstream os;
+    scope.generate(os);
+    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
+}
+
+BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
+{
+        Scope scope;
+    Class int_("Int");
+    Doc doc;
+    doc.push_back("A 32-bit integer.");
+    doc.push_back("Indeed!");
+    doc.push_back("");
+    int_.scope = Scope();
+    int_.scope.get().push_back(doc);
+    scope.push_back(int_);
+    std::ostringstream os;
+    scope.generate(os);
+    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

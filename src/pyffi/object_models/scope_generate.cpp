@@ -74,7 +74,7 @@ public:
     scope_grammar() : scope_grammar::base_type(start) {
         indent = engine::repeat(engine::_r1)[' '];
         start = scope(0) << engine::eol;
-        declaration = class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1);
+        declaration = class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1) | doc(engine::_r1);
         scope = declaration(engine::_r1) % engine::eol;
         class_ =
             indent(engine::_r1)
@@ -108,8 +108,14 @@ public:
         if_elifs_else =
             if_elifs(engine::_r1) // IfElifsElse.ifs_
             << -(engine::eol << else_(engine::_r1)); // IfElifsElse.else_
+        doc =
+            indent(engine::_r1)
+            << "\"\"\""
+            << (doc_line % (engine::eol << indent(engine::_r1)))
+            << "\"\"\"";
         class_name = engine::string; // must be CamelCase for parser
         attr_name = engine::string; // must be lower_case_with_underscores for parser
+        doc_line = engine::string; // must not contain newlines or """ for parser
 
         indent.name("indent");
         start.name("start");
