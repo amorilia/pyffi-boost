@@ -74,7 +74,7 @@ public:
 
     scope_grammar() : scope_grammar::base_type(start) {
         indent %= engine::repeat(engine::_r1)[' '];
-        start %= -eol >> scope(0) >> engine::omit[*engine::space];
+        start %= -eol >> scope(0) >> engine::omit[*engine::space] >> engine::eoi;
         declaration %= class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1) | doc(engine::_r1);
         scope %= declaration(engine::_r1) % eol;
         class_ %=
@@ -173,7 +173,7 @@ bool Scope::parse(std::istream & in)
     bool r = engine::parse(first, last, parser, *this);
 
     // fail if we did not get a full match
-    if (!r || first != last) {
+    if (!r) {
         std::string rest(first, last);
         throw std::runtime_error(
             "Syntax error while parsing\nStopped at:\n" + rest);
