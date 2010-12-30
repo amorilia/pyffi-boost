@@ -78,6 +78,19 @@ BOOST_AUTO_TEST_CASE(ast_generate_attr_test)
     BOOST_CHECK_EQUAL(os.str(), "Int x\n");
 }
 
+BOOST_AUTO_TEST_CASE(ast_parse_attr_doc_test)
+{
+    Scope scope;
+    Attr x("Int", "x");
+    Doc doc;
+    doc.push_back("Hello world.");
+    x.doc = doc;
+    scope.push_back(x);
+    std::ostringstream os;
+    scope.generate(os);
+    BOOST_CHECK_EQUAL(os.str(), "Int x\n\"\"\"Hello world.\"\"\"\n");
+}
+
 BOOST_AUTO_TEST_CASE(ast_generate_class_attr_test)
 {
     Scope scope;

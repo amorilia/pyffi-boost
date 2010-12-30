@@ -42,6 +42,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/optional.hpp>
 #include <string>
 
+#include "pyffi/object_models/doc.hpp"
+
 namespace pyffi
 {
 
@@ -65,6 +67,7 @@ public:
 
     std::string class_name; //!< Name of the class of this attribute.
     std::string name;       //!< Name of this attribute.
+    boost::optional<Doc> doc; //<! Documentation.
 
     //! Get a reference to the actual class.
     Class const & get_class() const;
@@ -90,6 +93,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     pyffi::object_models::Attr,
     (std::string, class_name)
     (std::string, name)
+    (boost::optional<pyffi::object_models::Doc>, doc)
 )
 
 #endif

@@ -88,7 +88,8 @@ public:
             indent(engine::_r1)
             << class_name // Attr.class_name
             << ' '
-            << attr_name; // Attr.name
+            << attr_name // Attr.name
+            << -(eol << doc(engine::_r1)); // Attr.doc
         expr = engine::bool_; // for now
         if_ =
             indent(engine::_r1)

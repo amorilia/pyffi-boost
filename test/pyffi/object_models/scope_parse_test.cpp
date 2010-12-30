@@ -79,6 +79,19 @@ BOOST_AUTO_TEST_CASE(ast_parse_attr_test)
     BOOST_CHECK_EQUAL(get<Attr>(scope[0]).name, "x");
 }
 
+BOOST_AUTO_TEST_CASE(ast_parse_attr_doc_test)
+{
+    std::istringstream is("Int x\n\"\"\"Hello world.\"\"\"\n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).class_name, "Int");
+    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).name, "x");
+    BOOST_CHECK(get<Attr>(scope[0]).doc);
+    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).doc.get().size(), 1);
+    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).doc.get().front(), "Hello world.");
+}
+
 BOOST_AUTO_TEST_CASE(ast_parse_class_attr_test)
 {
     std::istringstream is("class Int\nInt x\n");
