@@ -244,4 +244,89 @@ BOOST_AUTO_TEST_CASE(ast_parse_doc_multiline_test_3)
     BOOST_CHECK_EQUAL(doc.front(), "Indeed!");
 }
 
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_1)
+{
+    std::istringstream is("\nclass Vector");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(!get<Class>(scope[0]).scope);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_2)
+{
+    std::istringstream is(" \n  \n     \n\n   \nclass Vector");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(!get<Class>(scope[0]).scope);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_3)
+{
+    std::istringstream is("class Vector:\n\n    Int x\n\n  \n    Int y\n      \n    Int z");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(get<Class>(scope[0]).scope);
+    Scope & class_scope = get<Class>(scope[0]).scope.get();
+    BOOST_CHECK_EQUAL(class_scope.size(), 3);
+    BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).class_name, "Int");
+    BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).name, "x");
+    BOOST_CHECK_EQUAL(get<Attr>(class_scope[1]).class_name, "Int");
+    BOOST_CHECK_EQUAL(get<Attr>(class_scope[1]).name, "y");
+    BOOST_CHECK_EQUAL(get<Attr>(class_scope[2]).class_name, "Int");
+    BOOST_CHECK_EQUAL(get<Attr>(class_scope[2]).name, "z");
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_4)
+{
+    std::istringstream is("class Vector");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(!get<Class>(scope[0]).scope);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_5)
+{
+    std::istringstream is("class Vector   ");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(!get<Class>(scope[0]).scope);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_6)
+{
+    std::istringstream is("class Vector   \n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(!get<Class>(scope[0]).scope);
+}
+
+BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_7)
+{
+    std::istringstream is("class Vector\n  \n     \n\n   \n");
+    Scope scope;
+    BOOST_CHECK_EQUAL(scope.parse(is), true);
+    BOOST_CHECK_EQUAL(scope.size(), 1);
+    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
+    BOOST_CHECK(!get<Class>(scope[0]).base_name);
+    BOOST_CHECK(!get<Class>(scope[0]).scope);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -71,18 +71,19 @@ public:
     engine::rule<Iterator, std::string()> class_name;
     engine::rule<Iterator, std::string()> attr_name;
     engine::rule<Iterator, std::string()> doc_line;
+    engine::rule<Iterator, void()> eol;
 
     scope_grammar() : scope_grammar::base_type(start) {
         indent = engine::repeat(engine::_r1)[' '];
-        start = scope(0) << engine::eol;
+        start = scope(0) << eol;
         declaration = class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1) | doc(engine::_r1);
-        scope = declaration(engine::_r1) % engine::eol;
+        scope = declaration(engine::_r1) % eol;
         class_ =
             indent(engine::_r1)
             << "class "
             << class_name // Class.name
             << -('(' << class_name << ')') // Class.base_name
-            << -(':' << engine::eol << scope(engine::_r1 + 4)); // Class.scope
+            << -(':' << eol << scope(engine::_r1 + 4)); // Class.scope
         attr =
             indent(engine::_r1)
             << class_name // Attr.class_name
@@ -93,31 +94,32 @@ public:
             indent(engine::_r1)
             << "if "
             << expr // If.expr
-            << ':' << engine::eol << scope(engine::_r1 + 4); // If.scope
+            << ':' << eol << scope(engine::_r1 + 4); // If.scope
         elif_ =
             indent(engine::_r1)
             << "elif "
             << expr // If.expr
-            << ':' << engine::eol << scope(engine::_r1 + 4); // If.scope
+            << ':' << eol << scope(engine::_r1 + 4); // If.scope
         else_ =
             indent(engine::_r1)
             << "else"
-            << ':' << engine::eol << scope(engine::_r1 + 4); // Scope
+            << ':' << eol << scope(engine::_r1 + 4); // Scope
         if_elifs =
             if_(engine::_r1) // IfElifsElse.ifs_[0]
-            << *(engine::eol << elif_(engine::_r1)); // IfElifsElse.ifs_[1:]
+            << *(eol << elif_(engine::_r1)); // IfElifsElse.ifs_[1:]
         if_elifs_else =
             if_elifs(engine::_r1) // IfElifsElse.ifs_
-            << -(engine::eol << else_(engine::_r1)); // IfElifsElse.else_
+            << -(eol << else_(engine::_r1)); // IfElifsElse.else_
         doc =
             indent(engine::_r1)
             << "\"\"\""
-            << (doc_line % (engine::eol << indent(engine::_r1)))
-            << -(engine::eps(boost::phoenix::size(engine::_val) > 1) << (engine::eol << indent(engine::_r1)))
+            << (doc_line % (eol << indent(engine::_r1)))
+            << -(engine::eps(boost::phoenix::size(engine::_val) > 1) << (eol << indent(engine::_r1)))
             << "\"\"\"";
         class_name = engine::string; // must be CamelCase for parser
         attr_name = engine::string; // must be lower_case_with_underscores for parser
         doc_line = engine::string; // must not contain newlines or """ for parser
+        eol = engine::eol;
 
         indent.name("indent");
         start.name("start");
@@ -152,6 +154,7 @@ public:
         engine::debug(class_name);
         engine::debug(attr_name);
         engine::debug(doc_line);
+        engine::debug(eol);
     }
 };
 
