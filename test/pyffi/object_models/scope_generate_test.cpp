@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(ast_parse_attr_doc_test)
     doc.push_back("Hello world.");
     x.doc = doc;
     scope.push_back(x);
-    GenerateParseFixture(scope, "Int x\n\"\"\"Hello world.\"\"\"\n");
+    GenerateParseFixture(scope, "Int x\n\"\"\"Hello world.\"\"\"\n\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_class_attr_test)
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_oneline_test)
     int_.scope = Scope();
     int_.scope.get().push_back(doc);
     scope.push_back(int_);
-    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
+    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test)
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test)
     int_.scope = Scope();
     int_.scope.get().push_back(doc);
     scope.push_back(int_);
-    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
+    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

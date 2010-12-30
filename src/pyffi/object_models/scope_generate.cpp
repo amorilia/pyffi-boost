@@ -116,7 +116,7 @@ public:
             << "\"\"\""
             << (doc_line % (eol << indent(engine::_r1)))
             << -(engine::eps(boost::phoenix::size(engine::_val) > 1) << (eol << indent(engine::_r1)))
-            << "\"\"\"";
+            << "\"\"\"" << eol; // extra eol here for prettier formatting
         class_name = engine::string; // must be CamelCase for parser
         attr_name = engine::string; // must be lower_case_with_underscores for parser
         doc_line = engine::string; // must not contain newlines or """ for parser
