@@ -94,19 +94,9 @@ BOOST_AUTO_TEST_CASE(scope_parse_xml_full_test)
     XmlParser xml("/data/xml/test_full.xml");
 }
 
-BOOST_AUTO_TEST_CASE(scope_parse_xml_header_test)
-{
-    XmlParser xml("/data/xml/test_header.xml");
-}
-
 BOOST_AUTO_TEST_CASE(scope_parse_xml_invalid_test)
 {
     XmlParser xml("/data/xml/test_invalid.xml", false);
-}
-
-BOOST_AUTO_TEST_CASE(scope_parse_xml_minimal_test)
-{
-    XmlParser xml("/data/xml/test_minimal.xml");
 }
 
 BOOST_AUTO_TEST_CASE(scope_parse_xml_version_test)
