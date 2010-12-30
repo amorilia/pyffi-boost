@@ -45,301 +45,55 @@ using boost::get;
 using namespace pyffi;
 using namespace pyffi::object_models;
 
+class ParseFixture
+{
+public:
+    ParseFixture() : scope() {};
+    void parse_check_equal(std::string const & str) const {
+        std::istringstream is(str);
+        Scope scope_parsed;
+        BOOST_CHECK_EQUAL(scope_parsed.parse(is), true);
+        //BOOST_CHECK_EQUAL(scope_parsed, scope);
+        BOOST_CHECK(scope_parsed == scope);
+    };
+    Scope scope;
+};
+
 BOOST_AUTO_TEST_SUITE(ast_parse_test_suite)
 
-BOOST_AUTO_TEST_CASE(ast_parse_class_test)
+BOOST_FIXTURE_TEST_CASE(ast_parse_doc_multiline_test, ParseFixture)
 {
-    std::istringstream is("class Int\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
+    Class int_("Int");
+    Doc doc;
+    doc.push_back("A 32-bit integer.");
+    doc.push_back("Indeed!");
+    int_.scope = Scope();
+    int_.scope.get().push_back(doc);
+    scope.push_back(int_);
+    parse_check_equal("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
+    parse_check_equal("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");
 }
 
-BOOST_AUTO_TEST_CASE(ast_parse_base_name_test)
+BOOST_FIXTURE_TEST_CASE(ast_parse_blank_lines_test_1, ParseFixture)
 {
-    std::istringstream is("class Int(Object)\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).base_name.get(), "Object");
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
+    scope.push_back(Class("Vector"));
+    parse_check_equal("class Vector");
+    parse_check_equal("\nclass Vector");
+    parse_check_equal(" \n  \n     \n\n   \nclass Vector");
+    parse_check_equal("class Vector   ");
+    parse_check_equal("class Vector   \n");
+    parse_check_equal("class Vector\n  \n     \n\n   \n");
 }
 
-BOOST_AUTO_TEST_CASE(ast_parse_attr_test)
+BOOST_FIXTURE_TEST_CASE(ast_parse_blank_lines_test_2, ParseFixture)
 {
-    std::istringstream is("Int x\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).name, "x");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_attr_doc_test)
-{
-    std::istringstream is("Int x\n\"\"\"Hello world.\"\"\"\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).name, "x");
-    BOOST_CHECK(get<Attr>(scope[0]).doc);
-    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).doc.get().size(), 1);
-    BOOST_CHECK_EQUAL(get<Attr>(scope[0]).doc.get().front(), "Hello world.");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_class_attr_test)
-{
-    std::istringstream is("class Int\nInt x\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 2);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
-    BOOST_CHECK_EQUAL(get<Attr>(scope[1]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(scope[1]).name, "x");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_class_scope_test)
-{
-    std::istringstream is("class Vector:\n    Int x\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(get<Class>(scope[0]).scope);
-    Scope & class_scope = get<Class>(scope[0]).scope.get();
-    BOOST_CHECK_EQUAL(class_scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).name, "x");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_if_test)
-{
-    std::istringstream is("if false:\n    Float angle\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[0]);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].expr, false);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.size(), 1);
-    Attr & attr = get<Attr>(ifelifselse.ifs_[0].scope[0]);
-    BOOST_CHECK_EQUAL(attr.class_name, "Float");
-    BOOST_CHECK_EQUAL(attr.name, "angle");
-    BOOST_CHECK(!ifelifselse.else_);
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_if_else_test)
-{
-    std::istringstream is("if true:\n    Int64 size\nelse:\n    Int32 offset\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[0]);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].expr, true);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.size(), 1);
-    Attr & attr1 = get<Attr>(ifelifselse.ifs_[0].scope[0]);
-    BOOST_CHECK_EQUAL(attr1.class_name, "Int64");
-    BOOST_CHECK_EQUAL(attr1.name, "size");
-    BOOST_CHECK(ifelifselse.else_);
-    BOOST_CHECK_EQUAL(ifelifselse.else_.get().size(), 1);
-    Attr & attr2 = get<Attr>(ifelifselse.else_.get()[0]);
-    BOOST_CHECK_EQUAL(attr2.class_name, "Int32");
-    BOOST_CHECK_EQUAL(attr2.name, "offset");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_if_elifs_else_test)
-{
-    std::istringstream is("if false:\n    Int x1\nelif true:\n    Int x2\nelif false:\n    Int x3\nelif true:\n    Int x4\nelse:\n    Int another_attribute\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    IfElifsElse & ifelifselse = get<IfElifsElse>(scope[0]);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_.size(), 4);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].expr, false);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[1].expr, true);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[2].expr, false);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[3].expr, true);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[0].scope.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[1].scope.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[2].scope.size(), 1);
-    BOOST_CHECK_EQUAL(ifelifselse.ifs_[3].scope.size(), 1);
-    Attr & attr0 = get<Attr>(ifelifselse.ifs_[0].scope[0]);
-    Attr & attr1 = get<Attr>(ifelifselse.ifs_[1].scope[0]);
-    Attr & attr2 = get<Attr>(ifelifselse.ifs_[2].scope[0]);
-    Attr & attr3 = get<Attr>(ifelifselse.ifs_[3].scope[0]);
-    BOOST_CHECK_EQUAL(attr0.class_name, "Int");
-    BOOST_CHECK_EQUAL(attr1.class_name, "Int");
-    BOOST_CHECK_EQUAL(attr2.class_name, "Int");
-    BOOST_CHECK_EQUAL(attr3.class_name, "Int");
-    BOOST_CHECK_EQUAL(attr0.name, "x1");
-    BOOST_CHECK_EQUAL(attr1.name, "x2");
-    BOOST_CHECK_EQUAL(attr2.name, "x3");
-    BOOST_CHECK_EQUAL(attr3.name, "x4");
-    BOOST_CHECK(ifelifselse.else_);
-    BOOST_CHECK_EQUAL(ifelifselse.else_.get().size(), 1);
-    Attr & attr4 = get<Attr>(ifelifselse.else_.get()[0]);
-    BOOST_CHECK_EQUAL(attr4.class_name, "Int");
-    BOOST_CHECK_EQUAL(attr4.name, "another_attribute");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_doc_oneline_test)
-{
-    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK(get<Class>(scope[0]).scope);
-    Scope & inner_scope = get<Class>(scope[0]).scope.get();
-    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
-    Doc & doc = get<Doc>(inner_scope[0]);
-    BOOST_CHECK_EQUAL(doc.size(), 1);
-    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_doc_multiline_test_1)
-{
-    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK(get<Class>(scope[0]).scope);
-    Scope & inner_scope = get<Class>(scope[0]).scope.get();
-    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
-    Doc & doc = get<Doc>(inner_scope[0]);
-    BOOST_CHECK_EQUAL(doc.size(), 2);
-    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
-    doc.pop_front();
-    BOOST_CHECK_EQUAL(doc.front(), "Indeed!");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_doc_multiline_test_2)
-{
-    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK(get<Class>(scope[0]).scope);
-    Scope & inner_scope = get<Class>(scope[0]).scope.get();
-    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
-    Doc & doc = get<Doc>(inner_scope[0]);
-    BOOST_CHECK_EQUAL(doc.size(), 2);
-    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
-    doc.pop_front();
-    BOOST_CHECK_EQUAL(doc.front(), "Indeed!");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_doc_multiline_test_3)
-{
-    std::istringstream is("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Int");
-    BOOST_CHECK(get<Class>(scope[0]).scope);
-    Scope & inner_scope = get<Class>(scope[0]).scope.get();
-    BOOST_CHECK_EQUAL(inner_scope.size(), 1);
-    Doc & doc = get<Doc>(inner_scope[0]);
-    BOOST_CHECK_EQUAL(doc.size(), 2);
-    BOOST_CHECK_EQUAL(doc.front(), "A 32-bit integer.");
-    doc.pop_front();
-    BOOST_CHECK_EQUAL(doc.front(), "Indeed!");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_1)
-{
-    std::istringstream is("\nclass Vector");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_2)
-{
-    std::istringstream is(" \n  \n     \n\n   \nclass Vector");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_3)
-{
-    std::istringstream is("class Vector:\n\n    Int x\n\n  \n    Int y\n      \n    Int z");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(get<Class>(scope[0]).scope);
-    Scope & class_scope = get<Class>(scope[0]).scope.get();
-    BOOST_CHECK_EQUAL(class_scope.size(), 3);
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[0]).name, "x");
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[1]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[1]).name, "y");
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[2]).class_name, "Int");
-    BOOST_CHECK_EQUAL(get<Attr>(class_scope[2]).name, "z");
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_4)
-{
-    std::istringstream is("class Vector");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_5)
-{
-    std::istringstream is("class Vector   ");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_6)
-{
-    std::istringstream is("class Vector   \n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
-}
-
-BOOST_AUTO_TEST_CASE(ast_parse_blank_lines_test_7)
-{
-    std::istringstream is("class Vector\n  \n     \n\n   \n");
-    Scope scope;
-    BOOST_CHECK_EQUAL(scope.parse(is), true);
-    BOOST_CHECK_EQUAL(scope.size(), 1);
-    BOOST_CHECK_EQUAL(get<Class>(scope[0]).name, "Vector");
-    BOOST_CHECK(!get<Class>(scope[0]).base_name);
-    BOOST_CHECK(!get<Class>(scope[0]).scope);
+    Class vec("Vector");
+    vec.scope = Scope();
+    vec.scope.get().push_back(Attr("Int", "x"));
+    vec.scope.get().push_back(Attr("Int", "y"));
+    vec.scope.get().push_back(Attr("Int", "z"));
+    scope.push_back(vec);
+    parse_check_equal("class Vector:\n\n    Int x\n\n  \n    Int y\n      \n    Int z");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

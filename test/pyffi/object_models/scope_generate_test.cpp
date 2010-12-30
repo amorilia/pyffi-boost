@@ -177,9 +177,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_oneline_test)
     GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
 }
 
-// no ast_generate_doc_multiline_test_1 equivalent of ast_parse_doc_multiline_test_1
-
-BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
+BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test)
 {
     Scope scope;
     Class int_("Int");
@@ -190,20 +188,6 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
     int_.scope.get().push_back(doc);
     scope.push_back(int_);
     GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
-}
-
-BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_3)
-{
-    Scope scope;
-    Class int_("Int");
-    Doc doc;
-    doc.push_back("A 32-bit integer.");
-    doc.push_back("Indeed!");
-    doc.push_back("");
-    int_.scope = Scope();
-    int_.scope.get().push_back(doc);
-    scope.push_back(int_);
-    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
