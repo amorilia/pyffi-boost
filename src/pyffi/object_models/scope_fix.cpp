@@ -101,6 +101,8 @@ private:
                 "cannot fix attribute name without valid characters");
         };
     };
+
+    //! Trim all lines in doc_line and append them to doc.
     void fix_doc_line(std::string const & doc_line, Doc & doc) const {
         std::list<std::string> split_doc_line;
         boost::split(
@@ -113,15 +115,14 @@ private:
             doc.push_back(line);
         };
     };
+
+    //! Trim empty strings at front and at back.
     void fix_doc(Doc & doc) const {
         while (!doc.empty() && doc.front().empty()) {
             doc.pop_front();
         };
         while (!doc.empty() && doc.back().empty()) {
             doc.pop_back();
-        };
-        if (doc.size() > 1) {
-            doc.push_back("");
         };
     };
 public:

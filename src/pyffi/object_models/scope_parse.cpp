@@ -174,6 +174,10 @@ bool Scope::parse(std::istream & in)
         throw std::runtime_error(
             "Syntax error while parsing\nStopped at:\n" + rest);
     }
+
+    // fix documentation
+    fix();
+
     return r;
 }
 

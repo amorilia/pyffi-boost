@@ -167,7 +167,9 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_oneline_test)
     BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
 }
 
-BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_1)
+// no ast_generate_doc_multiline_test_1 equivalent of ast_parse_doc_multiline_test_1
+
+BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
 {
     Scope scope;
     Class int_("Int");
@@ -179,10 +181,10 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_1)
     scope.push_back(int_);
     std::ostringstream os;
     scope.generate(os);
-    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
+    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
 }
 
-BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
+BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_3)
 {
     Scope scope;
     Class int_("Int");
@@ -195,7 +197,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test_2)
     scope.push_back(int_);
     std::ostringstream os;
     scope.generate(os);
-    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
+    BOOST_CHECK_EQUAL(os.str(), "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

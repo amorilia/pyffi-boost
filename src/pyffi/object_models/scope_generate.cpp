@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_container.hpp>
 #include <boost/spirit/include/support_ostream_iterator.hpp>
 
 #include "pyffi/object_models/scope.hpp"
@@ -112,6 +113,7 @@ public:
             indent(engine::_r1)
             << "\"\"\""
             << (doc_line % (engine::eol << indent(engine::_r1)))
+            << -(engine::eps(boost::phoenix::size(engine::_val) > 1) << (engine::eol << indent(engine::_r1)))
             << "\"\"\"";
         class_name = engine::string; // must be CamelCase for parser
         attr_name = engine::string; // must be lower_case_with_underscores for parser
