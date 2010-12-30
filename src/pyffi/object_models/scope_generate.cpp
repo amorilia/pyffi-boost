@@ -137,6 +137,7 @@ public:
         class_name.name("class-name");
         attr_name.name("attr-name");
         doc_line.name("doc-line");
+        eol.name("eol");
 
         engine::debug(indent);
         engine::debug(start);
