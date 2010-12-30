@@ -60,6 +60,18 @@ public:
     If() : expr(), scope() {}; //<! Constructor.
     Expr expr;   //!< Condition.
     Scope scope; //!< Declarations.
+
+    //! Equality operator.
+    bool operator==(If const & other) const {
+        return
+            (expr == other.expr) &&
+            (scope == other.scope);
+    };
+
+    //! Inequality operator.
+    bool operator!=(If const & other) const {
+        return !(*this == other);
+    };
 };
 
 //! An if/elif/else declaration.
@@ -69,6 +81,18 @@ public:
     IfElifsElse() : ifs_(), else_() {}; //<! Constructor.
     std::vector<If> ifs_;         //!< The if and elif parts.
     boost::optional<Scope> else_; //!< The else part.
+
+    //! Equality operator.
+    bool operator==(IfElifsElse const & other) const {
+        return
+            (ifs_ == other.ifs_) &&
+            (else_ == other.else_);
+    };
+
+    //! Inequality operator.
+    bool operator!=(IfElifsElse const & other) const {
+        return !(*this == other);
+    };
 };
 
 } // namespace object_models

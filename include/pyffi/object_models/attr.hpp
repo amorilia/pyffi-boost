@@ -60,10 +60,10 @@ class Attr
 public:
     //! Default constructor.
     Attr()
-        : class_name(), name(), class_(), index() {};
+        : class_name(), name(), class_(), index(), doc() {};
     //! Constructor.
     Attr(std::string const & class_name, std::string const & name)
-        : class_name(class_name), name(name), class_() {};
+        : class_name(class_name), name(name), class_(), doc() {};
 
     std::string class_name; //!< Name of the class of this attribute.
     std::string name;       //!< Name of this attribute.
@@ -74,6 +74,19 @@ public:
 
     //! Get the index.
     std::size_t get_index() const;
+
+    //! Equality operator.
+    bool operator==(Attr const & other) const {
+        return
+            (class_name == other.class_name) &&
+            (name == other.name) &&
+            (doc == other.doc);
+    };
+
+    //! Inequality operator.
+    bool operator!=(Attr const & other) const {
+        return !(*this == other);
+    };
 
 private:
     Class const *class_; //!< Pointer to the actual class.

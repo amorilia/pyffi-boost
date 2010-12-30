@@ -102,6 +102,14 @@ public:
     //! Write all attributes.
     void write(std::vector<Instance> & instances, std::ostream & os) const;
 
+    //! Equality operator.
+    bool operator==(Scope const & other) const;
+
+    //! Inequality operator.
+    bool operator!=(Scope const & other) const {
+        return !(*this == other);
+    };
+
 private:
     //! Type of local_class_map.
     typedef boost::unordered_map<std::string, Class const *> LocalClassMap;

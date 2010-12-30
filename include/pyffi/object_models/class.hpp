@@ -211,6 +211,19 @@ public:
     //! Get attribute (Attr, not Instance).
     Attr const & get_attr(std::string const & name) const;
 
+    //! Equality operator.
+    bool operator==(Class const & other) const {
+        return
+            (name == other.name) &&
+            (base_name == other.base_name) &&
+            (scope == other.scope);
+    };
+
+    //! Inequality operator.
+    bool operator!=(Class const & other) const {
+        return !(*this == other);
+    };
+
 private:
 
     Class const *base_class; //!< Pointer to the base class.

@@ -45,6 +45,23 @@ using boost::get;
 using namespace pyffi;
 using namespace pyffi::object_models;
 
+class GenerateParseFixture
+{
+public:
+    GenerateParseFixture(Scope const & scope, std::string const & str) : scope(scope), str(str) {
+        std::ostringstream os;
+        BOOST_CHECK_EQUAL(scope.generate(os), true);
+        BOOST_CHECK_EQUAL(os.str(), str);
+        std::istringstream is(str);
+        Scope scope_parsed;
+        BOOST_CHECK_EQUAL(scope_parsed.parse(is), true);
+        //BOOST_CHECK_EQUAL(scope_parsed, scope);
+        BOOST_CHECK(scope_parsed == scope);
+    };
+    Scope scope;
+    std::string str;
+};
+
 BOOST_AUTO_TEST_SUITE(ast_generate_test_suite)
 
 BOOST_AUTO_TEST_CASE(ast_generate_class_test)
@@ -52,9 +69,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_test)
     Scope scope;
     Class int_("Int");
     scope.push_back(int_);
-    std::ostringstream os;
-    scope.generate(os);
-    BOOST_CHECK_EQUAL(os.str(), "class Int\n");
+    GenerateParseFixture(scope, "class Int\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_base_name_test)

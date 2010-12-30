@@ -122,6 +122,35 @@ void Scope::init(std::vector<Instance> & instances) const
     };
 };
 
+//! A visitor for comparing declarations.
+class declaration_equality_visitor
+    : public boost::static_visitor<bool>
+{
+public:
+    template <typename T, typename U>
+    bool operator()(const T &, const U &) const {
+        return false;
+    }
+
+    template <typename T>
+    bool operator()(const T & lhs, const T & rhs) const {
+        return lhs == rhs;
+    }
+};
+
+bool Scope::operator==(Scope const & other) const
+{
+    if (size() != other.size()) {
+        return false;
+    };
+    for (int i = 0; i < size(); i++) {
+        if (!boost::apply_visitor(declaration_equality_visitor(), (*this)[i], other[i])) {
+            return false;
+        };
+    };
+    return true;
+};
+
 } // namespace object_models
 
 } // namespace pyffi
