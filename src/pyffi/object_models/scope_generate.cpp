@@ -122,6 +122,7 @@ public:
         doc_line = engine::string; // must not contain newlines or """ for parser
         eol = engine::eol;
 
+#ifdef DEBUG
         indent.name("indent");
         start.name("start");
         declaration.name("declaration");
@@ -157,6 +158,7 @@ public:
         engine::debug(attr_name);
         engine::debug(doc_line);
         engine::debug(eol);
+#endif // DEBUG
     }
 };
 

@@ -120,6 +120,7 @@ public:
         doc_line %= *(!engine::lit("\"\"\"") >> !eol >> engine::char_);
         eol = +(*(engine::space - engine::eol) >> engine::eol);
 
+#ifdef DEBUG
         indent.name("indent");
         start.name("start");
         declaration.name("declaration");
@@ -155,6 +156,7 @@ public:
         engine::debug(attr_name);
         engine::debug(doc_line);
         engine::debug(eol);
+#endif // DEBUG
     }
 };
 
