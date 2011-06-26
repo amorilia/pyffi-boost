@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(ast_parse_attr_doc_test)
     doc.push_back("Hello world.");
     x.doc = doc;
     scope.push_back(x);
-    GenerateParseFixture(scope, "Int x\n\"\"\"Hello world.\"\"\"\n\n");
+    GenerateParseFixture(scope, "Int x:\n    \"\"\"Hello world.\"\"\"\n\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_class_attr_test)
