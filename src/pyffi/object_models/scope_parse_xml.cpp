@@ -68,12 +68,9 @@ bool Scope::parse_xml(std::istream & in)
             Class class_(decl.second.get<std::string>("<xmlattr>.name"));
             // set class docs (the fixer will split the lines and
             // handle whitespace)
-            std::string docstr = decl.second.data();
-            if (!docstr.empty()) {
-                Doc doc;
-                doc.push_back(docstr);
-                class_.doc = doc;
-            };
+            Doc doc;
+            doc.push_back(decl.second.data());
+            class_.doc = doc;
             push_back(class_);
         } else if (decl.first == "compound" || decl.first == "niobject") {
             // set class name
@@ -86,6 +83,9 @@ bool Scope::parse_xml(std::istream & in)
                     Attr attr(
                         add.second.get<std::string>("<xmlattr>.type"),
                         add.second.get<std::string>("<xmlattr>.name"));
+                    Doc doc;
+                    doc.push_back(add.second.data());
+                    attr.doc = doc;
                     scope.push_back(attr);
                 };
             };
