@@ -133,6 +133,15 @@ private:
             doc.pop_back();
         };
     };
+
+    void fix_optional_doc(boost::optional<Doc> & doc) const {
+        if (doc) {
+            fix_doc(doc.get());
+            if (doc.get().empty()) {
+                doc = boost::optional<Doc>();
+            };
+        };
+    };
 public:
     //! A class.
     void operator()(Class & class_) const {
@@ -140,9 +149,7 @@ public:
         if (class_.base_name) {
             fix_class_name(class_.base_name.get());
         };
-        if (class_.doc) {
-            fix_doc(class_.doc.get());
-        };
+        fix_optional_doc(class_.doc);
         if (class_.scope) {
             class_.scope.get().fix();
         };
@@ -152,9 +159,7 @@ public:
     void operator()(Attr & attr) const {
         fix_attr_name(attr.name);
         fix_class_name(attr.class_name);
-        if (attr.doc) {
-            fix_doc(attr.doc.get());
-        };
+        fix_optional_doc(attr.doc);
     };
 
     //! An if/elif/.../else structure.
