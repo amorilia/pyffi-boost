@@ -92,6 +92,7 @@ BOOST_AUTO_TEST_CASE(scope_parse_xml_enum_test)
 BOOST_AUTO_TEST_CASE(scope_parse_xml_full_test)
 {
     XmlParser xml("/data/xml/test_full.xml");
+    xml.check_generate("/data/ffi/test_full.ffi");
 }
 
 BOOST_AUTO_TEST_CASE(scope_parse_xml_invalid_test)

@@ -1,0 +1,142 @@
+class Bool:
+    """A boolean; 32-bit from 4.0.0.2, and 8-bit from 4.1.0.1 on."""
+class Byte:
+    """An unsigned 8-bit integer."""
+class Char
+class UInt:
+    """An unsigned 32-bit integer."""
+class UShort:
+    """An unsigned 16-bit integer."""
+class Int:
+    """A signed 32-bit integer."""
+class Short:
+    """A signed 16-bit integer."""
+class Float
+class StringIndex
+class Ref
+class Ptr
+class Flags
+class SizedString:
+    UInt length:
+        """The string length."""
+    Char value:
+        """The string itself."""
+class String:
+    SizedString string:
+        """The normal string."""
+    StringIndex index:
+        """The string index."""
+class Vector3:
+    Float x:
+        """First coordinate."""
+    Float y:
+        """Second coordinate."""
+    Float z:
+        """Third coordinate."""
+class Matrix33:
+    Float m11:
+        """Member 1,1 (top left)"""
+    Float m21:
+        """Member 2,1"""
+    Float m31:
+        """Member 3,1 (bottom left)"""
+    Float m12:
+        """Member 1,2"""
+    Float m22:
+        """Member 2,2"""
+    Float m32:
+        """Member 3,2"""
+    Float m13:
+        """Member 1,3 (top right)"""
+    Float m23:
+        """Member 2,3"""
+    Float m33:
+        """Member 3,3 (bottom left)"""
+class NiObject
+class NiExtraData(NiObject):
+    String name:
+        """Name of this object."""
+    Ref next_extra_data:
+        """Block number of the next extra data object."""
+class NiInterpolator(NiObject)
+class NiObjectNET(NiObject):
+    String name:
+        """Name of this controllable object, used to refer to the object in .kf files."""
+    UInt has_old_extra_data:
+        """Extra data for pre-3.0 versions."""
+    String old_extra_prop_name:
+        """(=NiStringExtraData)"""
+    UInt old_extra_internal_id:
+        """ref"""
+    String old_extra_string:
+        """Extra string data."""
+    Byte unknown_byte:
+        """Always 0."""
+    Ref extra_data:
+        """Extra data object index. (The first in a chain)"""
+    UInt num_extra_data_list:
+        """The number of Extra Data objects referenced through the list."""
+    Ref extra_data_list:
+        """List of extra data indices."""
+    Ref controller:
+        """Controller object index. (The first in a chain)"""
+class NiAVObject(NiObjectNET):
+    Flags flags:
+        """Some flags; commonly 0x000C or 0x000A."""
+    UShort unknown_short_1:
+        """Unknown Flag"""
+    Vector3 translation:
+        """The translation vector."""
+    Matrix33 rotation:
+        """The rotation part of the transformation matrix."""
+    Float scale:
+        """Scaling part (only uniform scaling is supported)."""
+    Vector3 velocity:
+        """Unknown function. Always seems to be (0, 0, 0)"""
+    UInt num_properties:
+        """The number of property objects referenced."""
+    Ref properties:
+        """List of node properties."""
+    UInt unknown_1:
+        """Always 2,0,2,0."""
+    Byte unknown_2:
+        """0 or 1."""
+    Ref collision_object:
+        """Refers to NiCollisionObject, which is usually a bounding box or other simple collision shape.  In Oblivion this links the Havok objects."""
+class NiDynamicEffect(NiAVObject):
+    Bool switch_state:
+        """Turns effect on and off?  Switches list to list of unaffected nodes?"""
+    UInt num_affected_node_list_pointers:
+        """The number of affected nodes referenced."""
+    UInt num_affected_nodes:
+        """The number of affected nodes referenced."""
+    UInt affected_node_list_pointers:
+        """This is probably the list of affected nodes. For some reason i do not know the max exporter seems to write pointers instead of links. But it doesn't matter because at least in version 4.0.0.2 the list is automagically updated by the engine during the load stage."""
+    Ref affected_nodes:
+        """The list of affected nodes?"""
+class NiLight(NiDynamicEffect):
+    Float dimmer:
+        """Dimmer."""
+class NiProperty(NiObjectNET)
+class NiTimeController(NiObject):
+    Ref next_controller:
+        """Index of the next controller."""
+    Flags flags:
+        """Controller flags (usually 0x000C). Probably controls loops.
+        Bit 0 : Anim type, 0=APP_TIME 1=APP_INIT
+        Bit 1-2 : Cycle type  00=Loop 01=Reverse 10=Loop
+        Bit 3 : Active
+        Bit 4 : Play backwards
+        """
+    Float frequency:
+        """Frequency (is usually 1.0)."""
+    Float phase:
+        """Phase (usually 0.0)."""
+    Float start_time:
+        """Controller start time."""
+    Float stop_time:
+        """Controller stop time."""
+    Ptr target:
+        """Controller target (object index of the first controllable ancestor of this object)."""
+    UInt unknown_integer:
+        """Unknown integer."""
