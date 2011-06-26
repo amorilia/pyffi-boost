@@ -39,6 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_container.hpp>
+#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/support_ostream_iterator.hpp>
 
 #include "pyffi/object_models/scope.hpp"
@@ -76,14 +77,18 @@ public:
     scope_grammar() : scope_grammar::base_type(start) {
         indent = engine::repeat(engine::_r1)[' '];
         start = scope(0) << eol;
-        declaration = class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1) | doc(engine::_r1);
+        declaration = class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1);
         scope = declaration(engine::_r1) % eol;
         class_ =
             indent(engine::_r1)
             << "class "
             << class_name // Class.name
             << -('(' << class_name << ')') // Class.base_name
-            << -(':' << eol << scope(engine::_r1 + 4)); // Class.scope
+            // generate a colon only if there is a doc (at_c<2>) or a scope (at_c<3>)
+            << -(engine::eps(boost::phoenix::at_c<2>(engine::_val) || boost::phoenix::at_c<3>(engine::_val)) << ':')
+            << -(eol << doc(engine::_r1 + 4)) // Class.doc
+            << -(eol << scope(engine::_r1 + 4)) // Class.scope
+            ;
         attr =
             indent(engine::_r1)
             << class_name // Attr.class_name

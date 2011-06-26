@@ -44,6 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/optional.hpp>
 
 #include "pyffi/object_models/attr_map.hpp"
+#include "pyffi/object_models/doc.hpp"
 #include "pyffi/object_models/scope.hpp"
 
 namespace pyffi
@@ -168,13 +169,13 @@ class Class
 public:
     //! Default constructor.
     Class()
-        : name(), base_name(), scope(),
+        : name(), base_name(), doc(), scope(),
           init(&class_init), read(&class_read), write(&class_write),
           attr(&class_attr), const_attr(&class_const_attr),
           base_class() {};
     //! Constructor.
     Class(std::string const & name)
-        : name(name), base_name(), scope(),
+        : name(name), base_name(), doc(), scope(),
           init(&class_init), read(&class_read), write(&class_write),
           attr(&class_attr), const_attr(&class_const_attr),
           base_class() {};
@@ -182,6 +183,7 @@ public:
     // information about the class which is stored in the format description
     std::string name;                       //!< Name of this class.
     boost::optional<std::string> base_name; //!< The base class name.
+    boost::optional<Doc> doc;               //!< Documentation of this class.
     boost::optional<Scope> scope;           //!< Declarations of this class.
 
     //! Constructor method.
@@ -216,6 +218,7 @@ public:
         return
             (name == other.name) &&
             (base_name == other.base_name) &&
+            (doc == other.doc);
             (scope == other.scope);
     };
 
@@ -242,6 +245,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     pyffi::object_models::Class,
     (std::string, name)
     (boost::optional<std::string>, base_name)
+    (boost::optional<pyffi::object_models::Doc>, doc)
     (boost::optional<pyffi::object_models::Scope>, scope)
 )
 

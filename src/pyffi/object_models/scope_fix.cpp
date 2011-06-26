@@ -116,8 +116,16 @@ private:
         };
     };
 
-    //! Trim empty strings at front and at back.
+    //! Clean up the documentation.
     void fix_doc(Doc & doc) const {
+        // trim empty strings at front and at back.
+        std::list<std::string> old_doc(doc);
+        doc.clear();
+        // split and trim lines
+        BOOST_FOREACH(std::string const & doc_line, old_doc) {
+            fix_doc_line(doc_line, doc);
+        };
+        // remove empty lines in front and back
         while (!doc.empty() && doc.front().empty()) {
             doc.pop_front();
         };
@@ -132,8 +140,10 @@ public:
         if (class_.base_name) {
             fix_class_name(class_.base_name.get());
         };
+        if (class_.doc) {
+            fix_doc(class_.doc.get());
+        };
         if (class_.scope) {
-            // fix the nested scope
             class_.scope.get().fix();
         };
     };
@@ -142,6 +152,9 @@ public:
     void operator()(Attr & attr) const {
         fix_attr_name(attr.name);
         fix_class_name(attr.class_name);
+        if (attr.doc) {
+            fix_doc(attr.doc.get());
+        };
     };
 
     //! An if/elif/.../else structure.
@@ -154,18 +167,6 @@ public:
             // fix the else's scope
             ifelifselse.else_.get().fix();
         };
-    };
-
-    //! Documentation.
-    void operator()(Doc & doc) const {
-        std::list<std::string> old_doc(doc);
-        doc.clear();
-        // split and trim lines
-        BOOST_FOREACH(std::string const & doc_line, old_doc) {
-            fix_doc_line(doc_line, doc);
-        };
-        // remove empty lines in front and back
-        fix_doc(doc);
     };
 };
 

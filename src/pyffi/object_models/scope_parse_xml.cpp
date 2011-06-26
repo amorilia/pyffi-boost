@@ -70,11 +70,9 @@ bool Scope::parse_xml(std::istream & in)
             // handle whitespace)
             std::string docstr = decl.second.data();
             if (!docstr.empty()) {
-                Scope scope;
                 Doc doc;
                 doc.push_back(docstr);
-                scope.push_back(doc);
-                class_.scope = scope;
+                class_.doc = doc;
             };
             push_back(class_);
         } else if (decl.first == "compound" || decl.first == "niobject") {

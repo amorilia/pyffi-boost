@@ -67,8 +67,7 @@ BOOST_FIXTURE_TEST_CASE(ast_parse_doc_multiline_test, ParseFixture)
     Doc doc;
     doc.push_back("A 32-bit integer.");
     doc.push_back("Indeed!");
-    int_.scope = Scope();
-    int_.scope.get().push_back(doc);
+    int_.doc = doc;
     scope.push_back(int_);
     parse_check_equal("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
     parse_check_equal("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");

@@ -75,14 +75,17 @@ public:
     scope_grammar() : scope_grammar::base_type(start) {
         indent %= engine::repeat(engine::_r1)[' '];
         start %= -eol >> scope(0) >> engine::omit[*engine::space] >> engine::eoi;
-        declaration %= class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1) | doc(engine::_r1);
+        declaration %= class_(engine::_r1) | attr(engine::_r1) | if_elifs_else(engine::_r1);
         scope %= declaration(engine::_r1) % eol;
         class_ %=
             indent(engine::_r1)
             >> "class "
             >> class_name // Class.name
             >> -('(' >> class_name >> ')') // Class.base_name
-            >> -(':' >> eol >> scope(engine::_r1 + 4)); // Class.scope
+            >> -engine::lit(':') // TODO colon only if we have doc or scope
+            >> -(eol >> doc(engine::_r1 + 4)) // Class.doc
+            >> -(eol >> scope(engine::_r1 + 4)) // Class.scope
+            ;
         attr %=
             indent(engine::_r1)
             >> class_name // Attr.class_name
