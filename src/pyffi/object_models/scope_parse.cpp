@@ -82,7 +82,6 @@ public:
             >> "class "
             >> class_name // Class.name
             >> -('(' >> class_name >> ')') // Class.base_name
-            >> -engine::lit(':') // TODO colon only if we have doc or scope
             >> -(eol >> doc(engine::_r1 + 4)) // Class.doc
             >> -(eol >> scope(engine::_r1 + 4)) // Class.scope
             ;
@@ -91,22 +90,22 @@ public:
             >> class_name // Attr.class_name
             >> ' '
             >> attr_name // Attr.name
-            >> -(':' >> eol >> doc(engine::_r1 + 4)); // Attr.doc
+            >> -(eol >> doc(engine::_r1 + 4)); // Attr.doc
         expr = engine::bool_; // for now
         if_ %=
             indent(engine::_r1)
             >> "if "
             >> expr // If.expr
-            >> ':' >> eol >> scope(engine::_r1 + 4); // If.scope
+            >> eol >> scope(engine::_r1 + 4); // If.scope
         elif_ %=
             indent(engine::_r1)
             >> "elif "
             >> expr // If.expr
-            >> ':' >> eol >> scope(engine::_r1 + 4); // If.scope
+            >> eol >> scope(engine::_r1 + 4); // If.scope
         else_ %=
             indent(engine::_r1)
             >> "else"
-            >> ':' >> eol >> scope(engine::_r1 + 4); // Scope
+            >> eol >> scope(engine::_r1 + 4); // Scope
         if_elifs %=
             if_(engine::_r1) // IfElifsElse.ifs_[0]
             >> *(eol >> elif_(engine::_r1)); // IfElifsElse.ifs_[1:]

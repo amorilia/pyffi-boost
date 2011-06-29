@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(ast_parse_attr_doc_test)
     doc.push_back("Hello world.");
     x.doc = doc;
     scope.push_back(x);
-    GenerateParseFixture(scope, "Int x:\n    \"\"\"Hello world.\"\"\"\n");
+    GenerateParseFixture(scope, "Int x\n    \"\"\"Hello world.\"\"\"\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_class_attr_test)
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_class_scope_test)
     BOOST_CHECK_EQUAL(vec.scope.get().size(), 1);
     Scope scope;
     scope.push_back(vec);
-    GenerateParseFixture(scope, "class Vector:\n    Int x\n");
+    GenerateParseFixture(scope, "class Vector\n    Int x\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_if_test)
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_test)
     ifelifselse.ifs_[0].scope.push_back(Attr("Float", "angle"));
     Scope scope;
     scope.push_back(ifelifselse);
-    GenerateParseFixture(scope, "if false:\n    Float angle\n");
+    GenerateParseFixture(scope, "if false\n    Float angle\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_if_else_test)
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_else_test)
     ifelifselse.else_.get().push_back(Attr("Int32", "offset"));
     Scope scope;
     scope.push_back(ifelifselse);
-    GenerateParseFixture(scope, "if true:\n    Int64 size\nelse:\n    Int32 offset\n");
+    GenerateParseFixture(scope, "if true\n    Int64 size\nelse\n    Int32 offset\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_if_elifs_else_test)
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_if_elifs_else_test)
     ifelifselse.else_.get().push_back(Attr("Int", "another_attribute"));
     Scope scope;
     scope.push_back(ifelifselse);
-    GenerateParseFixture(scope, "if false:\n    Int x1\nelif true:\n    Int x2\nelif false:\n    Int x3\nelif true:\n    Int x4\nelse:\n    Int another_attribute\n");
+    GenerateParseFixture(scope, "if false\n    Int x1\nelif true\n    Int x2\nelif false\n    Int x3\nelif true\n    Int x4\nelse\n    Int another_attribute\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_doc_oneline_test)
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_oneline_test)
     doc.push_back("A 32-bit integer.");
     int_.doc = doc;
     scope.push_back(int_);
-    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\"\"\"\n");
+    GenerateParseFixture(scope, "class Int\n    \"\"\"A 32-bit integer.\"\"\"\n");
 }
 
 BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test)
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(ast_generate_doc_multiline_test)
     doc.push_back("Indeed!");
     int_.doc = doc;
     scope.push_back(int_);
-    GenerateParseFixture(scope, "class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
+    GenerateParseFixture(scope, "class Int\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \"\"\"\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

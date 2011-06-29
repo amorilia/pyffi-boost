@@ -84,8 +84,6 @@ public:
             << "class "
             << class_name // Class.name
             << -('(' << class_name << ')') // Class.base_name
-            // generate a colon only if there is a doc (at_c<2>) or a scope (at_c<3>)
-            << -(engine::eps(boost::phoenix::at_c<2>(engine::_val) || boost::phoenix::at_c<3>(engine::_val)) << ':')
             << -(eol << doc(engine::_r1 + 4)) // Class.doc
             << -(eol << scope(engine::_r1 + 4)) // Class.scope
             ;
@@ -94,23 +92,23 @@ public:
             << class_name // Attr.class_name
             << ' '
             << attr_name // Attr.name
-            << -(':' << eol << doc(engine::_r1 + 4)) // Attr.doc
+            << -(eol << doc(engine::_r1 + 4)) // Attr.doc
             ;
         expr = engine::bool_; // for now
         if_ =
             indent(engine::_r1)
             << "if "
             << expr // If.expr
-            << ':' << eol << scope(engine::_r1 + 4); // If.scope
+            << eol << scope(engine::_r1 + 4); // If.scope
         elif_ =
             indent(engine::_r1)
             << "elif "
             << expr // If.expr
-            << ':' << eol << scope(engine::_r1 + 4); // If.scope
+            << eol << scope(engine::_r1 + 4); // If.scope
         else_ =
             indent(engine::_r1)
             << "else"
-            << ':' << eol << scope(engine::_r1 + 4); // Scope
+            << eol << scope(engine::_r1 + 4); // Scope
         if_elifs =
             if_(engine::_r1) // IfElifsElse.ifs_[0]
             << *(eol << elif_(engine::_r1)); // IfElifsElse.ifs_[1:]

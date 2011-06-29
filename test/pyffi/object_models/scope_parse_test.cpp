@@ -69,8 +69,8 @@ BOOST_FIXTURE_TEST_CASE(ast_parse_doc_multiline_test, ParseFixture)
     doc.push_back("Indeed!");
     int_.doc = doc;
     scope.push_back(int_);
-    parse_check_equal("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
-    parse_check_equal("class Int:\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");
+    parse_check_equal("class Int\n    \"\"\"A 32-bit integer.\n    Indeed!\"\"\"\n");
+    parse_check_equal("class Int\n    \"\"\"A 32-bit integer.\n    Indeed!\n    \n    \"\"\"\n");
 }
 
 BOOST_FIXTURE_TEST_CASE(ast_parse_blank_lines_test_1, ParseFixture)
@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_CASE(ast_parse_blank_lines_test_2, ParseFixture)
     vec.scope.get().push_back(Attr("Int", "y"));
     vec.scope.get().push_back(Attr("Int", "z"));
     scope.push_back(vec);
-    parse_check_equal("class Vector:\n\n    Int x\n\n  \n    Int y\n      \n    Int z");
+    parse_check_equal("class Vector\n\n    Int x\n\n  \n    Int y\n      \n    Int z");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
