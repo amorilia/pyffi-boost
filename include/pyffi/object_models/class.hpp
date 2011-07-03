@@ -218,7 +218,7 @@ public:
         return
             (name == other.name) &&
             (base_name == other.base_name) &&
-            (doc == other.doc);
+            (doc == other.doc) &&
             (scope == other.scope);
     };
 
